@@ -1,0 +1,19 @@
+
+# Java / Spring Boot
+backend-spring/target/
+backend-spring/.idea/
+backend-spring/*.iml
+backend-spring/.mvn/
+backend-spring/mvnw
+backend-spring/mvnw.cmd
+
+# Node / React
+frontend-react/node_modules/
+frontend-react/dist/
+frontend-react/.env
+frontend-react/.env.local
+
+# OS / Divers
+.DS_Store
+Thumbs.db
+
