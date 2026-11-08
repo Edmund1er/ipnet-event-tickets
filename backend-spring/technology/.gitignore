@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Configuration locale privée (Données sensibles)
+**/src/main/resources/application-local.properties
