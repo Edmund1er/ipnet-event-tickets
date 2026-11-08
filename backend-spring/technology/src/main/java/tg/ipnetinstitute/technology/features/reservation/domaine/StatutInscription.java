@@ -16,7 +16,8 @@ public enum StatutInscription {
             case EN_ATTENTE_PAIEMENT -> cible == PREUVE_ENVOYEE || cible == ANNULEE || cible == EXPIREE;
             case PREUVE_ENVOYEE -> cible == CONFIRMEE || cible == REJETEE || cible == ANNULEE;
             case REJETEE -> cible == PREUVE_ENVOYEE || cible == ANNULEE || cible == EXPIREE;
-            case CONFIRMEE, ANNULEE, EXPIREE -> false;
+            case CONFIRMEE -> cible == ANNULEE; // RG-19 : Autorisé lors de l'annulation d'un événement
+            case ANNULEE, EXPIREE -> false;
         };
     }
 }

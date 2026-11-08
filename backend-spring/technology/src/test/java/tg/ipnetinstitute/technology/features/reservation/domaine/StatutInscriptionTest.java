@@ -19,8 +19,8 @@ class StatutInscriptionTest {
         assertTrue(StatutInscription.PREUVE_ENVOYEE.peutPasserA(StatutInscription.REJETEE));
         assertFalse(StatutInscription.PREUVE_ENVOYEE.peutPasserA(StatutInscription.EXPIREE));
 
-        // CONFIRMEE -> Etat terminal
-        assertFalse(StatutInscription.CONFIRMEE.peutPasserA(StatutInscription.ANNULEE));
+        // CONFIRMEE -> ANNULEE possible lors de l'annulation d'un événement (RG-19)
+        assertTrue(StatutInscription.CONFIRMEE.peutPasserA(StatutInscription.ANNULEE));
         assertFalse(StatutInscription.CONFIRMEE.peutPasserA(StatutInscription.PREUVE_ENVOYEE));
     }
 }
