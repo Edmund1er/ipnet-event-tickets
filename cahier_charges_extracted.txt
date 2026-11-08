@@ -1,0 +1,2645 @@
+CAHIER DES CHARGES
+
+Plateforme de billetterie événementielle avec QR code
+
+Élément
+
+Détail
+
+Version
+
+1.1
+
+Date
+
+08/11/2026
+
+Statut
+
+Mise à jour après retours du commanditaire (filière, annulation d'événement, paiement par référence, livraison des billets)
+
+Stack
+
+Java 21, Spring Boot 3, Spring Security, Spring Data JPA, PostgreSQL, Flyway, MapStruct, ZXing, libphonenumber, React 18 (Vite, TypeScript)
+
+1. Contexte et objectifs
+
+1.1 Contexte
+
+L'établissement organise des événements (conférences, soirées, journées d'intégration, forums de recrutement, etc.) ouverts à des publics variés : étudiants inscrits, parents, étudiants d'autres universités, recruteurs. Aujourd'hui, la réservation et le contrôle d'accès ne sont pas centralisés.
+
+1.2 Objectifs
+
+Code
+
+Objectif
+
+O1
+
+Permettre l'inscription en ligne et la réservation de billets pour tout événement publié.
+
+O2
+
+Sécuriser le paiement par validation manuelle d'une preuve, avant émission du billet.
+
+O3
+
+Émettre un billet avec QR code infalsifiable, envoyé par e-mail.
+
+O4
+
+Contrôler l'accès par scan du QR code et fournir en temps réel le nombre de personnes entrées, avec leurs noms et adresses.
+
+O5
+
+Intégrer les événements de manière dynamique : chaque événement est créé et chargé par l'administrateur, sans intervention technique.
+
+O6
+
+Concevoir un code extensible (nouveaux types de participants, modes de paiement, canaux de notification, formats d'export) sans modifier le code existant.
+
+1.3 Hors périmètre (version 1)
+
+Intégration directe à l'API de l'opérateur mobile money (appel temps réel). En V1, la confirmation automatique passe par un import différé du relevé de transactions et un rapprochement par référence (EF-26) ; l'appel API en temps réel est prévu en extension.
+
+Remboursement automatique (le remboursement reste un traitement manuel de l'administrateur, hors plateforme, cf. RG-19).
+
+Application mobile native (l'application web responsive suffit).
+
+Gestion de billets payants multiples par événement (une seule catégorie de billet en V1).
+
+2. Acteurs
+
+Acteur
+
+Description
+
+Droits principaux
+
+Visiteur anonyme
+
+Personne non connectée
+
+Consulter les événements publiés
+
+Étudiant interne
+
+Étudiant inscrit dans l'établissement
+
+Compte, réservation, consultation de ses billets, envoi de preuve
+
+Visiteur externe
+
+Parent, étudiant d'une autre université, recruteur, autre
+
+Mêmes droits que l'étudiant interne
+
+Administrateur
+
+Gestionnaire de la plateforme
+
+Gérer les événements, valider ou rejeter les paiements, consulter les participants
+
+Agent de scan
+
+Personne chargée du contrôle à l'entrée
+
+Scanner les billets, consulter les statistiques de scan. Aucun accès aux paiements
+
+3. Exigences fonctionnelles
+
+3.1 Gestion des comptes
+
+Code
+
+Exigence
+
+EF-01
+
+Un visiteur peut créer un compte en choisissant son type : étudiant interne ou visiteur externe.
+
+EF-02
+
+L'inscription demande les informations du profil : nom, prénom, adresse, e-mail, téléphone, mot de passe.
+
+EF-03
+
+Un étudiant interne renseigne sa filière (choisie dans une liste) et son année d'inscription en L1. Un étudiant peut changer de filière en cours de parcours (ex. Génie Logiciel en L1 puis Intelligence Artificielle en L2) : voir EF-09.
+
+EF-04
+
+Un visiteur externe renseigne sa catégorie (parent, étudiant externe, recruteur, autre) et, s'il y a lieu, son organisation.
+
+EF-05
+
+Le téléphone est vérifié par code OTP envoyé par un canal gratuit pour la V1 (fournisseur SMS à offre gratuite ou OTP par e-mail à défaut, cf. RG-02). Sans vérification, aucune réservation n'est possible.
+
+EF-06
+
+L'utilisateur peut se connecter, se déconnecter et réinitialiser son mot de passe par e-mail.
+
+EF-07
+
+Après inscription, l'utilisateur voit le numéro de paiement de l'administrateur.
+
+EF-08
+
+L'utilisateur peut modifier ses informations de profil, sauf son type et son e-mail, qui exigent une procédure de vérification.
+
+EF-09
+
+Un étudiant interne peut demander un changement de filière (ex. Génie Logiciel → Intelligence Artificielle). Ce changement n'est autorisé que tant que l'étudiant n'a pas dépassé sa deuxième année (L2) d'inscription ; au-delà, la filière est verrouillée et la demande est refusée (RG-04).
+
+3.2 Gestion des événements
+
+Code
+
+Exigence
+
+EF-10
+
+L'administrateur crée un événement : titre, description, date et heure de début, lieu, prix, capacité, image facultative.
+
+EF-11
+
+Un événement passe par les statuts BROUILLON, PUBLIE, TERMINE ou ANNULE. Seul un événement PUBLIE est visible et réservable.
+
+EF-12
+
+L'administrateur peut modifier un événement tant qu'aucune réservation n'est confirmée.
+
+EF-13
+
+Les visiteurs consultent la liste des événements publiés, avec filtres (date, prix, recherche par titre) et pagination.
+
+EF-14
+
+L'administrateur peut annuler un événement ; tous les participants ayant une réservation active (EN_ATTENTE_PAIEMENT, PREUVE_ENVOYEE ou CONFIRMEE) en sont informés par e-mail. Leurs réservations sont automatiquement annulées et leurs billets, s'ils existent, sont invalidés (RG-19). Si un paiement avait déjà été validé, il passe au statut A_REMBOURSER : le remboursement est traité manuellement par l'administrateur (hors plateforme en V1, cf. 1.3), et l'e-mail d'annulation précise la marche à suivre.
+
+3.3 Réservation et paiement
+
+Code
+
+Exigence
+
+EF-20
+
+Un utilisateur vérifié réserve un billet pour un événement publié. La réservation est créée au statut EN_ATTENTE_PAIEMENT.
+
+EF-21
+
+L'utilisateur paie vers le numéro mobile money de l'administrateur (EF-07), puis saisit la référence de la transaction fournie par l'opérateur (champ obligatoire). Il peut en complément joindre une capture d'écran justificative (JPG, PNG ou PDF, 5 Mo maximum), mais celle-ci reste facultative (RG-21). Le statut devient PREUVE_ENVOYEE.
+
+EF-22
+
+L'administrateur voit la liste des preuves en attente de traitement manuel (celles non rapprochées automatiquement, EF-26), peut visualiser la capture jointe si elle existe, et valider ou rejeter avec un motif.
+
+EF-23
+
+Un rejet renvoie la réservation à REJETEE. L'utilisateur peut renvoyer une nouvelle référence/preuve.
+
+EF-24
+
+Une réservation non payée est annulée automatiquement après un délai configurable (par défaut 48 h).
+
+EF-25
+
+L'utilisateur peut annuler une réservation tant qu'elle n'est pas confirmée.
+
+EF-26
+
+L'administrateur peut importer le relevé de transactions de l'opérateur mobile money (fichier CSV : référence, montant, date). Le système rapproche automatiquement chaque référence déclarée par un utilisateur (EF-21) avec une ligne du relevé de même référence et de même montant : en cas de correspondance exacte, le paiement est confirmé automatiquement (statut VALIDE, cf. RG-10) sans intervention manuelle. Seuls les cas non rapprochés (référence absente du relevé, montant différent, référence déjà utilisée) restent à traiter manuellement par l'administrateur (EF-22), ce qui évite de vérifier chaque capture d'écran une par une sur un volume de plusieurs milliers d'utilisateurs.
+
+3.4 Billets et QR code
+
+Code
+
+Exigence
+
+EF-30
+
+À la confirmation du paiement, un billet est généré avec un QR code unique.
+
+EF-31
+
+Le billet est envoyé par e-mail (QR code en pièce jointe ou intégré) à l'adresse e-mail courante et vérifiée du compte (RG-20), et reste consultable dans le compte. Un échec d'envoi est rejoué automatiquement (outbox) jusqu'à succès ou épuisement des tentatives, avec alerte à l'administrateur le cas échéant.
+
+EF-32
+
+Le billet affiche : nom de l'événement, date, lieu, nom et prénom du porteur, et le QR code.
+
+3.5 Contrôle d'accès et statistiques
+
+Code
+
+Exigence
+
+EF-40
+
+L'agent de scan sélectionne l'événement en cours, puis scanne les QR codes avec la caméra ou par saisie manuelle.
+
+EF-41
+
+Un billet valide et non utilisé est accepté. L'écran affiche le nom, le prénom et l'adresse du porteur.
+
+EF-42
+
+Un billet déjà utilisé est refusé, avec l'heure du premier scan.
+
+EF-43
+
+Un QR code falsifié ou appartenant à un autre événement est refusé.
+
+EF-44
+
+Le tableau de bord de scan affiche en temps réel : le nombre de personnes entrées, le nombre de billets confirmés restants, et la liste des personnes entrées (nom, prénom, adresse, heure).
+
+EF-45
+
+L'administrateur peut exporter la liste des présents en CSV ou PDF.
+
+3.6 Administration
+
+Code
+
+Exigence
+
+EF-50
+
+L'administrateur consulte la liste des participants par événement, avec le statut de chaque réservation.
+
+EF-51
+
+L'administrateur consulte le journal d'audit (qui a validé quoi, quand).
+
+EF-52
+
+L'administrateur crée et désactive les comptes agents de scan.
+
+4. Règles de gestion
+
+Code
+
+Règle
+
+RG-01
+
+Une adresse e-mail est unique sur la plateforme. Elle est normalisée (minuscules, espaces retirés) et validée au format RFC 5322. La vérification de l'e-mail (lien ou code) utilise exclusivement le SMTP de l'établissement, donc sans coût additionnel.
+
+RG-02
+
+Le téléphone est obligatoire, au format international E.164 (indicatif pays obligatoire). Il est validé par libphonenumber, unique, et doit être vérifié par OTP. Pour la V1, l'envoi de l'OTP doit rester gratuit : fournisseur SMS à offre gratuite/sandbox, ou solution de repli par e-mail tant qu'aucun budget SMS n'est alloué (CanalNotification, section 9.9, permet de changer de canal sans modifier le code métier).
+
+RG-03
+
+Un code OTP est valable 5 minutes, à usage unique, et limité à 5 tentatives.
+
+RG-04
+
+Un étudiant interne doit choisir une filière existante. L'année d'inscription en L1 doit être ≤ l'année courante ; aucune borne basse stricte n'est imposée (les cours du soir peuvent avoir des inscriptions plus anciennes que les filières classiques). Le changement de filière (EF-09) n'est possible que tant que l'étudiant n'a pas dépassé sa deuxième année d'inscription (année courante − année d'inscription L1 ≤ 1) ; passé ce seuil, la filière est verrouillée (champ filiere_verrouillee, cf. 7.2).
+
+RG-05
+
+Un visiteur doit choisir une catégorie existante.
+
+RG-06
+
+Un participant ne peut réserver qu'une seule fois le même événement (contrainte unique en base et contrôle applicatif).
+
+RG-07
+
+Une réservation n'est possible que si : l'utilisateur est vérifié, l'événement est PUBLIE, sa date n'est pas passée, et la capacité n'est pas atteinte.
+
+RG-08
+
+Les places sont comptées à la réservation (et non à la confirmation), afin d'éviter la sur-réservation.
+
+RG-09
+
+Une réservation annulée ou rejetée libère sa place.
+
+RG-10
+
+Un billet n'est émis qu'après confirmation du paiement par un administrateur.
+
+RG-11
+
+Un billet ne peut être accepté qu'une seule fois. Un second scan est refusé et journalisé.
+
+RG-12
+
+Le QR code contient un jeton signé (HMAC-SHA256) ; il n'est jamais un identifiant séquentiel prévisible.
+
+RG-13
+
+Lorsqu'une capture d'écran est jointe (facultatif, cf. RG-21), une même preuve (empreinte SHA-256 identique) ne peut être utilisée que pour une seule réservation.
+
+RG-14
+
+Une référence de paiement (et, si fournie, une preuve) ne peut être soumise qu'une fois par réservation, sauf après un rejet.
+
+RG-15
+
+Un administrateur ne peut pas valider une preuve qu'il a lui-même soumise en tant que participant.
+
+RG-16
+
+Toute action sensible (validation, rejet, annulation, scan, changement de statut) est journalisée : acteur, date, cible, ancien et nouveau statut.
+
+RG-17
+
+Le montant d'un paiement est figé à la réservation, afin qu'une modification ultérieure du prix ne change pas la somme due.
+
+RG-18
+
+Un compte désactivé ne peut plus se connecter ni réserver. Ses billets déjà émis restent valables jusqu'à la fin de l'événement.
+
+RG-19
+
+Lorsqu'un événement passe à ANNULE (EF-14) : toute réservation EN_ATTENTE_PAIEMENT, PREUVE_ENVOYEE ou CONFIRMEE passe à ANNULEE (motif = «evenement_annule») ; tout billet déjà émis est marqué invalide (refusé au scan, RG-11) ; tout paiement VALIDE passe à A_REMBOURSER. Le remboursement automatique reste hors périmètre (1.3) : l'administrateur rembourse manuellement et peut ensuite marquer le paiement REMBOURSE.
+
+RG-20
+
+Le billet (QR code) n'est envoyé qu'à l'adresse e-mail courante et vérifiée de l'utilisateur au moment de l'émission. Un envoi en échec est rejoué via l'outbox (exigence Fiabilité, section 6) ; après épuisement des tentatives, l'administrateur est alerté et l'utilisateur peut toujours retélécharger son billet depuis son compte.
+
+RG-21
+
+Une référence de paiement (fournie par l'opérateur mobile money) est unique sur la plateforme et ne peut être rattachée qu'à une seule réservation. La capture d'écran (empreinte SHA-256, RG-13) reste une pièce justificative facultative, en complément de la référence.
+
+5. Exigences de sécurité
+
+5.1 Authentification et autorisation
+
+Authentification par JWT d'accès (durée 15 minutes) et refresh token (durée 7 jours) stocké en cookie HttpOnly, Secure, SameSite=Strict, avec rotation à chaque usage.
+
+Hachage des mots de passe en BCrypt (force ≥ 12). Politique : 12 caractères minimum.
+
+Contrôle d'accès par rôle : ROLE_PARTICIPANT, ROLE_ADMIN, ROLE_SCANNER, via @PreAuthorize sur les services (et non seulement sur les contrôleurs).
+
+Contrôle de propriété : un utilisateur ne voit que ses propres réservations et billets. La vérification est faite dans la couche service.
+
+Limitation des tentatives de connexion (5 échecs puis verrouillage temporaire de 15 minutes).
+
+5.2 Protection des données
+
+Aucune entité JPA n'est exposée par l'API : seuls des DTO (records Java) sont retournés.
+
+Chiffrement en transit (TLS 1.2 minimum).
+
+Les preuves de paiement sont stockées hors du répertoire web, sous un nom aléatoire (UUID), et servies uniquement via un endpoint authentifié.
+
+Minimisation des données : les noms et adresses affichés au scan ne sont visibles que par les rôles ADMIN et SCANNER.
+
+Possibilité de suppression de compte, conformément aux obligations locales de protection des données.
+
+5.3 Protection applicative
+
+Validation des entrées : Bean Validation sur les DTO, validation métier dans les objets de valeur (Email, Telephone).
+
+Limitation de débit (Bucket4j) sur : inscription, envoi d'OTP, connexion, scan.
+
+CSRF activé pour les requêtes portées par cookie.
+
+CORS restreint à l'origine du front-end.
+
+En-têtes de sécurité : CSP, HSTS, X-Content-Type-Options, X-Frame-Options.
+
+Réponses d'erreur normalisées (RFC 9457 ProblemDetail) sans détails techniques ; les détails restent dans les journaux.
+
+Secrets (clé HMAC, identifiants SMTP, clé SMS) dans des variables d'environnement ou un coffre (Vault, secrets Docker). Aucun secret dans le dépôt.
+
+5.4 Sécurité des billets
+
+Jeton QR = billetId + HMAC-SHA256(secret, billetId | eventId | nonce), encodé en Base64 URL.
+
+Vérification de la signature à chaque scan, avant tout accès à la base.
+
+Concurrence : @Version sur Billet ; deux scans simultanés d'un même billet ne peuvent pas être tous les deux acceptés.
+
+5.5 Sécurité des preuves de paiement
+
+Types MIME vérifiés par inspection du contenu (et non seulement de l'extension).
+
+Taille limitée à 5 Mo.
+
+Empreinte SHA-256 calculée à l'envoi (RG-13).
+
+Analyse antivirus recommandée avant mise à disposition.
+
+5.6 Journalisation et audit
+
+Journal d'audit en base (table journal_audit) pour toutes les actions de RG-16.
+
+Journaux applicatifs structurés (JSON), sans données personnelles en clair.
+
+6. Exigences non fonctionnelles
+
+Domaine
+
+Exigence
+
+Performance
+
+Scan d'un billet : moins de 300 ms au 95e percentile. Liste d'événements : moins de 500 ms.
+
+Charge
+
+Pic attendu à l'ouverture des inscriptions : prévoir 500 réservations simultanées sans survente.
+
+Disponibilité
+
+99 % sur les périodes d'événement. Sauvegarde quotidienne de la base et des preuves.
+
+Fiabilité
+
+Une notification échouée est rejouée (table outbox). Un billet émis est toujours renvoyable depuis le compte.
+
+Maintenabilité
+
+Couverture de tests unitaires des règles de gestion supérieure à 80 %. Architecture par modules.
+
+Accessibilité
+
+Interface conforme WCAG 2.1 niveau AA. Scanner utilisable au clavier (saisie manuelle).
+
+Internationalisation
+
+Interface en français, structure prête pour l'anglais (fichiers de messages).
+
+Documentation
+
+OpenAPI généré par springdoc. ADR pour les décisions d'architecture.
+
+Déploiement
+
+Conteneurs Docker. Migrations Flyway versionnées. Configuration par profil (dev, test, prod).
+
+7. Modèle de données
+
+7.1 Principe
+
+Séparation identité / profil : la table utilisateur porte les identifiants (e-mail, téléphone, mot de passe). Les profils etudiant et visiteur partagent la clé primaire de utilisateur (relation 1-1 via @MapsId). Un e-mail et un téléphone ne sont donc stockés qu'une seule fois.
+
+Tables de référence pour les filières et catégories, afin d'éviter la saisie libre et les incohérences.
+
+Contraintes en base pour chaque règle critique, en complément des contrôles applicatifs.
+
+7.2 Tables
+
+utilisateur
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK, généré
+
+email
+
+VARCHAR(255)
+
+NOT NULL, UNIQUE (RG-01)
+
+telephone
+
+VARCHAR(20)
+
+NOT NULL, UNIQUE (RG-02), format E.164
+
+telephone_verifie
+
+BOOLEAN
+
+NOT NULL, défaut FALSE
+
+mot_de_passe_hash
+
+VARCHAR(100)
+
+NOT NULL
+
+type_profil
+
+VARCHAR(20)
+
+NOT NULL, CHECK IN (ETUDIANT, VISITEUR, AUCUN)
+
+role
+
+VARCHAR(20)
+
+NOT NULL, CHECK IN (PARTICIPANT, ADMIN, SCANNER)
+
+actif
+
+BOOLEAN
+
+NOT NULL, défaut TRUE
+
+tentatives_echec
+
+SMALLINT
+
+NOT NULL, défaut 0
+
+verrouille_jusqu_a
+
+TIMESTAMP
+
+NULL
+
+cree_le
+
+TIMESTAMP
+
+NOT NULL
+
+version
+
+BIGINT
+
+NOT NULL
+
+filiere (référence)
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+libelle
+
+VARCHAR(150)
+
+NOT NULL, UNIQUE
+
+actif
+
+BOOLEAN
+
+NOT NULL, défaut TRUE
+
+etudiant
+
+Colonne
+
+Type
+
+Contraintes
+
+utilisateur_id
+
+BIGINT
+
+PK, FK → utilisateur(id)
+
+nom
+
+VARCHAR(100)
+
+NOT NULL
+
+prenom
+
+VARCHAR(100)
+
+NOT NULL
+
+adresse
+
+VARCHAR(255)
+
+NOT NULL
+
+filiere_id
+
+BIGINT
+
+NOT NULL, FK → filiere(id)
+
+annee_inscription_l1
+
+SMALLINT
+
+NOT NULL, CHECK (≤ année courante) — pas de borne basse (cours du soir)
+
+filiere_verrouillee
+
+BOOLEAN
+
+NOT NULL, défaut FALSE — passe à TRUE dès que (année courante − annee_inscription_l1) > 1 (RG-04)
+
+historique_changement_filiere
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+etudiant_id
+
+BIGINT
+
+NOT NULL, FK → etudiant(utilisateur_id)
+
+ancienne_filiere_id
+
+BIGINT
+
+NULL, FK → filiere(id)
+
+nouvelle_filiere_id
+
+BIGINT
+
+NOT NULL, FK → filiere(id)
+
+modifie_le
+
+TIMESTAMP
+
+NOT NULL
+
+modifie_par
+
+BIGINT
+
+NOT NULL, FK → utilisateur(id)
+
+Trace chaque changement de filière (EF-09) ; alimente aussi le journal d'audit (RG-16).
+
+categorie_visiteur (référence, extensible sans déploiement)
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+code
+
+VARCHAR(30)
+
+NOT NULL, UNIQUE (PARENT, ETUDIANT_EXTERNE, RECRUTEUR, AUTRE)
+
+libelle
+
+VARCHAR(100)
+
+NOT NULL
+
+actif
+
+BOOLEAN
+
+NOT NULL, défaut TRUE
+
+visiteur
+
+Colonne
+
+Type
+
+Contraintes
+
+utilisateur_id
+
+BIGINT
+
+PK, FK → utilisateur(id)
+
+nom
+
+VARCHAR(100)
+
+NOT NULL
+
+prenom
+
+VARCHAR(100)
+
+NOT NULL
+
+adresse
+
+VARCHAR(255)
+
+NOT NULL
+
+categorie_id
+
+BIGINT
+
+NOT NULL, FK → categorie_visiteur(id)
+
+organisation
+
+VARCHAR(150)
+
+NULL
+
+verification_otp
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+utilisateur_id
+
+BIGINT
+
+NOT NULL, FK
+
+code_hash
+
+VARCHAR(100)
+
+NOT NULL
+
+expire_le
+
+TIMESTAMP
+
+NOT NULL
+
+tentatives
+
+SMALLINT
+
+NOT NULL, défaut 0, CHECK (≤ 5)
+
+consomme
+
+BOOLEAN
+
+NOT NULL, défaut FALSE
+
+evenement
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+titre
+
+VARCHAR(200)
+
+NOT NULL
+
+description
+
+TEXT
+
+NULL
+
+date_debut
+
+TIMESTAMP
+
+NOT NULL
+
+lieu
+
+VARCHAR(255)
+
+NULL
+
+prix
+
+NUMERIC(12,2)
+
+NOT NULL, CHECK (≥ 0)
+
+devise
+
+CHAR(3)
+
+NOT NULL
+
+capacite
+
+INTEGER
+
+NOT NULL, CHECK (> 0)
+
+places_reservees
+
+INTEGER
+
+NOT NULL, défaut 0, CHECK (≥ 0 et ≤ capacite)
+
+statut
+
+VARCHAR(20)
+
+NOT NULL, CHECK IN (BROUILLON, PUBLIE, TERMINE, ANNULE)
+
+cree_par
+
+BIGINT
+
+NOT NULL, FK → utilisateur(id)
+
+cree_le
+
+TIMESTAMP
+
+NOT NULL
+
+version
+
+BIGINT
+
+NOT NULL (verrou optimiste)
+
+inscription (réservation)
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+utilisateur_id
+
+BIGINT
+
+NOT NULL, FK
+
+evenement_id
+
+BIGINT
+
+NOT NULL, FK
+
+statut
+
+VARCHAR(30)
+
+NOT NULL, CHECK IN (EN_ATTENTE_PAIEMENT, PREUVE_ENVOYEE, REJETEE, CONFIRMEE, ANNULEE, EXPIREE)
+
+cree_le
+
+TIMESTAMP
+
+NOT NULL
+
+expire_le
+
+TIMESTAMP
+
+NULL (EF-24)
+
+version
+
+BIGINT
+
+NOT NULL
+
+motif_annulation
+
+VARCHAR(50)
+
+NULL (ex. «evenement_annule», RG-19)
+
+(contrainte)
+
+UNIQUE (utilisateur_id, evenement_id) (RG-06)
+
+Index : (evenement_id, statut) et (statut, expire_le) pour la tâche d'expiration.
+
+paiement
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+inscription_id
+
+BIGINT
+
+NOT NULL, UNIQUE, FK
+
+reference_operateur
+
+VARCHAR(50)
+
+NULL, UNIQUE (RG-21) — référence de transaction mobile money
+
+montant
+
+NUMERIC(12,2)
+
+NOT NULL (figé, RG-17)
+
+devise
+
+CHAR(3)
+
+NOT NULL
+
+chemin_preuve
+
+VARCHAR(255)
+
+NULL — capture d'écran facultative (RG-21)
+
+empreinte_preuve
+
+CHAR(64)
+
+NULL, UNIQUE (RG-13)
+
+statut
+
+VARCHAR(20)
+
+NOT NULL, CHECK IN (EN_ATTENTE, VALIDE, REJETE, A_REMBOURSER, REMBOURSE)
+
+valide_par
+
+BIGINT
+
+NULL, FK → utilisateur(id)
+
+valide_le
+
+TIMESTAMP
+
+NULL
+
+motif_rejet
+
+VARCHAR(255)
+
+NULL
+
+version
+
+BIGINT
+
+NOT NULL
+
+releve_transaction (EF-26, rapprochement automatique)
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+reference_operateur
+
+VARCHAR(50)
+
+NOT NULL, UNIQUE
+
+montant
+
+NUMERIC(12,2)
+
+NOT NULL
+
+date_transaction
+
+TIMESTAMP
+
+NULL
+
+importe_le
+
+TIMESTAMP
+
+NOT NULL
+
+rapproche
+
+BOOLEAN
+
+NOT NULL, défaut FALSE
+
+Alimentée par l'import CSV (EF-26). Le rapprochement automatique compare paiement.reference_operateur et paiement.montant à une ligne non encore rapprochée de même référence et de même montant ; en cas de correspondance, paiement.statut passe à VALIDE et releve_transaction.rapproche passe à TRUE.
+
+billet
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+UUID
+
+PK
+
+inscription_id
+
+BIGINT
+
+NOT NULL, UNIQUE, FK
+
+nonce
+
+CHAR(32)
+
+NOT NULL
+
+scanne_le
+
+TIMESTAMP
+
+NULL
+
+scanne_par
+
+BIGINT
+
+NULL, FK → utilisateur(id)
+
+invalide
+
+BOOLEAN
+
+NOT NULL, défaut FALSE — passe à TRUE si l'événement est annulé (RG-19)
+
+version
+
+BIGINT
+
+NOT NULL (RG-11)
+
+Le jeton QR n'est pas stocké : il est recalculé et vérifié à partir de id, nonce et du secret.
+
+journal_scan
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+billet_id
+
+UUID
+
+NULL, FK
+
+evenement_id
+
+BIGINT
+
+NOT NULL, FK
+
+agent_id
+
+BIGINT
+
+NOT NULL, FK
+
+resultat
+
+VARCHAR(30)
+
+NOT NULL, CHECK IN (ACCEPTE, DEJA_UTILISE, INVALIDE, MAUVAIS_EVENEMENT, EVENEMENT_ANNULE)
+
+horodatage
+
+TIMESTAMP
+
+NOT NULL
+
+journal_audit
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+acteur_id
+
+BIGINT
+
+NULL, FK
+
+action
+
+VARCHAR(50)
+
+NOT NULL
+
+type_cible
+
+VARCHAR(50)
+
+NOT NULL
+
+id_cible
+
+VARCHAR(50)
+
+NOT NULL
+
+details
+
+JSONB
+
+NULL (ancien et nouveau statut)
+
+horodatage
+
+TIMESTAMP
+
+NOT NULL
+
+outbox_notification
+
+Colonne
+
+Type
+
+Contraintes
+
+id
+
+BIGINT
+
+PK
+
+canal
+
+VARCHAR(10)
+
+NOT NULL (EMAIL, SMS)
+
+destinataire
+
+VARCHAR(255)
+
+NOT NULL
+
+modele
+
+VARCHAR(50)
+
+NOT NULL
+
+charge
+
+JSONB
+
+NOT NULL
+
+statut
+
+VARCHAR(15)
+
+NOT NULL (EN_ATTENTE, ENVOYEE, ECHEC)
+
+tentatives
+
+SMALLINT
+
+NOT NULL, défaut 0
+
+cree_le
+
+TIMESTAMP
+
+NOT NULL
+
+8. Architecture
+
+8.1 Découpage en modules
+
+com.billetterie
+
+├── identite/          (utilisateur, authentification, OTP, rôles)
+
+├── participant/       (profils étudiant et visiteur, catégories, filières)
+
+├── evenement/         (cycle de vie des événements)
+
+├── reservation/       (inscriptions, règles de réservation)
+
+├── paiement/          (preuves, validation, rejet)
+
+├── billet/            (émission, jeton signé, QR code)
+
+├── controle/          (scan, statistiques, export)
+
+├── notification/      (e-mail, SMS, outbox)
+
+├── audit/             (journal d'audit)
+
+└── partage/           (exceptions, types de valeur, utilitaires, configuration)
+
+Chaque module se découpe en quatre couches :
+
+api : contrôleurs REST et DTO (records).
+
+application : services et cas d'usage, interfaces publiques du module.
+
+domaine : entités, objets de valeur, règles, énumérations.
+
+infrastructure : repositories JPA, adaptateurs (stockage, SMS, e-mail, génération de QR).
+
+Règle de dépendance : un module n'accède qu'aux interfaces application des autres modules, jamais à leurs entités ou repositories. Les interactions entre modules passent par des événements Spring (ApplicationEventPublisher).
+
+8.2 Principes appliqués
+
+Ouvert / fermé (OCP) : chaque variation prévisible (type de participant, règle de réservation, mode de vérification de paiement, canal de notification, format d'export) est une interface avec des implémentations injectées. Ajouter une variante = ajouter une classe annotée @Component.
+
+Inversion de dépendance (DIP) : les services dépendent d'interfaces, jamais d'implémentations concrètes (ex. StockagePreuve, et non StockageLocal).
+
+Responsabilité unique (SRP) : un service par cas d'usage. Le scan, l'émission de billet et la notification sont trois services distincts.
+
+Événements de domaine : le paiement publie PaiementConfirmeEvent. Le module billet et le module notification y réagissent sans que le paiement les connaisse.
+
+8.3 Patterns retenus
+
+Pattern
+
+Lieu d'application
+
+Bénéfice
+
+Strategy
+
+ProfilParticipant, VerificateurPaiement, CanalNotification, ExportateurStatistiques
+
+Ajout d'un type, d'un mode, d'un canal ou d'un format sans modifier l'existant
+
+Factory (injection de Map)
+
+ProfilFactory, CanalFactory
+
+Sélection du bon composant sans if/else ni switch
+
+Chain of Responsibility
+
+RegleReservation, RegleScan
+
+Chaque règle est un bean indépendant ; l'ordre se définit par @Order
+
+State (table de transitions)
+
+StatutInscription, StatutPaiement, StatutEvenement
+
+Transitions illégales refusées de façon centralisée
+
+Observer (événements Spring)
+
+Paiement → billet → notification
+
+Découplage des modules
+
+Template Method
+
+CanalAbstrait
+
+Squelette d'envoi fixe ; seuls le transport et le format varient
+
+Value Object (records)
+
+Email, Telephone, Montant
+
+Validation unique, réutilisée partout
+
+Repository
+
+Spring Data JPA
+
+Isolation de la persistance
+
+DTO + Mapper (MapStruct)
+
+Toutes les API
+
+Aucune entité exposée, conversion générée
+
+Specification
+
+Recherche d'événements, filtres de participants
+
+Filtres combinables sans multiplier les méthodes
+
+Transactional Outbox
+
+Notifications
+
+Aucun e-mail perdu si l'envoi échoue
+
+Decorator (AOP @Auditable)
+
+Actions sensibles
+
+Journalisation sans polluer la logique métier
+
+9. Conception des classes et interfaces
+
+9.1 Value objects partagés (module partage)
+
+/** Adresse e-mail normalisée et validée (RG-01). */
+
+public record Email(String valeur) {
+
+private static final Pattern FORMAT = Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$");
+
+public Email {
+
+if (valeur == null) throw new EmailInvalideException(null);
+
+valeur = valeur.trim().toLowerCase(Locale.ROOT);
+
+if (!FORMAT.matcher(valeur).matches()) throw new EmailInvalideException(valeur);
+
+}
+
+}
+
+/** Numéro de téléphone au format E.164, validé par libphonenumber (RG-02). */
+
+public record Telephone(String valeur) {
+
+private static final PhoneNumberUtil UTIL = PhoneNumberUtil.getInstance();
+
+public Telephone { valeur = normaliser(valeur); }
+
+private static String normaliser(String brut) {
+
+try {
+
+var numero = UTIL.parse(brut, null);   // région null : indicatif pays obligatoire
+
+if (!UTIL.isValidNumber(numero)) throw new TelephoneInvalideException(brut);
+
+return UTIL.format(numero, PhoneNumberFormat.E164);
+
+} catch (NumberParseException e) {
+
+throw new TelephoneInvalideException(brut);
+
+}
+
+}
+
+}
+
+/** Somme d'argent avec devise ; le montant d'une réservation est figé (RG-17). */
+
+public record Montant(BigDecimal valeur, Currency devise) {
+
+public Montant {
+
+Objects.requireNonNull(valeur);
+
+if (valeur.signum() < 0) throw new IllegalArgumentException("Montant négatif");
+
+valeur = valeur.setScale(2, RoundingMode.HALF_EVEN);
+
+}
+
+}
+
+Ces trois objets remplacent les contrôles dispersés dans les DTO et les services. Un changement de règle se fait en un seul endroit.
+
+9.2 Profils participants (module participant)
+
+/** Contrat d'un type de participant. Chaque type est une stratégie. */
+
+public interface ProfilParticipant {
+
+TypeProfil type();
+
+void valider(DemandeProfil demande);          // RG-04 ou RG-05
+
+ResumePersonne resumer(Long utilisateurId);   // nom, prénom, adresse (billet et scan)
+
+}
+
+public enum TypeProfil { ETUDIANT, VISITEUR }
+
+@Component
+
+class ProfilEtudiant implements ProfilParticipant {
+
+private final FiliereRepository filieres;
+
+private final Clock horloge;
+
+@Override public TypeProfil type() { return TypeProfil.ETUDIANT; }
+
+@Override
+
+public void valider(DemandeProfil demande) {
+
+var e = (DemandeEtudiant) demande;
+
+filieres.findByIdAndActifTrue(e.filiereId())
+
+.orElseThrow(() -> new FiliereInvalideException(e.filiereId()));
+
+int anneeMax = Year.now(horloge).getValue();
+
+if (e.anneeInscriptionL1() < 2000 || e.anneeInscriptionL1() > anneeMax)
+
+throw new AnneeInvalideException(e.anneeInscriptionL1());
+
+}
+
+}
+
+@Component
+
+class ProfilVisiteur implements ProfilParticipant {
+
+private final CategorieVisiteurRepository categories;
+
+@Override public TypeProfil type() { return TypeProfil.VISITEUR; }
+
+@Override
+
+public void valider(DemandeProfil demande) {
+
+var v = (DemandeVisiteur) demande;
+
+categories.findByIdAndActifTrue(v.categorieId())
+
+.orElseThrow(() -> new CategorieInvalideException(v.categorieId()));
+
+}
+
+}
+
+/** Fabrique : Spring injecte toutes les implémentations. Ajouter un type = ajouter une classe. */
+
+@Component
+
+public class ProfilFactory {
+
+private final Map<TypeProfil, ProfilParticipant> profils;
+
+public ProfilFactory(List<ProfilParticipant> implementations) {
+
+this.profils = implementations.stream()
+
+.collect(Collectors.toUnmodifiableMap(ProfilParticipant::type, Function.identity()));
+
+}
+
+public ProfilParticipant pour(TypeProfil type) {
+
+return Optional.ofNullable(profils.get(type))
+
+.orElseThrow(() -> new TypeProfilNonSupporteException(type));
+
+}
+
+}
+
+Demandes d'inscription (types scellés, Java 21) :
+
+public sealed interface DemandeProfil permits DemandeEtudiant, DemandeVisiteur {}
+
+public record DemandeEtudiant(
+
+@NotBlank @Size(max = 100) String nom,
+
+@NotBlank @Size(max = 100) String prenom,
+
+@NotBlank @Size(max = 255) String adresse,
+
+@NotNull Long filiereId,
+
+@NotNull Integer anneeInscriptionL1) implements DemandeProfil {}
+
+public record DemandeVisiteur(
+
+@NotBlank @Size(max = 100) String nom,
+
+@NotBlank @Size(max = 100) String prenom,
+
+@NotBlank @Size(max = 255) String adresse,
+
+@NotNull Long categorieId,
+
+@Size(max = 150) String organisation) implements DemandeProfil {}
+
+public record DemandeInscription(
+
+@NotBlank @Email String email,
+
+@NotBlank String telephone,
+
+@NotBlank @Size(min = 12, max = 128) String motDePasse,
+
+@NotNull @Valid DemandeProfil profil) {}
+
+Les champs communs (e-mail, téléphone, mot de passe) sont dans DemandeInscription, sans duplication dans les profils.
+
+9.3 Inscription et connexion (module identite)
+
+public interface ServiceInscription {
+
+ReponseInscription inscrire(DemandeInscription demande);   // crée compte, profil, envoie l'OTP
+
+}
+
+public interface ServiceVerificationTelephone {
+
+void envoyerCode(Long utilisateurId);
+
+void verifier(Long utilisateurId, String code);            // RG-03
+
+}
+
+public interface ServiceAuthentification {
+
+TokensAcces connecter(Email email, String motDePasse);     // RG-18 et verrouillage
+
+TokensAcces rafraichir(String refreshToken);               // rotation
+
+void deconnecter(String refreshToken);
+
+}
+
+9.4 Événements (module evenement)
+
+@Entity @Table(name = "evenement")
+
+public class Evenement {
+
+@Id @GeneratedValue private Long id;
+
+private String titre;
+
+private LocalDateTime dateDebut;
+
+private int capacite;
+
+private int placesReservees;
+
+@Enumerated(EnumType.STRING) private StatutEvenement statut;
+
+@Version private Long version;
+
+/** Invariant : jamais plus de places réservées que de capacité (RG-08). */
+
+public void reserverPlace() {
+
+exigerStatut(StatutEvenement.PUBLIE);
+
+if (placesReservees >= capacite) throw new CapaciteAtteinteException(id);
+
+placesReservees++;
+
+}
+
+public void libererPlace() {                 // RG-09
+
+if (placesReservees > 0) placesReservees--;
+
+}
+
+public void publier(Clock horloge) {
+
+if (dateDebut.isBefore(LocalDateTime.now(horloge)))
+
+throw new DateEvenementPasseeException(id);
+
+statut = StatutEvenement.PUBLIE;
+
+}
+
+private void exigerStatut(StatutEvenement attendu) {
+
+if (statut != attendu) throw new EvenementNonReservableException(id, statut);
+
+}
+
+}
+
+public enum StatutEvenement { BROUILLON, PUBLIE, TERMINE, ANNULE }
+
+public interface ServiceEvenement {
+
+Evenement creer(DemandeEvenement demande, Long adminId);
+
+Evenement modifier(Long id, DemandeEvenement demande, Long adminId);
+
+void publier(Long id, Long adminId);
+
+void annuler(Long id, Long adminId, String motif);
+
+Page<EvenementResume> rechercher(FiltreEvenement filtre, Pageable pageable);
+
+}
+
+9.5 Réservation (module reservation)
+
+Statuts et transitions (State) :
+
+public enum StatutInscription {
+
+EN_ATTENTE_PAIEMENT, PREUVE_ENVOYEE, REJETEE, CONFIRMEE, ANNULEE, EXPIREE;
+
+/** Table de transitions centralisée. Toute autre transition est illégale. */
+
+public boolean peutPasserA(StatutInscription cible) {
+
+return switch (this) {
+
+case EN_ATTENTE_PAIEMENT -> cible == PREUVE_ENVOYEE || cible == ANNULEE || cible == EXPIREE;
+
+case PREUVE_ENVOYEE      -> cible == CONFIRMEE || cible == REJETEE || cible == ANNULEE;
+
+case REJETEE             -> cible == PREUVE_ENVOYEE || cible == ANNULEE || cible == EXPIREE;
+
+case CONFIRMEE, ANNULEE, EXPIREE -> false;
+
+};
+
+}
+
+}
+
+Règles de réservation (Chain of Responsibility) :
+
+public interface RegleReservation {
+
+void verifier(Utilisateur utilisateur, Evenement evenement);
+
+}
+
+@Component @Order(1)
+
+class RegleUtilisateurVerifie implements RegleReservation {      // EF-05
+
+public void verifier(Utilisateur u, Evenement e) {
+
+if (!u.isTelephoneVerifie() || !u.isActif())
+
+throw new UtilisateurNonAutoriseException(u.getId());
+
+}
+
+}
+
+@Component @Order(2)
+
+class RegleUniciteReservation implements RegleReservation {      // RG-06
+
+private final InscriptionRepository inscriptions;
+
+public void verifier(Utilisateur u, Evenement e) {
+
+if (inscriptions.existsByUtilisateurIdAndEvenementId(u.getId(), e.getId()))
+
+throw new DejaInscritException(u.getId(), e.getId());
+
+}
+
+}
+
+@Component @Order(3)
+
+class RegleEvenementOuvert implements RegleReservation {         // RG-07
+
+private final Clock horloge;
+
+public void verifier(Utilisateur u, Evenement e) {
+
+if (e.getStatut() != StatutEvenement.PUBLIE
+
+|| e.getDateDebut().isBefore(LocalDateTime.now(horloge)))
+
+throw new EvenementNonReservableException(e.getId(), e.getStatut());
+
+}
+
+}
+
+// La capacité est garantie par Evenement.reserverPlace() (invariant de l'entité)
+
+@Service
+
+class ServiceReservationImpl implements ServiceReservation {
+
+private final List<RegleReservation> regles;     // injectées, triées par @Order
+
+private final EvenementRepository evenements;
+
+private final InscriptionRepository inscriptions;
+
+private final ApplicationEventPublisher publieur;
+
+@Override
+
+@Transactional
+
+public Inscription reserver(Long utilisateurId, Long evenementId) {
+
+var utilisateur = utilisateurs.charger(utilisateurId);
+
+var evenement = evenements.findByIdForUpdate(evenementId).orElseThrow();
+
+regles.forEach(r -> r.verifier(utilisateur, evenement));
+
+evenement.reserverPlace();
+
+var inscription = inscriptions.save(Inscription.nouvelle(utilisateur, evenement));
+
+publieur.publishEvent(new ReservationCreeeEvent(inscription.getId()));
+
+return inscription;
+
+}
+
+}
+
+Concurrence : le verrou findByIdForUpdate sérialise les réservations d'un même événement. Le @Version reste en filet de sécurité. La contrainte UNIQUE en base reste la dernière barrière de RG-06.
+
+Extension : ajouter une règle (par exemple « quota par catégorie ») = créer une classe RegleQuotaCategorie implements RegleReservation. Aucune modification de ServiceReservationImpl.
+
+9.6 Paiement (module paiement)
+
+public interface VerificateurPaiement {
+
+ModeValidation mode();
+
+ResultatVerification verifier(Paiement paiement, PreuvePaiement preuve);
+
+}
+
+/** Aujourd'hui : décision humaine de l'administrateur. */
+
+@Component
+
+class VerificateurManuel implements VerificateurPaiement {
+
+public ModeValidation mode() { return ModeValidation.MANUEL; }
+
+public ResultatVerification verifier(Paiement p, PreuvePaiement preuve) {
+
+return ResultatVerification.EN_ATTENTE_DECISION_ADMIN;
+
+}
+
+}
+
+/** Demain : appel à l'API de l'opérateur, sans toucher au service de paiement. */
+
+@Component
+
+class VerificateurMobileMoney implements VerificateurPaiement { /* ... */ }
+
+public interface ServicePaiement {
+
+void soumettrePreuve(Long inscriptionId, Long utilisateurId, MultipartFile fichier); // EF-21, RG-13, RG-14
+
+void valider(Long paiementId, Long adminId);                                          // RG-15, RG-16
+
+void rejeter(Long paiementId, Long adminId, String motif);                            // EF-23
+
+Page<PaiementResume> lister(FiltrePaiement filtre, Pageable pageable);               // EF-22
+
+}
+
+public interface StockagePreuve {     // DIP : disque local ou S3 selon la configuration
+
+CheminStocke enregistrer(InputStream contenu, TypeMime type, String empreinteSha256);
+
+Resource lire(CheminStocke chemin);
+
+}
+
+public record PaiementConfirmeEvent(Long inscriptionId, Long paiementId, Long validePar) {}
+
+public record PaiementRejeteEvent(Long inscriptionId, String motif) {}
+
+9.7 Billets et QR code (module billet)
+
+/** Stratégie de signature du jeton. HMAC aujourd'hui ; clé asymétrique demain. */
+
+public interface SignateurJeton {
+
+String signer(UUID billetId, String nonce, Long evenementId);
+
+Optional<UUID> verifier(String jeton, Long evenementId);   // id si la signature est valide
+
+}
+
+@Component
+
+class SignateurHmac implements SignateurJeton { /* HMAC-SHA256, comparaison à temps constant */ }
+
+/** Génération de l'image du QR code. Interchangeable (ZXing). */
+
+public interface GenerateurQrCode {
+
+byte[] generer(String contenu, int taille);
+
+}
+
+@Service
+
+public class ServiceBillet {
+
+private final BilletRepository billets;
+
+private final SignateurJeton signateur;
+
+private final GenerateurQrCode qr;
+
+private final ApplicationEventPublisher publieur;
+
+/** Émission uniquement après commit du paiement (RG-10). */
+
+@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+
+public void surPaiementConfirme(PaiementConfirmeEvent evt) {
+
+var billet = billets.save(Billet.nouveau(evt.inscriptionId()));
+
+publieur.publishEvent(new BilletEmisEvent(billet.getId()));
+
+}
+
+public byte[] imageQr(UUID billetId) {
+
+var billet = billets.findById(billetId).orElseThrow();
+
+return qr.generer(signateur.signer(billet.getId(), billet.getNonce(), billet.evenementId()), 300);
+
+}
+
+}
+
+@Entity @Table(name = "billet")
+
+public class Billet {
+
+@Id private UUID id;
+
+private Long inscriptionId;
+
+private String nonce;
+
+private LocalDateTime scanneLe;
+
+private Long scannePar;
+
+@Version private Long version;                 // RG-11
+
+public static Billet nouveau(Long inscriptionId) { /* UUID et nonce aléatoires */ }
+
+/** Première et unique acceptation (RG-11). */
+
+public void marquerScanne(Long agentId, LocalDateTime instant) {
+
+if (scanneLe != null) throw new BilletDejaUtiliseException(id, scanneLe);
+
+this.scanneLe = instant;
+
+this.scannePar = agentId;
+
+}
+
+}
+
+9.8 Contrôle d'accès et statistiques (module controle)
+
+/** Résultat d'un scan : type scellé, aucune exception pour les cas attendus. */
+
+public sealed interface ResultatScan
+
+permits ResultatScan.Accepte, ResultatScan.DejaUtilise,
+
+ResultatScan.Invalide, ResultatScan.MauvaisEvenement {
+
+record Accepte(String nom, String prenom, String adresse, LocalDateTime instant) implements ResultatScan {}
+
+record DejaUtilise(LocalDateTime premierScan) implements ResultatScan {}
+
+record Invalide() implements ResultatScan {}
+
+record MauvaisEvenement() implements ResultatScan {}
+
+}
+
+/** Règle de contrôle (Chain of Responsibility) : signature, événement, non-utilisation. */
+
+public interface RegleScan {
+
+Optional<ResultatScan> verifier(ContexteScan contexte);   // vide = règle satisfaite
+
+}
+
+public interface ServiceScan {
+
+ResultatScan scanner(String jeton, Long evenementId, Long agentId);   // EF-40 à EF-43
+
+}
+
+public interface ServiceStatistiques {
+
+StatistiquesEvenement pour(Long evenementId);                          // EF-44
+
+byte[] exporter(Long evenementId, FormatExport format);                // EF-45
+
+}
+
+public record StatistiquesEvenement(
+
+long nombreEntrees, long nombreBilletsConfirmes, List<PersonneEntree> personnes) {}
+
+public record PersonneEntree(String nom, String prenom, String adresse, LocalDateTime entreeLe) {}
+
+/** Strategy d'export : CSV, PDF, ou autre sans modifier le service. */
+
+public interface ExportateurStatistiques {
+
+FormatExport format();
+
+byte[] exporter(StatistiquesEvenement statistiques);
+
+}
+
+Temps réel : le module expose un flux SSE (GET /api/scan/evenements/{id}/flux) qui pousse les compteurs après chaque scan accepté, ce qui évite le rafraîchissement manuel.
+
+9.9 Notifications (module notification)
+
+public interface CanalNotification {
+
+ModeCanal canal();
+
+void envoyer(Destinataire destinataire, Notification notification);
+
+}
+
+/** Squelette commun : validation, formatage, envoi, journalisation (Template Method). */
+
+public abstract class CanalAbstrait implements CanalNotification {
+
+private final JournalNotification journal;
+
+@Override
+
+public final void envoyer(Destinataire d, Notification n) {
+
+verifierDestinataire(d);
+
+var corps = formater(n);
+
+try {
+
+transmettre(d, corps, n.piecesJointes());
+
+journal.succes(canal(), d, n.modele());
+
+} catch (RuntimeException e) {
+
+journal.echec(canal(), d, n.modele(), e);   // réessai via l'outbox
+
+throw e;
+
+}
+
+}
+
+protected abstract void transmettre(Destinataire d, String corps, List<PieceJointe> pj);
+
+protected abstract String formater(Notification n);
+
+protected void verifierDestinataire(Destinataire d) { /* commun */ }
+
+}
+
+@Component class CanalEmail extends CanalAbstrait { /* JavaMailSender */ }
+
+@Component class CanalSms   extends CanalAbstrait { /* API SMS */ }
+
+public enum ModeleNotification { OTP, BILLET_EMIS, PREUVE_REJETEE, EVENEMENT_ANNULE, RESET_MOT_DE_PASSE }
+
+/** Listener unique : aucun cas d'usage n'appelle directement l'envoi. */
+
+@Component
+
+class ListenerNotification {
+
+private final OutboxNotificationRepository outbox;
+
+@TransactionalEventListener
+
+public void sur(BilletEmisEvent e)     { outbox.enregistrer(ModeleNotification.BILLET_EMIS, e); }
+
+@TransactionalEventListener
+
+public void sur(PaiementRejeteEvent e) { outbox.enregistrer(ModeleNotification.PREUVE_REJETEE, e); }
+
+}
+
+/** Traitement asynchrone de l'outbox, avec réessai. */
+
+@Component
+
+class DispatcheurOutbox {
+
+private final Map<ModeCanal, CanalNotification> canaux;
+
+@Scheduled(fixedDelay = 10_000)
+
+public void traiterEnAttente() { /* lit, envoie, marque ENVOYEE ou ECHEC */ }
+
+}
+
+9.10 Audit (module audit)
+
+@Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME)
+
+public @interface Auditable {
+
+String action();
+
+String typeCible();
+
+}
+
+/** Aspect unique pour toutes les actions sensibles (RG-16). */
+
+@Aspect @Component
+
+class AspectAudit {
+
+private final JournalAuditRepository journal;
+
+@AfterReturning("@annotation(auditable)")
+
+public void journaliser(JoinPoint jp, Auditable auditable) { /* acteur, cible, horodatage */ }
+
+}
+
+// Usage :
+
+@Auditable(action = "VALIDER_PAIEMENT", typeCible = "PAIEMENT")
+
+public void valider(Long paiementId, Long adminId) { /* ... */ }
+
+9.11 Entités : principes
+
+FetchType.LAZY partout. Les listes passent par des projections (records) et @EntityGraph ciblé.
+
+Pas de @Data ni de @EqualsAndHashCode sur les entités : égalité par identifiant.
+
+Les méthodes métier (reserverPlace, marquerScanne, peutPasserA) portent les invariants. Les setters publics sont interdits.
+
+Constructeurs protégés pour JPA, fabriques statiques (nouveau, nouvelle) pour le métier.
+
+10. API REST (aperçu)
+
+Méthode
+
+Route
+
+Rôle
+
+Description
+
+POST
+
+/api/auth/inscription
+
+Public
+
+Création de compte (EF-01 à EF-04)
+
+POST
+
+/api/auth/otp/envoi
+
+Compte
+
+Envoi du code OTP
+
+POST
+
+/api/auth/otp/verification
+
+Compte
+
+Vérification du téléphone
+
+POST
+
+/api/auth/connexion
+
+Public
+
+Connexion
+
+POST
+
+/api/auth/rafraichir
+
+Cookie
+
+Rotation du jeton d'accès
+
+GET
+
+/api/evenements
+
+Public
+
+Liste paginée des événements publiés
+
+GET
+
+/api/evenements/{id}
+
+Public
+
+Détail d'un événement
+
+POST
+
+/api/admin/evenements
+
+ADMIN
+
+Création
+
+PUT
+
+/api/admin/evenements/{id}
+
+ADMIN
+
+Modification
+
+POST
+
+/api/admin/evenements/{id}/publication
+
+ADMIN
+
+Publication
+
+POST
+
+/api/reservations
+
+PARTICIPANT
+
+Réservation (RG-06, RG-07)
+
+GET
+
+/api/reservations/moi
+
+PARTICIPANT
+
+Mes réservations
+
+DELETE
+
+/api/reservations/{id}
+
+PARTICIPANT
+
+Annulation
+
+POST
+
+/api/reservations/{id}/preuve
+
+PARTICIPANT
+
+Envoi de la référence de paiement et, facultativement, de la capture (multipart, EF-21)
+
+POST
+
+/api/admin/paiements/releve
+
+ADMIN
+
+Import CSV du relevé opérateur et rapprochement automatique (EF-26)
+
+GET
+
+/api/billets/moi
+
+PARTICIPANT
+
+Mes billets
+
+GET
+
+/api/billets/{id}/qr
+
+Propriétaire
+
+Image du QR code
+
+GET
+
+/api/admin/paiements?statut=PREUVE_ENVOYEE
+
+ADMIN
+
+Preuves à traiter
+
+POST
+
+/api/admin/paiements/{id}/validation
+
+ADMIN
+
+Validation
+
+POST
+
+/api/admin/paiements/{id}/rejet
+
+ADMIN
+
+Rejet avec motif
+
+POST
+
+/api/scan
+
+SCANNER
+
+Scan d'un jeton (evenementId dans le corps)
+
+GET
+
+/api/scan/evenements/{id}/statistiques
+
+SCANNER, ADMIN
+
+Compteurs et liste des entrées
+
+GET
+
+/api/scan/evenements/{id}/flux
+
+SCANNER, ADMIN
+
+Flux SSE temps réel
+
+GET
+
+/api/admin/evenements/{id}/export?format=CSV
+
+ADMIN
+
+Export des présents
+
+Format d'erreur unique (RFC 9457) :
+
+{
+
+"type": "https://billetterie/erreurs/deja-inscrit",
+
+"title": "Inscription déjà existante",
+
+"status": 409,
+
+"detail": "Cet utilisateur est déjà inscrit à cet événement.",
+
+"code": "RG-06"
+
+}
+
+Le champ code renvoie à la règle de gestion violée, pour faciliter le diagnostic côté front.
+
+11. Front-end React
+
+11.1 Structure
+
+src/
+
+├── app/                    (routeur, providers, garde de rôle)
+
+├── features/
+
+│   ├── auth/               (inscription, connexion, OTP, mot de passe)
+
+│   ├── evenements/         (liste, détail, filtres)
+
+│   ├── reservations/       (réservation, envoi de preuve, annulation)
+
+│   ├── billets/            (mes billets, affichage du QR)
+
+│   ├── admin-evenements/   (création, publication)
+
+│   ├── admin-paiements/    (file de preuves, validation, rejet)
+
+│   └── controle/           (scanner, compteurs, export)
+
+├── shared/
+
+│   ├── api/                (client HTTP unique, refresh automatique)
+
+│   ├── validation/         (schémas Zod partagés : email, téléphone E.164)
+
+│   ├── components/         (formulaire, table paginée, badge de statut)
+
+│   └── hooks/              (useSse, useRole)
+
+└── types/                  (types générés depuis l'OpenAPI)
+
+11.2 Règles
+
+Garde de route : <RequireRole role="ADMIN"> ; le rôle est lu depuis le jeton, mais la décision finale reste côté serveur.
+
+Validation : les schémas Zod reprennent les mêmes règles que le backend (E.164, e-mail, longueur). Le serveur reste la seule source de vérité.
+
+Scanner : lecture caméra (html5-qrcode) avec saisie manuelle de secours. Retour sonore et visuel distinct pour les quatre résultats de scan.
+
+Preuve de paiement : le numéro de l'administrateur est affiché à l'étape de paiement, avec un bouton de copie. Le champ « référence de transaction » est obligatoire ; la capture d'écran est facultative mais, si fournie, elle est vérifiée (type, taille) avant envoi.
+
+Import de relevé (admin) : page dédiée pour déposer le CSV de l'opérateur et consulter le rapport de rapprochement (nombre confirmé automatiquement / nombre à traiter manuellement, EF-26).
+
+Accessibilité : rôles ARIA sur les tableaux et les statuts, focus visible, contrastes WCAG AA.
+
+Types : générés depuis l'OpenAPI pour éviter les écarts entre front et back.
+
+12. Stratégie de tests
+
+Niveau
+
+Cible
+
+Outils
+
+Unitaire
+
+Value objects, règles, transitions d'état, invariants de Evenement et Billet
+
+JUnit 5, AssertJ
+
+Unitaire
+
+Chaque RegleReservation et RegleScan isolée
+
+JUnit 5, Mockito
+
+Intégration
+
+Repositories, contraintes SQL (unicité, CHECK), migrations Flyway
+
+Testcontainers (PostgreSQL)
+
+API
+
+Contrôleurs, sécurité (rôles, propriété), format d'erreur
+
+MockMvc, Spring Security Test
+
+Concurrence
+
+Réservation simultanée sur la dernière place ; double scan du même billet
+
+Tests multithreads, Testcontainers
+
+Front
+
+Composants, garde de route, schémas Zod
+
+Vitest, Testing Library
+
+End-to-end
+
+Parcours complet : inscription, réservation, preuve, validation, scan
+
+Playwright
+
+Charge
+
+Pic d'inscriptions et de scans
+
+k6
+
+Cas de test obligatoires (extrait) :
+
+Deux visiteurs réservent la dernière place simultanément : un seul réussit.
+
+Un étudiant tente une deuxième réservation sur le même événement : refus avec le code RG-06.
+
+Un billet est scanné deux fois en parallèle : une seule acceptation.
+
+Un jeton dont un caractère est modifié : refus INVALIDE.
+
+Un administrateur tente de valider sa propre preuve : refus RG-15.
+
+Une preuve identique est soumise pour deux réservations : refus RG-13.
+
+Une référence de paiement correspond exactement à une ligne du relevé importé (même référence, même montant) : confirmation automatique sans intervention de l'administrateur (EF-26).
+
+Une référence ne correspond à aucune ligne du relevé, ou le montant diffère : la réservation reste en attente de traitement manuel.
+
+Un étudiant en L1 change de filière : la demande est acceptée et journalisée (EF-09). Le même étudiant, une fois en L3, tente de changer de filière : refus RG-04 (filière verrouillée).
+
+Un événement avec des réservations CONFIRMEE et des paiements VALIDE est annulé : les réservations passent à ANNULEE, les billets deviennent invalides (refusés au scan), les paiements passent à A_REMBOURSER, et un e-mail est envoyé à chaque participant (RG-19).
+
+13. Livrables
+
+Code source backend (Spring Boot) et frontend (React), dépôt versionné.
+
+Scripts de migration Flyway versionnés.
+
+Documentation OpenAPI et fichier de configuration Docker Compose.
+
+Jeux de données de démonstration (filières, catégories, événements de test).
+
+Rapport de tests (couverture, résultats de charge, résultats de sécurité).
+
+Guide d'exploitation : déploiement, sauvegarde, rotation des secrets, procédure d'urgence.
+
+Manuel utilisateur (participant, administrateur, agent de scan).
+
+14. Hypothèses et points à valider
+
+Les points suivants ont été supposés pour rédiger ce document. Merci de les confirmer ou de les corriger :
+
+N°
+
+Sujet
+
+Hypothèse / question
+
+1
+
+Paiement
+
+Mobile money vers un numéro unique de l'administrateur ; l'utilisateur saisit la référence de transaction, rapprochée automatiquement avec un relevé importé par l'administrateur (EF-26). Seuls les cas non rapprochés passent en validation manuelle. Quel est le format exact du relevé (export de l'opérateur), et à quelle fréquence l'administrateur peut-il l'importer (quotidien, à la demande) ?
+
+2
+
+Devise et prix
+
+Un seul prix par événement, identique pour étudiants et visiteurs. Quelle devise ?
+
+3
+
+Capacité
+
+Chaque événement a une capacité fixe. Peut-elle être illimitée ?
+
+4
+
+Expiration
+
+Une réservation non payée est libérée après 48 heures. Ce délai convient-il ?
+
+5
+
+Annulation
+
+Un participant peut annuler sa propre réservation tant qu'elle n'est pas confirmée (EF-25). En cas d'annulation d'un événement par l'administrateur, les réservations et billets déjà émis sont automatiquement invalidés et les paiements validés passent en attente de remboursement (RG-19), mais le remboursement lui-même reste manuel (hors plateforme) : quel délai et quelle politique de remboursement annoncer aux participants ?
+
+6
+
+Administrateurs
+
+Un ou plusieurs administrateurs ? Quels droits pour chacun ?
+
+7
+
+Agents de scan
+
+Combien d'agents simultanés par événement, et sur quels appareils ?
+
+8
+
+Notifications
+
+L'OTP et les notifications doivent rester gratuits en V1 (RG-02) : l'établissement a-t-il un fournisseur SMS à offre gratuite, ou l'envoi de l'OTP par e-mail est-il acceptable en attendant un budget SMS ? Un SMTP est-il disponible pour les e-mails ?
+
+9
+
+Données personnelles
+
+Durée de conservation des preuves de paiement et des données des participants, selon les textes applicables.
+
+10
+
+Langue
+
+Interface en français uniquement pour la V1 ?
+
+11
+
+Hébergement
+
+Serveur de l'établissement ou cloud ? Cela conditionne le stockage des preuves et la sauvegarde.
+
+12
+
+Profils existants
+
+Des étudiants sont-ils déjà enregistrés dans un autre système à importer ?
+
+13
+
+Redoublement et filière
+
+Le verrouillage de filière (RG-04) se base sur (année courante − année d'inscription L1). En cas de redoublement de L1 ou de L2, faut-il un ajustement manuel de la date de verrouillage par l'administrateur ?
+
+14
+
+Format du relevé opérateur
+
+Quel est le format exact (colonnes, encodage) du relevé exporté par l'opérateur mobile money, utilisé pour le rapprochement automatique (EF-26) ?
+
+15. Prochaines étapes
+
+Validation de ce cahier des charges et réponses aux points de la section 14.
+
+Rédaction des ADR (choix de la signature des billets, stratégie de verrouillage, stockage des preuves).
+
+Découpage en lots : identité, événements, réservation et paiement, billets et scan, administration.
+
+Développement itératif avec tests à chaque lot.
