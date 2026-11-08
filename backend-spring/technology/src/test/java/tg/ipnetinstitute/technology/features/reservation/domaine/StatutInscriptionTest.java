@@ -1,6 +1,7 @@
 package tg.ipnetinstitute.technology.features.reservation.domaine;
 
 import org.junit.jupiter.api.Test;
+import tg.ipnetinstitute.technology.features.reservation.model.StatutInscription;
 
 import static org.junit.jupiter.api.Assertions.*;
 

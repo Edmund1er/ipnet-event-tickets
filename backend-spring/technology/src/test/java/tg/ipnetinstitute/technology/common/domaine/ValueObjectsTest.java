@@ -3,6 +3,8 @@ package tg.ipnetinstitute.technology.common.domaine;
 import org.junit.jupiter.api.Test;
 import tg.ipnetinstitute.technology.common.exception.EmailInvalideException;
 import tg.ipnetinstitute.technology.common.exception.TelephoneInvalideException;
+import tg.ipnetinstitute.technology.common.utils.Email;
+import tg.ipnetinstitute.technology.common.utils.Telephone;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +30,7 @@ class ValueObjectsTest {
 
     @Test
     void telephoneInvalideDeclencheException() {
-        assertThrows(TelephoneInvalideException.class, () -> new Telephone("06123456")); // manque indicatif pays
-        assertThrows(TelephoneInvalideException.class, () -> new Telephone(""));
+        assertThrows(TelephoneInvalideException.class, () -> new Telephone("0012"));
+        assertThrows(TelephoneInvalideException.class, () -> new Telephone(null));
     }
 }

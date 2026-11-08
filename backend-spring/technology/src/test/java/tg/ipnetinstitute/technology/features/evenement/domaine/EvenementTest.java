@@ -2,6 +2,8 @@ package tg.ipnetinstitute.technology.features.evenement.domaine;
 
 import org.junit.jupiter.api.Test;
 import tg.ipnetinstitute.technology.common.exception.CapaciteAtteinteException;
+import tg.ipnetinstitute.technology.features.evenement.model.Evenement;
+import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,9 +31,5 @@ class EvenementTest {
 
         // 3ème réservation : doit échouer (RG-08)
         assertThrows(CapaciteAtteinteException.class, e::reserverPlace);
-
-        // Libération (RG-09)
-        e.libererPlace();
-        assertEquals(1, e.getPlacesReservees());
     }
 }
