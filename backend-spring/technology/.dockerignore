@@ -1,4 +1,8 @@
-target
-uploads
-code-installation.txt
+target/
+uploads/
+.git
+.idea
+*.md
 .env
+src/main/resources/application-local.properties
+code-installation.txt
