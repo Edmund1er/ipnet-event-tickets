@@ -5,14 +5,9 @@ import { dateLongue, montant } from '../../../core/utils/format'
 import { urlImageEvenement } from '../services/evenementService'
 
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
-  if (evenement.aImage) {
-    return <img src={urlImageEvenement(evenement.id)} alt="" loading="lazy" className={`object-cover ${className}`} />
-  }
-  return (
-    <div className={`flex items-center justify-center bg-gradient-to-br from-primaire to-primaire-fonce text-white ${className}`}>
-      <Icone nom="event" taille={48} />
-    </div>
-  )
+  // Les images sont ajoutées par l'administrateur : sans image, on n'affiche rien.
+  if (!evenement.aImage) return null
+  return <img src={urlImageEvenement(evenement.id)} alt="" loading="lazy" className={`object-cover ${className}`} />
 }
 
 export function JaugePlaces({ evenement }: { evenement: Evenement }) {
@@ -28,8 +23,8 @@ export function JaugePlaces({ evenement }: { evenement: Evenement }) {
           {evenement.placesReservees} / {evenement.capacite}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded bg-primaire-clair" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Taux de remplissage">
-        <div className={`h-full rounded ${pct >= 90 ? 'bg-rouge' : 'bg-primaire'}`} style={{ width: `${pct}%` }} />
+      <div className="h-2 overflow-hidden rounded-full bg-primaire-clair" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Taux de remplissage">
+        <div className={`h-full rounded-full ${pct >= 90 ? 'bg-rouge' : 'bg-primaire'}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   )
@@ -39,15 +34,20 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
   return (
     <Link
       to={`/evenements/${evenement.id}`}
-      className="carte group flex flex-col overflow-hidden transition-shadow hover:shadow-[0_4px_12px_-2px_rgba(15,23,42,0.12)]"
+      className="carte group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primaire/10"
     >
-      <div className="relative">
-        <VisuelEvenement evenement={evenement} className="aspect-[16/9] w-full" />
-        <span className="absolute left-3 top-3 rounded bg-rouge px-2.5 py-1 text-sm font-bold text-white">
-          {montant(evenement.prix, evenement.devise)}
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      {evenement.aImage && (
+        <div className="relative">
+          <VisuelEvenement evenement={evenement} className="aspect-[16/9] w-full" />
+          <span className="absolute left-3 top-3 rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white shadow-md">
+            {montant(evenement.prix, evenement.devise)}
+          </span>
+        </div>
+      )}
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+        {!evenement.aImage && (
+          <span className="self-start rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white">{montant(evenement.prix, evenement.devise)}</span>
+        )}
         <h2 className="text-lg font-semibold leading-snug group-hover:text-primaire">{evenement.titre}</h2>
         <div className="flex flex-col gap-1.5 text-sm text-attenue">
           <p className="flex items-center gap-2">

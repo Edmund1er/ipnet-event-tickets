@@ -14,7 +14,7 @@ const ALERTES: Record<TonAlerte, { classe: string; icone: string }> = {
 export function Alerte({ ton = 'info', titre, children }: { ton?: TonAlerte; titre?: string; children?: ReactNode }) {
   const a = ALERTES[ton]
   return (
-    <div role={ton === 'erreur' ? 'alert' : 'status'} className={`flex gap-3 rounded-lg border p-3.5 text-sm ${a.classe}`}>
+    <div role={ton === 'erreur' ? 'alert' : 'status'} className={`flex gap-3 rounded-xl border p-3.5 text-sm ${a.classe}`}>
       <Icone nom={a.icone} pleine className="mt-0.5 shrink-0" taille={20} />
       <div className="min-w-0">
         {titre && <p className="font-semibold">{titre}</p>}
@@ -27,7 +27,7 @@ export function Alerte({ ton = 'info', titre, children }: { ton?: TonAlerte; tit
 export function EtatVide({ icone, titre, texte, action }: { icone: string; titre: string; texte?: string; action?: ReactNode }) {
   return (
     <div className="carte flex flex-col items-center px-6 py-14 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primaire-clair text-primaire">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primaire-clair text-primaire ring-8 ring-primaire-clair/50">
         <Icone nom={icone} taille={30} />
       </div>
       <h2 className="text-lg font-semibold">{titre}</h2>
@@ -123,7 +123,7 @@ export function Modale({
         e.preventDefault()
         surFermeture()
       }}
-      className={`m-auto w-[calc(100%-2rem)] rounded-xl border border-slate-300 bg-white p-0 text-encre shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] backdrop:bg-slate-900/50 ${large ? 'max-w-3xl' : 'max-w-lg'}`}
+      className={`m-auto w-[calc(100%-2rem)] rounded-2xl border border-slate-200 bg-white p-0 text-encre shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] backdrop:bg-slate-900/50 ${large ? 'max-w-3xl' : 'max-w-lg'}`}
     >
       {ouverte && (
         <>
@@ -161,9 +161,9 @@ export function Tuile({
     orange: 'bg-alerte-clair text-alerte',
   }[ton]
   return (
-    <div className="carte p-5">
+    <div className="carte p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${couleurs}`}>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${couleurs}`}>
           <Icone nom={icone} />
         </div>
         <p className="titre-section">{libelle}</p>

@@ -13,8 +13,8 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const STYLES: Record<Variante, string> = {
-  primaire: 'bg-primaire text-white hover:bg-primaire-fonce disabled:bg-primaire/50',
-  rouge: 'bg-rouge text-white hover:bg-rouge-fonce disabled:bg-rouge/50',
+  primaire: 'bg-primaire text-white shadow-sm shadow-primaire/30 hover:bg-primaire-fonce disabled:bg-primaire/50 disabled:shadow-none',
+  rouge: 'bg-rouge text-white shadow-sm shadow-rouge/30 hover:bg-rouge-fonce disabled:bg-rouge/50 disabled:shadow-none',
   secondaire:
     'bg-white text-primaire border-[1.5px] border-primaire hover:bg-primaire-clair disabled:text-primaire/50 disabled:border-primaire/40',
   danger: 'bg-erreur-clair text-erreur border border-erreur hover:bg-erreur hover:text-white disabled:opacity-50',
@@ -43,7 +43,7 @@ export function Bouton({
       type={type}
       disabled={disabled || enCours}
       aria-busy={enCours || undefined}
-      className={`inline-flex items-center justify-center rounded font-semibold transition-all active:scale-[0.98] disabled:cursor-not-allowed ${STYLES[variante]} ${TAILLES[taille]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-xl font-semibold transition-all active:scale-[0.98] disabled:cursor-not-allowed ${STYLES[variante]} ${TAILLES[taille]} ${className}`}
       {...reste}
     >
       {enCours ? <Chargement taille={18} clair={variante === 'primaire' || variante === 'rouge'} /> : icone && <Icone nom={icone} taille={20} />}

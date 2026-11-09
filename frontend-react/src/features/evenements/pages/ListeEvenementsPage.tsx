@@ -8,7 +8,7 @@ import { Icone } from '../../../core/components/ui/Icone'
 import { useRequete } from '../../../core/hooks/useRequete'
 import { CarteEvenement } from '../components/CarteEvenement'
 import { dateLongue } from '../../../core/utils/format'
-import { evenementService, urlImageEvenement, type FiltresEvenements } from '../services/evenementService'
+import { evenementService, type FiltresEvenements } from '../services/evenementService'
 
 const CLES = ['titre', 'dateMin', 'dateMax', 'prixMin', 'prixMax'] as const
 
@@ -22,9 +22,9 @@ export function ListeEvenementsPage() {
   const [saisie, setSaisie] = useState(() => Object.fromEntries(CLES.map((c) => [c, params.get(c) ?? ''])) as Record<(typeof CLES)[number], string>)
   const { donnees, chargement, erreur } = useRequete(() => evenementService.lister(filtres), [params.toString()])
   const filtreActif = CLES.some((c) => params.get(c))
-  // Bandeau d'accueil alimenté par le prochain événement publié (image, titre et date proviennent de l'administration)
+  // Bandeau d'accueil : lien vers le prochain événement publié
   const { donnees: prochains } = useRequete(() => evenementService.lister({ page: 0 }), [])
-  const prochain = prochains?.elements.find((e) => e.aImage) ?? prochains?.elements[0] ?? null
+  const prochain = prochains?.elements[0] ?? null
 
   function appliquer(e: FormEvent) {
     e.preventDefault()
@@ -40,27 +40,32 @@ export function ListeEvenementsPage() {
 
   return (
     <div>
-      <section className="relative mb-8 overflow-hidden rounded-xl bg-primaire-fonce text-white">
-        {prochain?.aImage && (
-          <div className="absolute inset-y-0 right-0 hidden w-1/2 md:block">
-            <img src={urlImageEvenement(prochain.id)} alt="" className="h-full w-full object-cover opacity-90" />
-            <div className="absolute inset-0 bg-gradient-to-r from-primaire-fonce via-primaire-fonce/60 to-transparent" />
-          </div>
-        )}
-        <div className="relative max-w-xl px-6 py-10 sm:px-10 sm:py-14">
-          <p className="mb-3 inline-flex items-center gap-2 rounded bg-rouge px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
+      <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primaire-fonce via-primaire to-primaire-fonce text-white shadow-xl shadow-primaire/20">
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rouge/30 blur-3xl" aria-hidden />
+        <div className="absolute inset-0 md:left-[35%]" aria-hidden>
+          <img
+            src="/logo_ipnet.jpg"
+            alt=""
+            className="h-full w-full object-cover object-[60%_40%] md:[mask-image:linear-gradient(to_right,transparent,black_45%)]"
+          />
+          <div className="absolute inset-0 bg-primaire-fonce/80 md:hidden" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primaire-fonce/50 via-transparent to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primaire-fonce/60 to-transparent" />
+        </div>
+        <div className="relative max-w-xl px-5 py-8 sm:px-10 sm:py-14">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-rouge px-3 py-1 text-xs font-bold shadow-md">
             <Icone nom="confirmation_number" taille={16} /> Billetterie officielle
           </p>
-          <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">Les événements d'IPNET Institute of Technology</h1>
-          <p className="mt-3 text-white/85">
+          <h1 className="text-[1.65rem] font-extrabold leading-tight tracking-tight sm:text-4xl">Les événements d'IPNET Institute of Technology</h1>
+          <p className="mt-3 text-[15px] text-white/85 sm:text-base">
             Réservez votre place, payez par Mobile Money et recevez votre billet avec QR code par e-mail.
           </p>
           {prochain && (
             <Link
               to={`/evenements/${prochain.id}`}
-              className="mt-5 inline-flex max-w-full items-center gap-2 rounded-md bg-white/15 px-3 py-2 text-sm font-semibold backdrop-blur hover:bg-white/25"
+              className="mt-6 inline-flex max-w-full items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-primaire-fonce shadow-lg transition-transform hover:-translate-y-0.5"
             >
-              <Icone nom="event" taille={18} />
+              <Icone nom="event" taille={18} className="text-rouge" />
               <span className="truncate">
                 Prochain : {prochain.titre} — {dateLongue(prochain.dateDebut)}
               </span>

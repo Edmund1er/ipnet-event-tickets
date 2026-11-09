@@ -7,6 +7,7 @@ import { Chargement, ChargementPage } from '../../../core/components/ui/Chargeme
 import { Alerte, EnteteSection, EtatVide, Modale } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
+import { LogoImage } from '../../../core/components/layout/Logo'
 import { useImageProtegee, useRequete } from '../../../core/hooks/useRequete'
 import { dateLongue, heure } from '../../../core/utils/format'
 import { billetService, type Billet } from '../services/billetService'
@@ -65,7 +66,7 @@ function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran:
       {/* Talon */}
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-center justify-between gap-2">
-          <img src="/logo-ipnet.png" alt="IPNET" className="h-9 w-12 rounded object-cover" />
+          <LogoImage className="h-10" />
           {billet.invalide ? (
             <Badge ton="rouge">Invalide — événement annulé</Badge>
           ) : billet.scanneLe ? (

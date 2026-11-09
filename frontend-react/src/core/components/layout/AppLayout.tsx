@@ -39,13 +39,13 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
 
       {/* Barre latérale */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-white shadow-xl shadow-slate-900/5 border-r border-bordure transition-transform lg:translate-x-0 ${
           menuOuvert ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Navigation principale"
       >
         <div className="flex min-h-0 flex-col">
-          <div className="flex h-16 items-center justify-between border-b-[3px] border-rouge px-5">
+          <div className="flex h-16 items-center justify-between border-b border-bordure bg-gradient-to-r from-primaire-clair/60 to-white px-4">
             <Logo compact />
             <button className="rounded p-1 text-attenue lg:hidden" onClick={() => setMenuOuvert(false)} aria-label="Fermer le menu">
               <Icone nom="close" />
@@ -63,9 +63,9 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
                         end={e.chemin === '/'}
                         onClick={() => setMenuOuvert(false)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors ${
+                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] transition-colors ${
                             isActive
-                              ? 'bg-primaire font-semibold text-white'
+                              ? 'bg-primaire font-semibold text-white shadow-md shadow-primaire/25'
                               : 'text-attenue hover:bg-primaire-clair hover:text-primaire'
                           }`
                         }
@@ -112,7 +112,7 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
           </div>
         </header>
 
-        <main id="contenu" className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8">
+        <main id="contenu" className="mx-auto w-full max-w-[1440px] px-3 py-5 sm:px-6 sm:py-8">
           <Outlet />
         </main>
       </div>
@@ -127,7 +127,7 @@ function FilAriane({ chemin, entrees }: { chemin: string; entrees: EntreeNavigat
   return (
     <p className="hidden items-center gap-2 text-sm font-semibold text-encre sm:flex">
       <span className="inline-block h-2 w-2 rounded-full bg-rouge" aria-hidden />
-      {actuelle?.libelle ?? 'IPNET Billetterie'}
+      {actuelle?.libelle ?? 'ipnet-event'}
     </p>
   )
 }

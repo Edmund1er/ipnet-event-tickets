@@ -39,6 +39,11 @@
   }
   body {
     @apply bg-surface text-encre font-sans antialiased;
+    background-image: radial-gradient(60rem 28rem at 100% -10%, rgb(30 91 163 / 0.07), transparent), radial-gradient(40rem 24rem at -10% 0%, rgb(176 50 42 / 0.05), transparent);
+    background-attachment: fixed;
+  }
+  html {
+    overflow-x: hidden;
   }
   h1,
   h2,
@@ -85,10 +90,10 @@
     font-variant-numeric: tabular-nums;
   }
   .carte {
-    @apply rounded-lg border border-bordure bg-white;
+    @apply rounded-2xl border border-bordure/80 bg-white shadow-sm shadow-slate-900/5;
   }
   .champ {
-    @apply h-12 w-full rounded border-[1.5px] border-bordure bg-white px-3 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
+    @apply h-12 w-full rounded-xl border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
   }
   .etiquette {
     @apply mb-1.5 block text-sm font-semibold text-encre;
