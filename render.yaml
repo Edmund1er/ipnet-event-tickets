@@ -6,8 +6,9 @@ services:
     runtime: docker
     region: frankfurt
     plan: free
-    rootDir: backend-spring/technology
-    dockerfilePath: ./Dockerfile
+    # Chemins relatifs à la racine du dépôt
+    dockerfilePath: ./backend-spring/technology/Dockerfile
+    dockerContext: ./backend-spring/technology
     healthCheckPath: /v3/api-docs
     # CI/CD : Render ne déploie un push sur main que si les contrôles GitHub Actions (tests) sont verts
     branch: main
