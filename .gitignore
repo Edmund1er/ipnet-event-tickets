@@ -35,3 +35,6 @@ backend-spring/technology/target/
 # IDE
 .idea/
 *.iml
+
+# Identifiants locaux (mot de passe base de donnees...)
+**/application-local.properties
