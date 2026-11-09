@@ -19,7 +19,9 @@ import tg.ipnetinstitute.technology.features.controle.repository.JournalScanRepo
 import tg.ipnetinstitute.technology.features.evenement.model.Evenement;
 import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 import tg.ipnetinstitute.technology.features.evenement.repository.EvenementRepository;
-import tg.ipnetinstitute.technology.features.identite.service.ProfilFactory;
+import tg.ipnetinstitute.technology.features.identite.service.ServiceIdentite;
+import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
+import tg.ipnetinstitute.technology.features.reservation.model.StatutInscription;
 import tg.ipnetinstitute.technology.features.identite.dto.response.ResumePersonne;
 import tg.ipnetinstitute.technology.features.reservation.model.Inscription;
 import tg.ipnetinstitute.technology.features.reservation.repository.InscriptionRepository;
@@ -40,7 +42,8 @@ public class ServiceControle {
     private final EvenementRepository evenements;
     private final JournalScanRepository journalScans;
     private final HmacWrapper signateur;
-    private final ProfilFactory profilFactory;
+    private final ServiceIdentite serviceIdentite;
+    private final ServiceEvenement serviceEvenement;
     private final Map<FormatExport, ExportateurStatistiques> exportateurs;
 
     public ServiceControle(BilletRepository billets,
@@ -48,14 +51,16 @@ public class ServiceControle {
                            EvenementRepository evenements,
                            JournalScanRepository journalScans,
                            HmacWrapper signateur,
-                           ProfilFactory profilFactory,
+                           ServiceIdentite serviceIdentite,
+                           ServiceEvenement serviceEvenement,
                            List<ExportateurStatistiques> exportateurList) {
         this.billets = billets;
         this.inscriptions = inscriptions;
         this.evenements = evenements;
         this.journalScans = journalScans;
         this.signateur = signateur;
-        this.profilFactory = profilFactory;
+        this.serviceIdentite = serviceIdentite;
+        this.serviceEvenement = serviceEvenement;
         this.exportateurs = exportateurList.stream()
                 .collect(Collectors.toMap(ExportateurStatistiques::format, e -> e));
     }
@@ -85,15 +90,16 @@ public class ServiceControle {
 
         Billet billet = optBillet.get();
 
-        // 3. Vérification signature HMAC à temps constant
-        Optional<UUID> validationSign = signateur.verifier(jeton, evenementId, billet.getNonce());
-        if (validationSign.isEmpty()) {
+        // 3. Vérification de la signature HMAC (temps constant) avec l'événement réel du billet :
+        //    un jeton altéré est INVALIDE ; un billet authentique d'un autre événement est MAUVAIS_EVENEMENT (EF-43)
+        Inscription inscription = inscriptions.findById(billet.getInscriptionId()).orElseThrow();
+        Optional<UUID> validationSign = signateur.verifier(jeton, inscription.getEvenementId(), billet.getNonce());
+        if (validationSign.isEmpty() || !validationSign.get().equals(billet.getId())) {
             journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.INVALIDE, now));
             return new ResultatScan.Invalide();
         }
 
         // 4. Vérification de l'événement et de son statut (RG-19)
-        Inscription inscription = inscriptions.findById(billet.getInscriptionId()).orElseThrow();
         Evenement evenement = evenements.findById(inscription.getEvenementId()).orElseThrow();
 
         if (!evenement.getId().equals(evenementId)) {
@@ -118,47 +124,45 @@ public class ServiceControle {
 
         journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.ACCEPTE, now));
 
-        // Résumé de la personne
-        ResumePersonne resume = profilFactory.pour(
-                inscriptions.findById(billet.getInscriptionId()).get().getStatut() != null 
-                        ? tg.ipnetinstitute.technology.features.identite.model.TypeProfil.ETUDIANT 
-                        : tg.ipnetinstitute.technology.features.identite.model.TypeProfil.VISITEUR
-        ).resumer(inscription.getUtilisateurId());
+        // Résumé du porteur selon son type de profil réel (EF-41)
+        ResumePersonne resume = serviceIdentite.resumer(inscription.getUtilisateurId());
 
-        return new ResultatScan.Accepte(resume.nom(), resume.prenom(), resume.adresse(), now);
+        return new ResultatScan.Accepte(resume.nom(), resume.prenom(), resume.detail(), now);
     }
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_SCANNER') or hasRole('ROLE_ADMIN')")
     public StatistiquesEvenement obtenirStatistiques(Long evenementId) {
-        long nombreEntrees = journalScans.countByEvenementIdAndResultat(evenementId, ResultatScanEnum.ACCEPTE);
-
+        serviceEvenement.consulter(evenementId); // 404 si l'événement n'existe pas
         var scansAcceptes = journalScans.findByEvenementIdAndResultatOrderByHorodatageAsc(evenementId, ResultatScanEnum.ACCEPTE);
         List<PersonneEntree> personnes = new ArrayList<>();
 
         for (var s : scansAcceptes) {
             if (s.getBilletId() != null) {
-                billets.findById(s.getBilletId()).ifPresent(b -> {
-                    inscriptions.findById(b.getInscriptionId()).ifPresent(i -> {
-                        ResumePersonne res = profilFactory.pour(tg.ipnetinstitute.technology.features.identite.model.TypeProfil.ETUDIANT)
-                                .resumer(i.getUtilisateurId());
-                        personnes.add(new PersonneEntree(res.nom(), res.prenom(), res.adresse(), s.getHorodatage()));
-                    });
-                });
+                billets.findById(s.getBilletId()).ifPresent(b ->
+                        inscriptions.findById(b.getInscriptionId()).ifPresent(i -> {
+                            ResumePersonne res = serviceIdentite.resumer(i.getUtilisateurId());
+                            personnes.add(new PersonneEntree(res.nom(), res.prenom(), res.detail(), s.getHorodatage()));
+                        }));
             }
         }
+        Collections.reverse(personnes); // la plus récente en premier
 
-        return new StatistiquesEvenement(nombreEntrees, personnes.size(), personnes);
+        long nombreEntrees = personnes.size();
+        long confirmes = inscriptions.countByEvenementIdAndStatut(evenementId, StatutInscription.CONFIRMEE);
+        long restants = Math.max(0, confirmes - nombreEntrees);
+        return new StatistiquesEvenement(evenementId, nombreEntrees, confirmes, restants, personnes);
     }
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public byte[] exporterStatistiques(Long evenementId, FormatExport format) {
+        var evenement = serviceEvenement.consulter(evenementId);
         StatistiquesEvenement stats = obtenirStatistiques(evenementId);
         ExportateurStatistiques exportateur = exportateurs.get(format);
         if (exportateur == null) {
             throw new IllegalArgumentException("Format d'export non supporté : " + format);
         }
-        return exportateur.exporter(stats);
+        return exportateur.exporter(evenement, stats);
     }
 }

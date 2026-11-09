@@ -15,11 +15,11 @@ public record Email(String valeur) {
 
     public Email {
         if (valeur == null) {
-            throw new EmailInvalideException(null);
+            throw new EmailInvalideException("L'adresse e-mail est obligatoire.");
         }
         valeur = valeur.trim().toLowerCase(Locale.ROOT);
         if (!FORMAT.matcher(valeur).matches()) {
-            throw new EmailInvalideException(valeur);
+            throw new EmailInvalideException("Adresse e-mail invalide : " + valeur);
         }
     }
 }

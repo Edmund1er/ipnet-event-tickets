@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface BilletRepository extends JpaRepository<Billet, UUID> {
     Optional<Billet> findByInscriptionId(Long inscriptionId);
+    long countByInvalideFalse();
+    long countByScanneLeIsNotNull();
 }

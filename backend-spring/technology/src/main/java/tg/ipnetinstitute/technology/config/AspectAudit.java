@@ -25,11 +25,11 @@ public class AspectAudit {
         this.journal = journal;
     }
 
-    @AfterReturning("@annotation(auditable)")
-    public void journaliser(JoinPoint jp, Auditable auditable) {
+    @AfterReturning(pointcut = "@annotation(auditable)", returning = "resultat")
+    public void journaliser(JoinPoint jp, Auditable auditable, Object resultat) {
         try {
             Long acteurId = extraireActeurId();
-            String idCible = extraireIdCible(jp.getArgs());
+            String idCible = tronquer(extraireIdCible(jp.getArgs(), resultat), 50);
 
             JournalAudit entree = new JournalAudit(
                     acteurId,
@@ -56,10 +56,38 @@ public class AspectAudit {
         return null;
     }
 
-    private String extraireIdCible(Object[] args) {
-        if (args != null && args.length > 0 && args[0] != null) {
+    /**
+     * Identifiant de la cible : premier argument s'il s'agit d'un identifiant (Long, UUID…),
+     * sinon identifiant porté par le résultat (record DTO avec id() / utilisateurId()).
+     * Jamais le toString() d'un DTO, qui contiendrait des données personnelles et dépasserait la colonne.
+     */
+    private String extraireIdCible(Object[] args, Object resultat) {
+        if (args != null && args.length > 0 && estIdentifiant(args[0])) {
             return String.valueOf(args[0]);
         }
+        if (resultat != null) {
+            if (estIdentifiant(resultat)) {
+                return String.valueOf(resultat);
+            }
+            for (String accesseur : new String[]{"id", "getId", "utilisateurId"}) {
+                try {
+                    Object valeur = resultat.getClass().getMethod(accesseur).invoke(resultat);
+                    if (estIdentifiant(valeur)) {
+                        return String.valueOf(valeur);
+                    }
+                } catch (ReflectiveOperationException ignored) {
+                    // accesseur absent : on essaie le suivant
+                }
+            }
+        }
         return "N/A";
+    }
+
+    private static boolean estIdentifiant(Object o) {
+        return o instanceof Number || o instanceof java.util.UUID;
+    }
+
+    private static String tronquer(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max);
     }
 }

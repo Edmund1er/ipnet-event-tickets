@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public sealed interface ResultatScan
         permits ResultatScan.Accepte, ResultatScan.DejaUtilise, ResultatScan.Invalide, ResultatScan.MauvaisEvenement, ResultatScan.EvenementAnnule {
 
-    record Accepte(String nom, String prenom, String adresse, LocalDateTime instant) implements ResultatScan {}
+    record Accepte(String nom, String prenom, String detail, LocalDateTime instant) implements ResultatScan {}
     record DejaUtilise(LocalDateTime premierScan) implements ResultatScan {}
     record Invalide() implements ResultatScan {}
     record MauvaisEvenement() implements ResultatScan {}

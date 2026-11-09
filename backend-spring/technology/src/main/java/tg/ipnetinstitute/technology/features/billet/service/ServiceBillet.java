@@ -11,7 +11,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException;
+import tg.ipnetinstitute.technology.features.billet.dto.response.BilletResponse;
 import tg.ipnetinstitute.technology.features.billet.model.Billet;
+import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
+import tg.ipnetinstitute.technology.features.identite.service.ServiceIdentite;
 import tg.ipnetinstitute.technology.features.billet.repository.BilletRepository;
 import tg.ipnetinstitute.technology.features.evenement.service.EvenementAnnuleEvent;
 import tg.ipnetinstitute.technology.features.paiement.service.PaiementConfirmeEvent;
@@ -33,17 +37,23 @@ public class ServiceBillet {
     private final HmacWrapper signateur;
     private final QrZxingWrapper qr;
     private final ApplicationEventPublisher publieur;
+    private final ServiceEvenement serviceEvenement;
+    private final ServiceIdentite serviceIdentite;
 
     public ServiceBillet(BilletRepository billets,
                          InscriptionRepository inscriptions,
                          HmacWrapper signateur,
                          QrZxingWrapper qr,
-                         ApplicationEventPublisher publieur) {
+                         ApplicationEventPublisher publieur,
+                         ServiceEvenement serviceEvenement,
+                         ServiceIdentite serviceIdentite) {
         this.billets = billets;
         this.inscriptions = inscriptions;
         this.signateur = signateur;
         this.qr = qr;
         this.publieur = publieur;
+        this.serviceEvenement = serviceEvenement;
+        this.serviceIdentite = serviceIdentite;
     }
 
     /**
@@ -61,7 +71,7 @@ public class ServiceBillet {
     @Transactional(readOnly = true)
     public byte[] imageQr(UUID billetId, Long utilisateurConnecteId) {
         var billet = billets.findById(billetId)
-                .orElseThrow(() -> new IllegalArgumentException("Billet introuvable : " + billetId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Billet", billetId));
 
         Inscription inscription = inscriptions.findById(billet.getInscriptionId()).orElseThrow();
 
@@ -75,13 +85,43 @@ public class ServiceBillet {
     }
 
     @Transactional(readOnly = true)
-    public List<Billet> mesBillets(Long utilisateurId) {
+    public List<BilletResponse> mesBillets(Long utilisateurId) {
         var mesInscriptions = inscriptions.findByUtilisateurId(utilisateurId, org.springframework.data.domain.Pageable.unpaged()).getContent();
         return mesInscriptions.stream()
-                .map(i -> billets.findByInscriptionId(i.getId()))
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
+                .flatMap(i -> billets.findByInscriptionId(i.getId()).stream().map(b -> versResponse(b, i)))
                 .toList();
+    }
+
+    /** Données nécessaires à l'e-mail du billet (EF-31) : détail + image du QR code. */
+    public record DonneesEmailBillet(BilletResponse billet, byte[] qrPng) {}
+
+    @Transactional(readOnly = true)
+    public DonneesEmailBillet pourEmail(UUID billetId) {
+        Billet b = billets.findById(billetId).orElseThrow(() -> new RessourceIntrouvableException("Billet", billetId));
+        Inscription i = inscriptions.findById(b.getInscriptionId()).orElseThrow();
+        String jeton = signateur.signer(b.getId(), b.getNonce(), i.getEvenementId());
+        return new DonneesEmailBillet(versResponse(b, i), qr.generer(jeton, 480));
+    }
+
+    /** EF-31 / §6 Fiabilité : le participant peut se faire renvoyer son billet par e-mail. */
+    @Transactional
+    public void renvoyer(UUID billetId, Long utilisateurId) {
+        Billet b = billets.findById(billetId).orElseThrow(() -> new RessourceIntrouvableException("Billet", billetId));
+        Inscription i = inscriptions.findById(b.getInscriptionId()).orElseThrow();
+        if (!i.getUtilisateurId().equals(utilisateurId)) {
+            throw new AccessDeniedException("Accès refusé à ce billet");
+        }
+        if (b.isInvalide()) {
+            throw new IllegalStateException("Ce billet n'est plus valable (événement annulé)");
+        }
+        publieur.publishEvent(new BilletEmisEvent(b.getId(), i.getId()));
+    }
+
+    private BilletResponse versResponse(Billet b, Inscription i) {
+        var evt = serviceEvenement.consulter(i.getEvenementId());
+        var porteur = serviceIdentite.resumer(i.getUtilisateurId());
+        return new BilletResponse(b.getId(), i.getId(), evt.id(), evt.titre(), evt.dateDebut(),
+                evt.lieu(), porteur.nom(), porteur.prenom(), b.getScanneLe(), b.isInvalide());
     }
 
     /**

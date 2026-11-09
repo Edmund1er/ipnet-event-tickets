@@ -17,4 +17,7 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
     Page<Inscription> findByUtilisateurId(Long utilisateurId, Pageable pageable);
     List<Inscription> findByEvenementIdAndStatutIn(Long evenementId, List<StatutInscription> statuts);
     List<Inscription> findByStatutAndExpireLeBefore(StatutInscription statut, LocalDateTime now);
+    List<Inscription> findByEvenementIdOrderByCreeLeAsc(Long evenementId);
+    long countByEvenementIdAndStatut(Long evenementId, StatutInscription statut);
+    long countByStatut(StatutInscription statut);
 }

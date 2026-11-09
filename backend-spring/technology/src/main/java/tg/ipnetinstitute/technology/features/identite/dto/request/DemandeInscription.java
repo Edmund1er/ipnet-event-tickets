@@ -19,8 +19,7 @@ public record DemandeInscription(
         // Données profil visiteur
         Long categorieId,
         String organisation,
-        // Données communes nom / prénom / adresse
+        // Données communes
         @NotBlank String nom,
-        @NotBlank String prenom,
-        @NotBlank String adresse
+        @NotBlank String prenom
 ) {}

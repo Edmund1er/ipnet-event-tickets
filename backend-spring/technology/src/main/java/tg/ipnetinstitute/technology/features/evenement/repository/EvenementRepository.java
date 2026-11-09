@@ -14,7 +14,8 @@ import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 import java.util.Optional;
 
 @Repository
-public interface EvenementRepository extends JpaRepository<Evenement, Long> {
+public interface EvenementRepository extends JpaRepository<Evenement, Long>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Evenement> {
 
     /**
      * Verrou pessimiste (PESSIMISTIC_WRITE) pour sérialiser les réservations
@@ -25,4 +26,8 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long> {
     Optional<Evenement> findByIdForUpdate(@Param("id") Long id);
 
     Page<Evenement> findByStatut(StatutEvenement statut, Pageable pageable);
+
+    java.util.List<Evenement> findByStatutAndDateDebutBefore(StatutEvenement statut, java.time.LocalDateTime limite);
+
+    long countByStatut(StatutEvenement statut);
 }

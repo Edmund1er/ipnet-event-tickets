@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface OutboxNotificationRepository extends JpaRepository<OutboxNotification, Long> {
     List<OutboxNotification> findTop20ByStatutOrderByCreeLeAsc(StatutOutbox statut);
+    long countByStatut(StatutOutbox statut);
+    org.springframework.data.domain.Page<OutboxNotification> findByStatut(StatutOutbox statut, org.springframework.data.domain.Pageable pageable);
 }

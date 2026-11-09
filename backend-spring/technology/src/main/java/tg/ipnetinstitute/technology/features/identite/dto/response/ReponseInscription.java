@@ -1,13 +1,11 @@
 package tg.ipnetinstitute.technology.features.identite.dto.response;
 
-import tg.ipnetinstitute.technology.features.identite.model.Role;
-import tg.ipnetinstitute.technology.features.identite.model.TypeProfil;
-
+/**
+ * Réponse à une demande d'inscription : aucun compte n'existe encore, aucune session n'est ouverte.
+ * Le compte n'est créé qu'après validation du code envoyé à {@code email}.
+ */
 public record ReponseInscription(
-        Long utilisateurId,
         String email,
-        String telephone,
-        TypeProfil typeProfil,
-        Role role,
+        int codeValideMinutes,
         String message
 ) {}

@@ -9,7 +9,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException;
 import tg.ipnetinstitute.technology.config.Auditable;
+import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
+import tg.ipnetinstitute.technology.features.reservation.dto.response.ReservationResponse;
 import tg.ipnetinstitute.technology.features.evenement.service.EvenementAnnuleEvent;
 import tg.ipnetinstitute.technology.features.evenement.model.Evenement;
 import tg.ipnetinstitute.technology.features.evenement.repository.EvenementRepository;
@@ -34,29 +37,43 @@ public class ServiceReservation {
     private final InscriptionRepository inscriptions;
     private final UtilisateurRepository utilisateurs;
     private final ApplicationEventPublisher publieur;
+    private final ServiceEvenement serviceEvenement;
+    private final int delaiExpirationHeures;
+    private final tg.ipnetinstitute.technology.features.parametrage.service.ServiceParametres serviceParametres;
 
     public ServiceReservation(List<RegleReservation> regles,
                               EvenementRepository evenements,
                               InscriptionRepository inscriptions,
                               UtilisateurRepository utilisateurs,
-                              ApplicationEventPublisher publieur) {
+                              ApplicationEventPublisher publieur,
+                              ServiceEvenement serviceEvenement,
+                              @org.springframework.beans.factory.annotation.Value("${app.reservation.expiration-heures:48}") int delaiExpirationHeures,
+                              tg.ipnetinstitute.technology.features.parametrage.service.ServiceParametres serviceParametres) {
         this.regles = regles;
         this.evenements = evenements;
         this.inscriptions = inscriptions;
         this.utilisateurs = utilisateurs;
         this.publieur = publieur;
+        this.serviceEvenement = serviceEvenement;
+        this.delaiExpirationHeures = delaiExpirationHeures;
+        this.serviceParametres = serviceParametres;
     }
 
     @Transactional
     @PreAuthorize("hasRole('ROLE_PARTICIPANT')")
     @Auditable(action = "RESERVATION", typeCible = "INSCRIPTION")
-    public Inscription reserver(Long utilisateurId, Long evenementId) {
+    public ReservationResponse reserver(Long utilisateurId, Long evenementId) {
         Utilisateur utilisateur = utilisateurs.findById(utilisateurId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Utilisateur", utilisateurId));
+
+        // EF-07 : sans numéro de paiement réel, aucune réservation ne pourrait être réglée
+        if (!serviceParametres.paiementConfigure()) {
+            throw new tg.ipnetinstitute.technology.common.exception.PaiementNonConfigureException();
+        }
 
         // Sérialisation des réservations sur l'événement pour éviter la surréservation
         Evenement evenement = evenements.findByIdForUpdate(evenementId)
-                .orElseThrow(() -> new IllegalArgumentException("Événement introuvable : " + evenementId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Événement", evenementId));
 
         // Chaîne de responsabilité des règles (Chain of Responsibility)
         regles.forEach(r -> r.verifier(utilisateur, evenement));
@@ -65,11 +82,12 @@ public class ServiceReservation {
         evenement.reserverPlace();
         evenements.save(evenement);
 
-        // Sauvegarde de l'inscription (délai configurable, ex: 48h, EF-24)
-        Inscription inscription = inscriptions.save(Inscription.nouvelle(utilisateurId, evenementId, 48));
+        // Délai d'expiration configurable (EF-24) et montant figé à la réservation (RG-17)
+        Inscription inscription = inscriptions.save(Inscription.nouvelle(utilisateurId, evenementId,
+                delaiExpirationHeures, evenement.getPrix(), evenement.getDevise()));
 
         publieur.publishEvent(new ReservationCreeeEvent(inscription.getId()));
-        return inscription;
+        return versResponse(inscription);
     }
 
     @Transactional
@@ -77,14 +95,19 @@ public class ServiceReservation {
     @Auditable(action = "ANNULATION_RESERVATION", typeCible = "INSCRIPTION")
     public void annuler(Long inscriptionId, Long utilisateurId) {
         Inscription inscription = inscriptions.findById(inscriptionId)
-                .orElseThrow(() -> new IllegalArgumentException("Inscription introuvable : " + inscriptionId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Réservation", inscriptionId));
 
         // Contrôle de propriété OWASP A01
         if (!inscription.getUtilisateurId().equals(utilisateurId)) {
             throw new AccessDeniedException("Vous n'êtes pas propriétaire de cette réservation");
         }
 
-        inscription.transitionnerVers(StatutInscription.ANNULEE, "Annulation par le participant");
+        // EF-25 : une réservation confirmée ne peut pas être annulée par le participant
+        // (seule l'annulation de l'événement la fait passer à ANNULEE, RG-19)
+        if (inscription.getStatut() == StatutInscription.CONFIRMEE) {
+            throw new IllegalStateException("Une réservation confirmée ne peut plus être annulée (EF-25)");
+        }
+        inscription.transitionnerVers(StatutInscription.ANNULEE, "annulation_participant");
         inscriptions.save(inscription);
 
         // Libération de la place (RG-09)
@@ -96,8 +119,17 @@ public class ServiceReservation {
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_PARTICIPANT')")
-    public Page<Inscription> mesReservations(Long utilisateurId, Pageable pageable) {
-        return inscriptions.findByUtilisateurId(utilisateurId, pageable);
+    public Page<ReservationResponse> mesReservations(Long utilisateurId, Pageable pageable) {
+        return inscriptions.findByUtilisateurId(utilisateurId, pageable).map(this::versResponse);
+    }
+
+    private ReservationResponse versResponse(Inscription i) {
+        var evt = serviceEvenement.consulter(i.getEvenementId());
+        return new ReservationResponse(i.getId(), i.getStatut(), i.getCreeLe(), i.getExpireLe(),
+                i.getMotifAnnulation(),
+                i.getMontant() != null ? i.getMontant() : evt.prix(),
+                i.getDevise() != null ? i.getDevise() : evt.devise(),
+                evt);
     }
 
     /**
@@ -123,7 +155,9 @@ public class ServiceReservation {
     @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void purgerReservationsExpirees() {
-        var expirees = inscriptions.findByStatutAndExpireLeBefore(StatutInscription.EN_ATTENTE_PAIEMENT, LocalDateTime.now());
+        var expirees = new java.util.ArrayList<>(inscriptions.findByStatutAndExpireLeBefore(StatutInscription.EN_ATTENTE_PAIEMENT, LocalDateTime.now()));
+        // Une réservation rejetée sans nouvelle référence avant l'échéance expire aussi (place libérée, RG-09)
+        expirees.addAll(inscriptions.findByStatutAndExpireLeBefore(StatutInscription.REJETEE, LocalDateTime.now()));
         for (Inscription i : expirees) {
             i.transitionnerVers(StatutInscription.EXPIREE, "Expiration délai de paiement");
             inscriptions.save(i);

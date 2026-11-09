@@ -5,5 +5,6 @@ public enum ModeleNotification {
     BILLET_EMIS,
     PREUVE_REJETEE,
     EVENEMENT_ANNULE,
-    RESET_MOT_DE_PASSE
+    RESET_MOT_DE_PASSE,
+    ALERTE_ECHEC_ENVOI
 }

@@ -53,16 +53,34 @@ public class OutboxNotification {
         return n;
     }
 
+    @Column(name = "derniere_erreur", length = 500)
+    private String derniereErreur;
+
+    public static final int TENTATIVES_MAX = 5;
+
     public void marquerSucces() {
         this.statut = StatutOutbox.ENVOYEE;
+        this.derniereErreur = null;
     }
 
-    public void marquerEchec() {
+    /** @return true si les tentatives sont épuisées (passage à ECHEC). */
+    public boolean marquerEchec(String erreur) {
         this.tentatives++;
-        if (this.tentatives >= 5) {
+        this.derniereErreur = erreur == null ? null : erreur.substring(0, Math.min(erreur.length(), 500));
+        if (this.tentatives >= TENTATIVES_MAX) {
             this.statut = StatutOutbox.ECHEC;
+            return true;
         }
+        return false;
     }
+
+    /** Relance manuelle par l'administrateur après correction (ex. SMTP rétabli). */
+    public void relancer() {
+        this.statut = StatutOutbox.EN_ATTENTE;
+        this.tentatives = 0;
+    }
+
+    public String getDerniereErreur() { return derniereErreur; }
 
     public Long getId() { return id; }
     public ModeCanal getCanal() { return canal; }

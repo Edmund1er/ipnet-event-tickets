@@ -5,6 +5,6 @@ import java.time.LocalDateTime;
 public record PersonneEntree(
         String nom,
         String prenom,
-        String adresse,
+        String detail,
         LocalDateTime entreeLe
 ) {}

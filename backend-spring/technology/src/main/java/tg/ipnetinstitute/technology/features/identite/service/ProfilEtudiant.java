@@ -34,6 +34,12 @@ public class ProfilEtudiant implements ProfilParticipant {
         if (!(demande instanceof DemandeProfil.DemandeEtudiant e)) {
             throw new IllegalArgumentException("Demande incompatible avec le profil étudiant");
         }
+        if (e.filiereId() == null) {
+            throw new IllegalArgumentException("La filière est obligatoire pour un étudiant interne (EF-03)");
+        }
+        if (e.anneeInscriptionL1() == null) {
+            throw new IllegalArgumentException("L'année d'inscription en L1 est obligatoire pour un étudiant interne (EF-03)");
+        }
         filieres.findByIdAndActifTrue(e.filiereId())
                 .orElseThrow(() -> new FiliereInvalideException(e.filiereId()));
 
@@ -55,7 +61,6 @@ public class ProfilEtudiant implements ProfilParticipant {
                 utilisateurId,
                 e.nom(),
                 e.prenom(),
-                e.adresse(),
                 filiere,
                 e.anneeInscriptionL1().shortValue(),
                 anneeCourante
@@ -66,7 +71,7 @@ public class ProfilEtudiant implements ProfilParticipant {
     @Override
     public ResumePersonne resumer(Long utilisateurId) {
         return etudiants.findById(utilisateurId)
-                .map(e -> new ResumePersonne(e.getNom(), e.getPrenom(), e.getAdresse()))
-                .orElse(new ResumePersonne("Inconnu", "Inconnu", "N/A"));
+                .map(e -> new ResumePersonne(e.getNom(), e.getPrenom(), e.getFiliere().getLibelle()))
+                .orElse(new ResumePersonne("Inconnu", "Inconnu", "—"));
     }
 }

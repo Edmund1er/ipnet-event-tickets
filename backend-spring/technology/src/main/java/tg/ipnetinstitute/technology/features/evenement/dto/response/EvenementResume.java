@@ -15,5 +15,11 @@ public record EvenementResume(
         String devise,
         int capacite,
         int placesReservees,
-        StatutEvenement statut
-) {}
+        StatutEvenement statut,
+        boolean aImage
+) {
+    @com.fasterxml.jackson.annotation.JsonProperty("placesRestantes")
+    public int placesRestantes() {
+        return Math.max(0, capacite - placesReservees);
+    }
+}

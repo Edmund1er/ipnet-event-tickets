@@ -26,6 +26,10 @@ public class Utilisateur {
     @Column(name = "telephone_verifie", nullable = false)
     private boolean telephoneVerifie = false;
 
+    /** RG-01 / RG-20 : adresse confirmée par un code envoyé par e-mail. */
+    @Column(name = "email_verifie", nullable = false)
+    private boolean emailVerifie = false;
+
     @Column(name = "mot_de_passe_hash", nullable = false, length = 100)
     private String motDePasseHash;
 
@@ -64,13 +68,26 @@ public class Utilisateur {
         u.role = role;
         u.actif = true;
         u.telephoneVerifie = false;
+        u.emailVerifie = false;
         u.tentativesEchec = 0;
         u.creeLe = LocalDateTime.now();
         return u;
     }
 
+    /** Réservé à une future vérification par SMS (RG-02, canal payant non activé en V1). */
     public void validerTelephone() {
         this.telephoneVerifie = true;
+    }
+
+    /** L'utilisateur a saisi le code reçu sur son adresse actuelle. */
+    public void validerEmail() {
+        this.emailVerifie = true;
+    }
+
+    /** EF-08 : changement d'adresse confirmé par un code reçu sur la nouvelle adresse. */
+    public void changerEmail(String nouvelEmailVerifie) {
+        this.email = nouvelEmailVerifie;
+        this.emailVerifie = true;
     }
 
     public void enregistrerEchecConnexion() {
@@ -102,10 +119,38 @@ public class Utilisateur {
         this.actif = true;
     }
 
+    /** EF-08 : un nouveau numéro doit être revérifié par OTP. */
+    public void changerTelephone(String telephoneE164) {
+        if (!telephoneE164.equals(this.telephone)) {
+            this.telephone = telephoneE164;
+            this.telephoneVerifie = false;
+        }
+    }
+
+    /** EF-06 : réinitialisation du mot de passe (le hash est fourni déjà calculé). */
+    public void changerMotDePasse(String nouveauHash) {
+        this.motDePasseHash = nouveauHash;
+        reinitialiserTentatives();
+    }
+
+    /**
+     * Suppression du compte (§5.2) : les données d'identification sont anonymisées et le compte désactivé.
+     * La ligne est conservée pour l'intégrité des réservations, paiements et du journal d'audit.
+     */
+    public void anonymiser(String hashInutilisable) {
+        this.email = "supprime-" + id + "@anonyme.invalid";
+        this.telephone = "SUPPR-" + id;
+        this.telephoneVerifie = false;
+        this.emailVerifie = false;
+        this.motDePasseHash = hashInutilisable;
+        this.actif = false;
+    }
+
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getTelephone() { return telephone; }
     public boolean isTelephoneVerifie() { return telephoneVerifie; }
+    public boolean isEmailVerifie() { return emailVerifie; }
     public String getMotDePasseHash() { return motDePasseHash; }
     public TypeProfil getTypeProfil() { return typeProfil; }
     public Role getRole() { return role; }

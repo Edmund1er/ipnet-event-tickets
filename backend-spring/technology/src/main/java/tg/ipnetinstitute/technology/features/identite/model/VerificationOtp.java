@@ -26,11 +26,21 @@ public class VerificationOtp {
     @Column(nullable = false)
     private boolean consomme = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private ObjetOtp objet;
+
+    /** Adresse à laquelle le code a été envoyé (et qui sera vérifiée / adoptée). */
+    @Column(length = 255)
+    private String cible;
+
     protected VerificationOtp() {}
 
-    public static VerificationOtp creer(Long utilisateurId, String codeHash, int dureeMinutes) {
+    public static VerificationOtp creer(Long utilisateurId, String codeHash, int dureeMinutes, ObjetOtp objet, String cible) {
         VerificationOtp otp = new VerificationOtp();
         otp.utilisateurId = utilisateurId;
+        otp.objet = objet;
+        otp.cible = cible;
         otp.codeHash = codeHash;
         otp.expireLe = LocalDateTime.now().plusMinutes(dureeMinutes);
         otp.tentatives = 0;
@@ -56,4 +66,6 @@ public class VerificationOtp {
     public LocalDateTime getExpireLe() { return expireLe; }
     public short getTentatives() { return tentatives; }
     public boolean isConsomme() { return consomme; }
+    public ObjetOtp getObjet() { return objet; }
+    public String getCible() { return cible; }
 }

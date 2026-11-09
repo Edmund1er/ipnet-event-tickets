@@ -31,6 +31,9 @@ public class ProfilVisiteur implements ProfilParticipant {
         if (!(demande instanceof DemandeProfil.DemandeVisiteur v)) {
             throw new IllegalArgumentException("Demande incompatible avec le profil visiteur");
         }
+        if (v.categorieId() == null) {
+            throw new IllegalArgumentException("La catégorie est obligatoire pour un visiteur externe (EF-04)");
+        }
         categories.findByIdAndActifTrue(v.categorieId())
                 .orElseThrow(() -> new CategorieInvalideException(v.categorieId()));
     }
@@ -45,7 +48,6 @@ public class ProfilVisiteur implements ProfilParticipant {
                 utilisateurId,
                 v.nom(),
                 v.prenom(),
-                v.adresse(),
                 categorie,
                 v.organisation()
         );
@@ -55,7 +57,12 @@ public class ProfilVisiteur implements ProfilParticipant {
     @Override
     public ResumePersonne resumer(Long utilisateurId) {
         return visiteurs.findById(utilisateurId)
-                .map(v -> new ResumePersonne(v.getNom(), v.getPrenom(), v.getAdresse()))
-                .orElse(new ResumePersonne("Inconnu", "Inconnu", "N/A"));
+                .map(v -> new ResumePersonne(v.getNom(), v.getPrenom(), detail(v)))
+                .orElse(new ResumePersonne("Inconnu", "Inconnu", "—"));
+    }
+
+    private static String detail(Visiteur v) {
+        String base = v.getCategorie().getLibelle();
+        return v.getOrganisation() == null || v.getOrganisation().isBlank() ? base : base + " — " + v.getOrganisation();
     }
 }

@@ -19,17 +19,17 @@ public record Telephone(String valeur) {
 
     private static String normaliser(String brut) {
         if (brut == null || brut.isBlank()) {
-            throw new TelephoneInvalideException(brut);
+            throw new TelephoneInvalideException("Numéro de téléphone invalide (format international attendu).");
         }
         try {
             // null région : impose l'indicatif international
             var numero = UTIL.parse(brut.trim(), null);
             if (!UTIL.isValidNumber(numero)) {
-                throw new TelephoneInvalideException(brut);
+                throw new TelephoneInvalideException("Numéro de téléphone invalide (format international attendu).");
             }
             return UTIL.format(numero, PhoneNumberFormat.E164);
         } catch (NumberParseException e) {
-            throw new TelephoneInvalideException(brut);
+            throw new TelephoneInvalideException("Numéro de téléphone invalide (format international attendu).");
         }
     }
 }

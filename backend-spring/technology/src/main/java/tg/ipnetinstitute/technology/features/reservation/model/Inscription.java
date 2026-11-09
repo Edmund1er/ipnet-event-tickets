@@ -34,8 +34,15 @@ public class Inscription {
     @Column(name = "expire_le")
     private LocalDateTime expireLe;
 
-    @Column(name = "motif_annulation", length = 50)
+    @Column(name = "motif_annulation", length = 255)
     private String motifAnnulation;
+
+    /** RG-17 : montant dû figé au moment de la réservation. */
+    @Column(precision = 12, scale = 2)
+    private java.math.BigDecimal montant;
+
+    @Column(length = 3)
+    private String devise;
 
     @Version
     @Column(nullable = false)
@@ -43,10 +50,13 @@ public class Inscription {
 
     protected Inscription() {}
 
-    public static Inscription nouvelle(Long utilisateurId, Long evenementId, int expirationHeures) {
+    public static Inscription nouvelle(Long utilisateurId, Long evenementId, int expirationHeures,
+                                       java.math.BigDecimal montant, String devise) {
         Inscription i = new Inscription();
         i.utilisateurId = utilisateurId;
         i.evenementId = evenementId;
+        i.montant = montant;
+        i.devise = devise;
         i.statut = StatutInscription.EN_ATTENTE_PAIEMENT;
         i.creeLe = LocalDateTime.now();
         i.expireLe = i.creeLe.plusHours(expirationHeures);
@@ -71,4 +81,6 @@ public class Inscription {
     public LocalDateTime getExpireLe() { return expireLe; }
     public String getMotifAnnulation() { return motifAnnulation; }
     public Long getVersion() { return version; }
+    public java.math.BigDecimal getMontant() { return montant; }
+    public String getDevise() { return devise; }
 }

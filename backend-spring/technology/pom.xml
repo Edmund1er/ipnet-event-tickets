@@ -17,7 +17,8 @@
 	<properties>
 		<java.version>21</java.version>
 		<jjwt.version>0.12.6</jjwt.version>
-		<libphonenumber.version>8.13.52</libphonenumber.version>
+		<libphonenumber.version>9.0.43</libphonenumber.version>
+		<libphonenumber-carrier.version>2.43</libphonenumber-carrier.version>
 		<zxing.version>3.5.3</zxing.version>
 		<bucket4j.version>8.10.1</bucket4j.version>
 		<tika.version>2.9.2</tika.version>
@@ -98,6 +99,12 @@
 			<artifactId>libphonenumber</artifactId>
 			<version>${libphonenumber.version}</version>
 		</dependency>
+		<!-- Détection de l'opérateur (Togocel, Moov…) à partir des métadonnées libphonenumber -->
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>carrier</artifactId>
+			<version>${libphonenumber-carrier.version}</version>
+		</dependency>
 
 		<!-- ZXing QR Code Generation -->
 		<dependency>
@@ -123,6 +130,13 @@
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
 			<version>${tika.version}</version>
+		</dependency>
+
+		<!-- OpenPDF : export PDF des présents (EF-45) -->
+		<dependency>
+			<groupId>com.github.librepdf</groupId>
+			<artifactId>openpdf</artifactId>
+			<version>2.0.3</version>
 		</dependency>
 
 		<!-- SpringDoc OpenAPI -->
@@ -156,13 +170,48 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- PostgreSQL réel embarqué (sans Docker) : migrations Flyway, contraintes SQL, concurrence -->
+		<dependency>
+			<groupId>io.zonky.test</groupId>
+			<artifactId>embedded-postgres</artifactId>
+			<version>2.0.7</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.zonky.test.postgres</groupId>
+				<artifactId>embedded-postgres-binaries-bom</artifactId>
+				<version>16.4.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- Couverture des tests (cible : > 80 % sur les règles de gestion) : target/site/jacoco/index.html -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals><goal>prepare-agent</goal></goals>
+					</execution>
+					<execution>
+						<id>rapport</id>
+						<phase>test</phase>
+						<goals><goal>report</goal></goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

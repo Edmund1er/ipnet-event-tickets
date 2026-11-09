@@ -1,0 +1,41 @@
+# IPNET Billetterie : base PostgreSQL + API Spring Boot + front React (nginx).
+# Usage : copier .env.example en .env, renseigner DB_PASSWORD, SMTP_*, JWT_SECRET, QR_HMAC_SECRET, puis :
+#   docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ipnet_db
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD obligatoire}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ipnet_db"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend-spring/technology
+    env_file: .env
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/ipnet_db
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      FRONT_URL: ${FRONT_URL:-http://localhost}
+      CORS_ORIGINES: ${CORS_ORIGINES:-http://localhost}
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend-react
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
+  uploads:

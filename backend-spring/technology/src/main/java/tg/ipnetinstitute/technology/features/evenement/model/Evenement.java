@@ -54,6 +54,9 @@ public class Evenement {
     @Column(name = "cree_le", nullable = false, updatable = false)
     private LocalDateTime creeLe;
 
+    @Column(name = "image_chemin", length = 255)
+    private String imageChemin;
+
     @Version
     @Column(nullable = false)
     private Long version;
@@ -127,8 +130,26 @@ public class Evenement {
     }
 
     public void annuler() {
+        if (statut == StatutEvenement.TERMINE || statut == StatutEvenement.ANNULE) {
+            throw new tg.ipnetinstitute.technology.common.exception.TransitionEvenementIllegaleException(id, statut);
+        }
         this.statut = StatutEvenement.ANNULE;
     }
+
+    /** Clôture de l'événement (manuelle ou automatique après la date). */
+    public void terminer() {
+        if (statut != StatutEvenement.PUBLIE) {
+            throw new tg.ipnetinstitute.technology.common.exception.TransitionEvenementIllegaleException(id, statut);
+        }
+        statut = StatutEvenement.TERMINE;
+    }
+
+    /** EF-10 : image facultative (nom de fichier aléatoire du stockage, ou null pour la retirer). */
+    public void definirImage(String cheminImage) {
+        this.imageChemin = cheminImage;
+    }
+
+    public String getImageChemin() { return imageChemin; }
 
     private void exigerStatut(StatutEvenement attendu) {
         if (statut != attendu) {

@@ -16,4 +16,6 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
     boolean existsByEmpreintePreuve(String empreintePreuve);
     boolean existsByReferenceOperateur(String referenceOperateur);
     Page<Paiement> findByStatut(StatutPaiement statut, Pageable pageable);
+    long countByStatutAndReferenceOperateurIsNotNull(StatutPaiement statut);
+    long countByStatut(StatutPaiement statut);
 }

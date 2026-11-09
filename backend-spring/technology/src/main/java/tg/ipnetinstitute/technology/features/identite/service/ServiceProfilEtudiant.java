@@ -36,14 +36,17 @@ public class ServiceProfilEtudiant {
     @Auditable(action = "CHANGEMENT_FILIERE", typeCible = "ETUDIANT")
     public void changerFiliere(Long utilisateurId, Long nouvelleFiliereId) {
         Etudiant etudiant = etudiants.findById(utilisateurId)
-                .orElseThrow(() -> new IllegalArgumentException("Profil étudiant introuvable : " + utilisateurId));
+                .orElseThrow(() -> new tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException("Profil étudiant", utilisateurId));
 
         Filiere nouvelleFiliere = filieres.findByIdAndActifTrue(nouvelleFiliereId)
-                .orElseThrow(() -> new IllegalArgumentException("Filière inactive ou introuvable : " + nouvelleFiliereId));
+                .orElseThrow(() -> new tg.ipnetinstitute.technology.common.exception.FiliereInvalideException(nouvelleFiliereId));
 
         Long ancienneFiliereId = etudiant.getFiliere() != null ? etudiant.getFiliere().getId() : null;
 
         int anneeCourante = Year.now().getValue();
+        if (!etudiant.filiereModifiable(anneeCourante)) {
+            throw new tg.ipnetinstitute.technology.common.exception.FiliereVerrouilleeException(utilisateurId);
+        }
         // Vérification RG-04 portée par l'entité
         etudiant.changerFiliere(nouvelleFiliere, anneeCourante);
         etudiants.save(etudiant);

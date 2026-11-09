@@ -17,3 +17,21 @@ frontend-react/.env.local
 .DS_Store
 Thumbs.db
 
+
+# Configuration locale (secrets SMTP, base de données…) et fichiers générés
+.env
+backend-spring/technology/.env
+backend-spring/technology/code-installation.txt
+backend-spring/technology/uploads/
+frontend-react/_ancien_squelette_src/
+frontend-react/_ancien_squelette_public/
+
+# Rapports de test
+frontend-react/test-results/
+frontend-react/playwright-report/
+frontend-react/coverage/
+backend-spring/technology/target/
+
+# IDE
+.idea/
+*.iml

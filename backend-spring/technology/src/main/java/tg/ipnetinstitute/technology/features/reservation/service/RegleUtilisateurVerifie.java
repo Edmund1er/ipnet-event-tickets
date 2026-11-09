@@ -12,7 +12,7 @@ public class RegleUtilisateurVerifie implements RegleReservation {
 
     @Override
     public void verifier(Utilisateur u, Evenement e) {
-        if (!u.isTelephoneVerifie() || !u.isActif()) {
+        if (!u.isEmailVerifie() || !u.isActif()) {
             throw new UtilisateurNonAutoriseException(u.getId());
         }
     }

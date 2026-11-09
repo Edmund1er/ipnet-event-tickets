@@ -20,9 +20,6 @@ public class Etudiant {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = false, length = 255)
-    private String adresse;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "filiere_id", nullable = false)
     private Filiere filiere;
@@ -35,12 +32,11 @@ public class Etudiant {
 
     protected Etudiant() {}
 
-    public static Etudiant creer(Long utilisateurId, String nom, String prenom, String adresse, Filiere filiere, short anneeInscriptionL1, int anneeCourante) {
+    public static Etudiant creer(Long utilisateurId, String nom, String prenom, Filiere filiere, short anneeInscriptionL1, int anneeCourante) {
         Etudiant e = new Etudiant();
         e.id = utilisateurId;
         e.nom = nom;
         e.prenom = prenom;
-        e.adresse = adresse;
         e.filiere = filiere;
         e.anneeInscriptionL1 = anneeInscriptionL1;
         // RG-04 : passe à TRUE dès que (année courante − année inscription L1) > 1
@@ -55,10 +51,20 @@ public class Etudiant {
         this.filiere = nouvelleFiliere;
     }
 
+    /** EF-08 : modification des informations de profil. */
+    public void modifierCoordonnees(String nom, String prenom) {
+        this.nom = nom;
+        this.prenom = prenom;
+    }
+
+    /** RG-04 : la filière reste modifiable tant que (année courante − année L1) ≤ 1. */
+    public boolean filiereModifiable(int anneeCourante) {
+        return !filiereVerrouillee && (anneeCourante - anneeInscriptionL1) <= 1;
+    }
+
     public Long getId() { return id; }
     public String getNom() { return nom; }
     public String getPrenom() { return prenom; }
-    public String getAdresse() { return adresse; }
     public Filiere getFiliere() { return filiere; }
     public short getAnneeInscriptionL1() { return anneeInscriptionL1; }
     public boolean isFiliereVerrouillee() { return filiereVerrouillee; }

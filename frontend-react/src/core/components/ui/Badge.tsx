@@ -1,20 +1,22 @@
-import React from 'react';
+import type { Ton } from '../../constants/statuts'
 
-interface BadgeProps {
-  label: string;
-  variant?: 'success' | 'warning' | 'error' | 'info';
+const TONS: Record<Ton, string> = {
+  bleu: 'bg-primaire-clair text-primaire',
+  vert: 'bg-succes-clair text-succes',
+  orange: 'bg-alerte-clair text-alerte',
+  rouge: 'bg-rouge-clair text-rouge',
+  gris: 'bg-slate-100 text-slate-600',
+  violet: 'bg-violet-100 text-violet-700',
 }
 
-export const Badge: React.FC<BadgeProps> = ({ label, variant = 'info' }) => {
-  const styles = {
-    success: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    warning: 'bg-amber-100 text-amber-800 border-amber-300',
-    error: 'bg-rose-100 text-rose-800 border-rose-300',
-    info: 'bg-sky-100 text-sky-800 border-sky-300'
-  };
+/** Pastille de statut (maquette : label-sm majuscule, padding 4/8). */
+export function Badge({ ton, children }: { ton: Ton; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${styles[variant]}`}>
-      {label}
+    <span
+      role="status"
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${TONS[ton]}`}
+    >
+      {children}
     </span>
-  );
-};
+  )
+}

@@ -1,14 +1,18 @@
 package tg.ipnetinstitute.technology.features.identite.controller;
 
-import org.springframework.data.domain.Page;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tg.ipnetinstitute.technology.config.JournalAudit;
+import tg.ipnetinstitute.technology.common.response.PageResponse;
+import tg.ipnetinstitute.technology.features.identite.dto.request.CreationAgentScanRequest;
+import tg.ipnetinstitute.technology.features.identite.dto.response.AgentScanResponse;
+import tg.ipnetinstitute.technology.features.identite.dto.response.JournalAuditResponse;
+import tg.ipnetinstitute.technology.features.identite.dto.response.ParticipantResponse;
 import tg.ipnetinstitute.technology.features.identite.service.ServiceAdmin;
-import tg.ipnetinstitute.technology.features.identite.model.Utilisateur;
-import tg.ipnetinstitute.technology.features.reservation.model.Inscription;
 
 import java.util.List;
 import java.util.Map;
@@ -18,34 +22,38 @@ import java.util.Map;
 public class AdminController {
 
     private final ServiceAdmin serviceAdmin;
+    private final tg.ipnetinstitute.technology.features.identite.service.ServiceTableauDeBord serviceTableauDeBord;
 
-    public AdminController(ServiceAdmin serviceAdmin) {
+    public AdminController(ServiceAdmin serviceAdmin,
+                           tg.ipnetinstitute.technology.features.identite.service.ServiceTableauDeBord serviceTableauDeBord) {
         this.serviceAdmin = serviceAdmin;
+        this.serviceTableauDeBord = serviceTableauDeBord;
+    }
+
+    @GetMapping("/tableau-de-bord")
+    public ResponseEntity<tg.ipnetinstitute.technology.features.identite.dto.response.TableauDeBordResponse> tableauDeBord() {
+        return ResponseEntity.ok(serviceTableauDeBord.indicateurs());
     }
 
     @GetMapping("/evenements/{id}/participants")
-    public ResponseEntity<List<Inscription>> listerParticipants(@PathVariable Long id) {
+    public ResponseEntity<List<ParticipantResponse>> listerParticipants(@PathVariable Long id) {
         return ResponseEntity.ok(serviceAdmin.listerParticipantsEvenement(id));
     }
 
     @GetMapping("/audit")
-    public ResponseEntity<Page<JournalAudit>> consulterAudit(Pageable pageable) {
-        return ResponseEntity.ok(serviceAdmin.consulterAudit(pageable));
+    public ResponseEntity<PageResponse<JournalAuditResponse>> consulterAudit(
+            @PageableDefault(size = 20, sort = "horodatage", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(PageResponse.de(serviceAdmin.consulterAudit(pageable)));
+    }
+
+    @GetMapping("/scanners")
+    public ResponseEntity<List<AgentScanResponse>> listerAgentsScan() {
+        return ResponseEntity.ok(serviceAdmin.listerAgentsScan());
     }
 
     @PostMapping("/scanners")
-    public ResponseEntity<Map<String, Object>> creerAgentScan(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String telephone = body.get("telephone");
-        String motDePasse = body.get("motDePasse");
-
-        Utilisateur agent = serviceAdmin.creerAgentScan(email, telephone, motDePasse);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "id", agent.getId(),
-                "email", agent.getEmail(),
-                "role", agent.getRole(),
-                "message", "Agent de scan créé avec succès"
-        ));
+    public ResponseEntity<AgentScanResponse> creerAgentScan(@Valid @RequestBody CreationAgentScanRequest demande) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(serviceAdmin.creerAgentScan(demande));
     }
 
     @PatchMapping("/scanners/{id}/desactivation")

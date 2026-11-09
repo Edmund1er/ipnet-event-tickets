@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ReleveTransactionRepository extends JpaRepository<ReleveTransaction, Long> {
     Optional<ReleveTransaction> findByReferenceOperateurAndRapprocheFalse(String referenceOperateur);
+    boolean existsByReferenceOperateur(String referenceOperateur);
 }

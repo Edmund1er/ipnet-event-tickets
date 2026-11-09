@@ -1,111 +1,118 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/*
+ * Charte IPNET Institute of Technology : bleu, rouge, blanc.
+ * Structure et typographie reprises de la maquette Stitch (Field Access & Event Operations).
+ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-titre: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-primaire: #1e5ba3;
+  --color-primaire-fonce: #133e70;
+  --color-primaire-clair: #e8f0fa;
+  --color-primaire-moyen: #a9c4e6;
+  --color-rouge: #b0322a;
+  --color-rouge-fonce: #8c241e;
+  --color-rouge-clair: #fbeae8;
+  --color-surface: #f6f8fc;
+  --color-encre: #0f1e33;
+  --color-attenue: #5b6b82;
+  --color-bordure: #e2e8f0;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  /* États de scan (maquette : sémantique opérationnelle) */
+  --color-succes: #16a34a;
+  --color-succes-clair: #dcfce7;
+  --color-alerte: #ea580c;
+  --color-alerte-clair: #ffedd5;
+  --color-erreur: #dc2626;
+  --color-erreur-clair: #fee2e2;
+  --color-mauvais: #9d3018;
+  --color-annule: #374151;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    @apply bg-surface text-encre font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-titre;
+  }
+  /* Formulaires : aucun champ (date, heure, sélection) ne doit déborder de sa colonne sur mobile */
+  .grid > *,
+  form > * {
+    min-width: 0;
+  }
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  select {
+    min-width: 0;
+    max-width: 100%;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primaire);
+    outline-offset: 2px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+@layer components {
+  .icone {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    user-select: none;
   }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  .icone-pleine {
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
   }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  .chiffres {
+    font-variant-numeric: tabular-nums;
+  }
+  .carte {
+    @apply rounded-lg border border-bordure bg-white;
+  }
+  .champ {
+    @apply h-12 w-full rounded border-[1.5px] border-bordure bg-white px-3 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
+  }
+  .etiquette {
+    @apply mb-1.5 block text-sm font-semibold text-encre;
+  }
+  .titre-section {
+    @apply text-[11px] font-bold uppercase tracking-wider text-attenue;
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+@keyframes balayage {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(244px);
   }
 }
-p {
-  margin: 0;
+.laser {
+  animation: balayage 2.4s ease-in-out infinite;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+@media (prefers-reduced-motion: reduce) {
+  .laser {
+    animation: none;
+  }
 }

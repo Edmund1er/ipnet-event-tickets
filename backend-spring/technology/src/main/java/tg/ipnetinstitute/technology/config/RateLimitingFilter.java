@@ -51,7 +51,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         // Appliquer uniquement sur les routes sensibles
-        if (uri.startsWith("/api/auth/") || uri.startsWith("/api/scan")) {
+        if (uri.startsWith("/api/auth/") || uri.startsWith("/api/scan") || uri.startsWith("/api/installation")) {
             String ip = request.getRemoteAddr();
             String cle = ip + ":" + uri;
 
