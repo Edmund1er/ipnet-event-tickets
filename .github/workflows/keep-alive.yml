@@ -1,10 +1,10 @@
 name: Keep alive (Render)
 
 # Render (offre gratuite) endort le service après 15 min sans requête.
-# Ce ping toutes les 10 min le garde éveillé. Lançable aussi à la main (Actions > Keep alive > Run workflow).
+# Ce ping toutes les 5 min le garde éveillé. Lançable aussi à la main (Actions > Keep alive > Run workflow).
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
