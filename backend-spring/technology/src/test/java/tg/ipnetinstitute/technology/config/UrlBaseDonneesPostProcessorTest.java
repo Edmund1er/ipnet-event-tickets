@@ -22,4 +22,9 @@ class UrlBaseDonneesPostProcessorTest {
         assertNull(UrlBaseDonneesPostProcessor.convertir("jdbc:postgresql://localhost:5432/ipnet_db"));
         assertNull(UrlBaseDonneesPostProcessor.convertir(null));
     }
+
+    @Test
+    void tolereGuillemetsEtNomDeVariable() {
+        assertEquals("Mot#16", UrlBaseDonneesPostProcessor.convertir("DB_URL=\"postgresql://u:Mot%2316@h:5432/postgres\"").get("spring.datasource.password"));
+    }
 }

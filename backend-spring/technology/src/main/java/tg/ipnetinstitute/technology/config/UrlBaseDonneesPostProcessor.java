@@ -25,15 +25,23 @@ public class UrlBaseDonneesPostProcessor implements EnvironmentPostProcessor {
             Map<String, Object> props = convertir(valeur);
             if (props != null) {
                 env.getPropertySources().addFirst(new MapPropertySource("urlBaseDonnees", props));
+                System.err.println("[config] Base de données : URL postgresql:// lue depuis " + cle + " -> " + props.get("spring.datasource.url"));
                 return;
             }
         }
+        // Diagnostic (sans secret) : indique quelle URL sera réellement utilisée
+        String jdbc = env.getProperty("spring.datasource.url");
+        System.err.println("[config] Base de données : " + (jdbc == null ? "aucune URL" : jdbc.replaceAll("//[^@/]*@", "//***@"))
+                + " (DATABASE_URL absent, DB_URL " + (env.getProperty("DB_URL") == null ? "absent" : "présent mais non reconnu") + ")");
     }
 
     /** @return les propriétés spring.datasource.* ou null si la valeur n'est pas une URL postgres(ql)://. */
     static Map<String, Object> convertir(String valeur) {
         if (valeur == null) return null;
         String v = valeur.trim();
+        // Tolère une valeur collée avec des guillemets ou avec le nom de la variable (DB_URL=...)
+        v = v.replaceFirst("^(DATABASE_URL|DB_URL)\s*=\s*", "");
+        if (v.length() > 1 && (v.startsWith("\"") && v.endsWith("\"") || v.startsWith("'") && v.endsWith("'"))) v = v.substring(1, v.length() - 1).trim();
         if (!v.startsWith("postgres://") && !v.startsWith("postgresql://")) return null;
         URI uri = URI.create(v);
         Map<String, Object> props = new HashMap<>();
