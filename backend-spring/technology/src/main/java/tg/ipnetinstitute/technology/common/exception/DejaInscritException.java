@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class DejaInscritException extends MetierException {
     public DejaInscritException(Long utilisateurId, Long evenementId) {
-        super("Vous êtes déjà inscrit à cet événement (RG-06)", HttpStatus.CONFLICT, "RG-06");
+        super("Vous êtes déjà inscrit à cet événement", HttpStatus.CONFLICT, "RG-06");
     }
 }

@@ -5,6 +5,6 @@ import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 
 public class EvenementNonReservableException extends MetierException {
     public EvenementNonReservableException(Long evenementId, StatutEvenement statut) {
-        super("L'événement " + evenementId + " n'est pas ouvert aux réservations (statut: " + statut + ")", HttpStatus.BAD_REQUEST, "RG-07");
+        super("Cet événement n'est pas ouvert aux réservations", HttpStatus.BAD_REQUEST, "RG-07");
     }
 }

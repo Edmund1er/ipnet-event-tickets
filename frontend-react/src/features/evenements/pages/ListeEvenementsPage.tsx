@@ -40,19 +40,17 @@ export function ListeEvenementsPage() {
 
   return (
     <div>
-      <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primaire-fonce via-primaire to-primaire-fonce text-white shadow-xl shadow-primaire/20">
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rouge/30 blur-3xl" aria-hidden />
-        <div className="absolute inset-0 md:left-[35%]" aria-hidden>
+      <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primaire-fonce via-primaire to-[#0a2342] text-white shadow-xl shadow-primaire/20">
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rouge/25 blur-3xl" aria-hidden />
+        <div className="absolute inset-y-0 right-0 w-full sm:w-1/2 md:w-5/12 lg:w-1/3 overflow-hidden pointer-events-none" aria-hidden>
           <img
             src="/logo_ipnet.jpg"
             alt=""
-            className="h-full w-full object-cover object-[60%_40%] md:[mask-image:linear-gradient(to_right,transparent,black_45%)]"
+            className="h-full w-full object-contain object-right opacity-30 md:opacity-40 mix-blend-screen p-4"
           />
-          <div className="absolute inset-0 bg-primaire-fonce/80 md:hidden" />
-          <div className="absolute inset-0 bg-gradient-to-r from-primaire-fonce/50 via-transparent to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primaire-fonce/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primaire-fonce via-transparent to-transparent hidden sm:block" />
         </div>
-        <div className="relative max-w-xl px-5 py-8 sm:px-10 sm:py-14">
+        <div className="relative z-10 max-w-2xl px-5 py-8 sm:px-10 sm:py-12">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-rouge px-3 py-1 text-xs font-bold shadow-md">
             <Icone nom="confirmation_number" taille={16} /> Billetterie officielle
           </p>

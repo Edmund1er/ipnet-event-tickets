@@ -101,8 +101,12 @@ public class AuthController {
     }
 
     @PostMapping("/rafraichir")
-    public ResponseEntity<SessionResponse> rafraichir(@CookieValue(name = COOKIE_REFRESH) String refreshToken,
+    public ResponseEntity<SessionResponse> rafraichir(@CookieValue(name = COOKIE_REFRESH, required = false) String refreshToken,
                                                       HttpServletResponse response) {
+        // Visiteur non connecté : pas de session à restaurer, réponse vide (et non une erreur)
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.noContent().build();
+        }
         TokensAcces tokens = serviceAuthentification.rafraichir(refreshToken);
         poserCookieRefresh(response, tokens.refreshToken());
         return ResponseEntity.ok(tokens.versSession());

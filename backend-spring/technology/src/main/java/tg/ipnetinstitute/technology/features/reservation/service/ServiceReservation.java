@@ -105,7 +105,7 @@ public class ServiceReservation {
         // EF-25 : une réservation confirmée ne peut pas être annulée par le participant
         // (seule l'annulation de l'événement la fait passer à ANNULEE, RG-19)
         if (inscription.getStatut() == StatutInscription.CONFIRMEE) {
-            throw new IllegalStateException("Une réservation confirmée ne peut plus être annulée (EF-25)");
+            throw new IllegalStateException("Une réservation confirmée ne peut plus être annulée");
         }
         inscription.transitionnerVers(StatutInscription.ANNULEE, "annulation_participant");
         inscriptions.save(inscription);

@@ -37,24 +37,24 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
         Aller au contenu
       </a>
 
-      {/* Barre latérale */}
+      {/* Barre latérale aux couleurs bleues de la marque */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-white shadow-xl shadow-slate-900/5 border-r border-bordure transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-gradient-to-b from-[#133e70] via-primaire to-[#0c284a] text-white shadow-2xl transition-transform lg:translate-x-0 ${
           menuOuvert ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Navigation principale"
       >
         <div className="flex min-h-0 flex-col">
-          <div className="flex h-16 items-center justify-between border-b border-bordure bg-gradient-to-r from-primaire-clair/60 to-white px-4">
+          <div className="flex h-16 items-center justify-between border-b border-white/10 bg-white/5 px-4 backdrop-blur">
             <Logo compact />
-            <button className="rounded p-1 text-attenue lg:hidden" onClick={() => setMenuOuvert(false)} aria-label="Fermer le menu">
+            <button className="rounded p-1 text-white/70 hover:text-white lg:hidden" onClick={() => setMenuOuvert(false)} aria-label="Fermer le menu">
               <Icone nom="close" />
             </button>
           </div>
           <nav className="flex-1 overflow-y-auto px-4 py-4">
             {Object.entries(groupes).map(([groupe, items]) => (
               <div key={groupe} className="mb-5">
-                <p className="titre-section mb-2 px-3">{groupe}</p>
+                <p className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-blue-200/60">{groupe}</p>
                 <ul className="flex flex-col gap-1">
                   {items.map((e) => (
                     <li key={e.chemin}>
@@ -63,10 +63,10 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
                         end={e.chemin === '/'}
                         onClick={() => setMenuOuvert(false)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] transition-colors ${
+                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-all ${
                             isActive
-                              ? 'bg-primaire font-semibold text-white shadow-md shadow-primaire/25'
-                              : 'text-attenue hover:bg-primaire-clair hover:text-primaire'
+                              ? 'bg-white text-primaire font-bold shadow-lg shadow-black/20 ring-1 ring-white/50'
+                              : 'text-blue-100/80 hover:bg-white/10 hover:text-white'
                           }`
                         }
                       >
@@ -80,10 +80,10 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
             ))}
           </nav>
         </div>
-        <div className="border-t border-bordure p-4">
+        <div className="border-t border-white/10 p-4 bg-black/10">
           <button
             onClick={deconnexion}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-rouge hover:bg-rouge-clair"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-red-200 hover:bg-red-500/20 hover:text-white transition-colors"
           >
             <Icone nom="logout" taille={22} />
             Se déconnecter
@@ -93,8 +93,8 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
       {menuOuvert && <div className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" onClick={() => setMenuOuvert(false)} aria-hidden />}
 
       <div className="lg:pl-72">
-        {/* En-tête */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-bordure bg-white/95 px-4 backdrop-blur sm:px-6">
+        {/* En-tête effet verre */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-white/40 bg-white/70 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 shadow-sm shadow-slate-900/5 sm:px-6">
           <div className="flex items-center gap-3">
             <button className="rounded p-2 text-encre lg:hidden" onClick={() => setMenuOuvert(true)} aria-label="Ouvrir le menu">
               <Icone nom="menu" />

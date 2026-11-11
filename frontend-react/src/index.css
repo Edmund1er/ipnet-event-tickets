@@ -15,10 +15,10 @@
   --color-rouge: #b0322a;
   --color-rouge-fonce: #8c241e;
   --color-rouge-clair: #fbeae8;
-  --color-surface: #f6f8fc;
+  --color-surface: #edf2f9;
   --color-encre: #0f1e33;
   --color-attenue: #5b6b82;
-  --color-bordure: #e2e8f0;
+  --color-bordure: #dbe3ee;
 
   /* États de scan (maquette : sémantique opérationnelle) */
   --color-succes: #16a34a;

@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class FiliereInvalideException extends MetierException {
     public FiliereInvalideException(Long filiereId) {
-        super("Filière inexistante ou inactive : " + filiereId, HttpStatus.BAD_REQUEST, "RG-04");
+        super("Cette filière n'est pas disponible", HttpStatus.BAD_REQUEST, "RG-04");
     }
 }

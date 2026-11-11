@@ -120,6 +120,16 @@ public class EvenementController {
         return ResponseEntity.ok(serviceEvenement.publier(id, adminId));
     }
 
+    @PostMapping("/admin/evenements/{id}/ventes/fermeture")
+    public ResponseEntity<EvenementResume> fermerVentes(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceEvenement.fermerVentes(id, adminId));
+    }
+
+    @PostMapping("/admin/evenements/{id}/ventes/reouverture")
+    public ResponseEntity<EvenementResume> rouvrirVentes(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceEvenement.rouvrirVentes(id, adminId));
+    }
+
     @PostMapping("/admin/evenements/{id}/cloture")
     public ResponseEntity<EvenementResume> cloturer(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
         return ResponseEntity.ok(serviceEvenement.cloturer(id, adminId));

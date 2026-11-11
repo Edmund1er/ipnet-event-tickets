@@ -46,7 +46,7 @@ public class Etudiant {
 
     public void changerFiliere(Filiere nouvelleFiliere, int anneeCourante) {
         if (filiereVerrouillee || (anneeCourante - anneeInscriptionL1) > 1) {
-            throw new IllegalStateException("La filière est verrouillée et ne peut plus être modifiée (RG-04).");
+            throw new IllegalStateException("La filière est verrouillée et ne peut plus être modifiée.");
         }
         this.filiere = nouvelleFiliere;
     }

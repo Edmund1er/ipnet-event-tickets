@@ -14,7 +14,7 @@ import { useRequete } from '../../../core/hooks/useRequete'
 import { dateCourte, heure, montant } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-type Action = { type: 'publier' | 'cloturer' | 'annuler'; evt: Evenement }
+type Action = { type: 'publier' | 'cloturer' | 'annuler' | 'fermer_ventes' | 'rouvrir_ventes'; evt: Evenement }
 
 export function AdminEvenementsPage() {
   const [statut, setStatut] = useState<StatutEvenement | ''>('')
@@ -38,8 +38,18 @@ export function AdminEvenementsPage() {
       if (action.type === 'publier') await adminEvenementService.publier(action.evt.id)
       if (action.type === 'cloturer') await adminEvenementService.cloturer(action.evt.id)
       if (action.type === 'annuler') await adminEvenementService.annuler(action.evt.id, motif.trim())
+      if (action.type === 'fermer_ventes') await adminEvenementService.fermerVentes(action.evt.id)
+      if (action.type === 'rouvrir_ventes') await adminEvenementService.rouvrirVentes(action.evt.id)
       toast.succes(
-        action.type === 'publier' ? 'Événement publié' : action.type === 'cloturer' ? 'Événement clôturé' : 'Événement annulé, participants informés par e-mail',
+        action.type === 'publier'
+          ? 'Événement publié'
+          : action.type === 'cloturer'
+          ? 'Événement clôturé'
+          : action.type === 'fermer_ventes'
+          ? 'Ventes suspendues'
+          : action.type === 'rouvrir_ventes'
+          ? 'Ventes rouvertes'
+          : 'Événement annulé, participants informés par e-mail',
       )
       setAction(null)
       setMotif('')
@@ -152,6 +162,17 @@ export function AdminEvenementsPage() {
                           </Link>
                         )}
                         {e.statut === 'PUBLIE' && (
+                          e.ventesSuspendues ? (
+                            <Bouton taille="petit" variante="fantome" icone="play_arrow" onClick={() => setAction({ type: 'rouvrir_ventes', evt: e })}>
+                              Rouvrir les ventes
+                            </Bouton>
+                          ) : (
+                            <Bouton taille="petit" variante="fantome" icone="pause" onClick={() => setAction({ type: 'fermer_ventes', evt: e })}>
+                              Fermer les ventes
+                            </Bouton>
+                          )
+                        )}
+                        {e.statut === 'PUBLIE' && (
                           <Bouton taille="petit" variante="fantome" icone="flag" onClick={() => setAction({ type: 'cloturer', evt: e })}>
                             Clôturer
                           </Bouton>
@@ -174,7 +195,17 @@ export function AdminEvenementsPage() {
 
       <Modale
         ouverte={!!action}
-        titre={action?.type === 'publier' ? "Publier l'événement" : action?.type === 'cloturer' ? "Clôturer l'événement" : "Annuler l'événement"}
+        titre={
+          action?.type === 'publier'
+            ? "Publier l'événement"
+            : action?.type === 'cloturer'
+            ? "Clôturer l'événement"
+            : action?.type === 'fermer_ventes'
+            ? 'Suspendre les ventes'
+            : action?.type === 'rouvrir_ventes'
+            ? 'Rouvrir les ventes'
+            : "Annuler l'événement"
+        }
         surFermeture={() => {
           setAction(null)
           setMotif('')
@@ -203,6 +234,16 @@ export function AdminEvenementsPage() {
         {action?.type === 'cloturer' && (
           <p>
             <strong>{action.evt.titre}</strong> passera au statut « Terminé » et ne sera plus réservable.
+          </p>
+        )}
+        {action?.type === 'fermer_ventes' && (
+          <p>
+            Suspendre temporairement les ventes pour <strong>{action.evt.titre}</strong>. Les participants ne pourront plus réserver tant que vous ne les rouvrirez pas.
+          </p>
+        )}
+        {action?.type === 'rouvrir_ventes' && (
+          <p>
+            Rouvrir les réservations pour <strong>{action.evt.titre}</strong>.
           </p>
         )}
         {action?.type === 'annuler' && (

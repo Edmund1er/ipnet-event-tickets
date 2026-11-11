@@ -18,5 +18,11 @@ public class RegleEvenementOuvert implements RegleReservation {
         if (e.getStatut() != StatutEvenement.PUBLIE || e.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new EvenementNonReservableException(e.getId(), e.getStatut());
         }
+        if (e.isVentesSuspendues()) {
+            throw new tg.ipnetinstitute.technology.common.exception.VentesFermeesException(true);
+        }
+        if (e.getDateLimiteReservation() != null && e.getDateLimiteReservation().isBefore(LocalDateTime.now())) {
+            throw new tg.ipnetinstitute.technology.common.exception.VentesFermeesException(false);
+        }
     }
 }

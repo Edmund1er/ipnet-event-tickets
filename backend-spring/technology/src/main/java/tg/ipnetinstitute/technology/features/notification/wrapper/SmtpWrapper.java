@@ -13,7 +13,11 @@ import tg.ipnetinstitute.technology.features.notification.model.ModeCanal;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Canal e-mail via le SMTP configuré (RG-01 : SMTP de l'établissement, sans coût additionnel).
+ * Canal e-mail via Brevo. Deux modes, au choix de la configuration :
+ * <ul>
+ *   <li>API HTTPS Brevo (BREVO_API_KEY) : recommandé en hébergement, où les ports SMTP sont souvent bloqués ;</li>
+ *   <li>relais SMTP Brevo (BREVO_SMTP_USERNAME / BREVO_SMTP_PASSWORD) : utilisé sinon, ou tout autre SMTP.</li>
+ * </ul>
  * Aucune simulation : en cas d'échec l'exception remonte et l'outbox rejoue l'envoi.
  */
 @Component
@@ -26,12 +30,18 @@ public class SmtpWrapper implements CanalNotification {
     private final String hote;
     private final int port;
     private final String nomExpediteur;
+    private final String cleApi;
+    private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
+    private final java.net.http.HttpClient http = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(10)).build();
 
     public SmtpWrapper(org.springframework.beans.factory.ObjectProvider<JavaMailSender> mailSender,
                        @Value("${app.mail.expediteur:}") String expediteur,
                        @Value("${app.mail.nom-expediteur:IPNET Billetterie}") String nomExpediteur,
                        @Value("${spring.mail.host:}") String hote,
-                       @Value("${spring.mail.port:587}") int port) {
+                       @Value("${spring.mail.port:587}") int port,
+                       @Value("${app.mail.brevo.api-key:}") String cleApi) {
+        this.cleApi = cleApi == null ? "" : cleApi.trim();
         this.mailSender = mailSender;
         this.hote = hote;
         this.port = port;
@@ -44,21 +54,33 @@ public class SmtpWrapper implements CanalNotification {
         return ModeCanal.EMAIL;
     }
 
-    /** Le serveur SMTP est renseigné (SMTP_HOST et adresse d'expédition). */
-    public boolean configure() {
-        return !hote.isBlank() && expediteur != null && !expediteur.isBlank() && mailSender.getIfAvailable() != null;
+    private boolean modeApi() {
+        return !cleApi.isBlank();
     }
 
-    public String hote() { return hote; }
-    public int port() { return port; }
+    /** Messagerie prête : clé API Brevo, ou relais SMTP renseigné, et adresse d'expédition validée chez Brevo. */
+    public boolean configure() {
+        if (expediteur == null || expediteur.isBlank()) {
+            return false;
+        }
+        return modeApi() || (!hote.isBlank() && mailSender.getIfAvailable() != null);
+    }
+
+    public String hote() { return modeApi() ? "api.brevo.com" : hote; }
+    public int port() { return modeApi() ? 443 : port; }
     public String expediteur() { return expediteur; }
 
     @Override
     public void envoyer(MessageSortant message) throws Exception {
-        JavaMailSender sender = mailSender.getIfAvailable();
-        if (!configure() || sender == null) {
-            throw new IllegalStateException("Serveur SMTP non configuré : renseignez SMTP_HOST, SMTP_USERNAME et SMTP_PASSWORD dans le fichier .env");
+        if (!configure()) {
+            throw new IllegalStateException("Messagerie non configurée : renseignez BREVO_API_KEY (ou BREVO_SMTP_USERNAME et "
+                    + "BREVO_SMTP_PASSWORD) ainsi que MAIL_EXPEDITEUR, l'adresse d'expédition validée dans Brevo");
         }
+        if (modeApi()) {
+            envoyerParApi(message);
+            return;
+        }
+        JavaMailSender sender = mailSender.getIfAvailable();
         MimeMessage mime = sender.createMimeMessage();
         boolean multipart = message.piecesJointes() != null && !message.piecesJointes().isEmpty();
         MimeMessageHelper helper = new MimeMessageHelper(mime, multipart, StandardCharsets.UTF_8.name());
@@ -78,5 +100,33 @@ public class SmtpWrapper implements CanalNotification {
         }
         sender.send(mime);
         log.info("E-mail « {} » envoyé", message.sujet());
+    }
+
+    /** API transactionnelle Brevo : POST /v3/smtp/email (HTTPS, sans port SMTP). */
+    private void envoyerParApi(MessageSortant message) throws Exception {
+        var corps = json.createObjectNode();
+        corps.putObject("sender").put("name", nomExpediteur).put("email", expediteur);
+        corps.putArray("to").addObject().put("email", message.destinataire());
+        corps.put("subject", message.sujet());
+        corps.put("htmlContent", message.corpsHtml());
+        if (message.piecesJointes() != null && !message.piecesJointes().isEmpty()) {
+            var pieces = corps.putArray("attachment");
+            for (PieceJointe pj : message.piecesJointes()) {
+                pieces.addObject().put("name", pj.nomFichier())
+                        .put("content", java.util.Base64.getEncoder().encodeToString(pj.contenu()));
+            }
+        }
+        var requete = java.net.http.HttpRequest.newBuilder(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                .timeout(java.time.Duration.ofSeconds(20))
+                .header("api-key", cleApi)
+                .header("accept", "application/json")
+                .header("content-type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json.writeValueAsString(corps), StandardCharsets.UTF_8))
+                .build();
+        var reponse = http.send(requete, java.net.http.HttpResponse.BodyHandlers.ofString());
+        if (reponse.statusCode() / 100 != 2) {
+            throw new IllegalStateException("Brevo a refusé l'envoi (HTTP " + reponse.statusCode() + ") : " + reponse.body());
+        }
+        log.info("E-mail « {} » envoyé via l'API Brevo", message.sujet());
     }
 }

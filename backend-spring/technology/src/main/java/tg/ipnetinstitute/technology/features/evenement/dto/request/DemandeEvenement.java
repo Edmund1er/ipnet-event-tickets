@@ -15,5 +15,11 @@ public record DemandeEvenement(
         @jakarta.validation.constraints.Size(max = 255) String lieu,
         @NotNull @Min(0) BigDecimal prix,
         @NotBlank @jakarta.validation.constraints.Size(min = 3, max = 3, message = "Code devise ISO à 3 lettres (ex. XOF)") String devise,
-        @NotNull @Min(1) Integer capacite
-) {}
+        @NotNull @Min(1) Integer capacite,
+        LocalDateTime dateLimiteReservation
+) {
+    public DemandeEvenement(String titre, String description, LocalDateTime dateDebut, String lieu,
+              BigDecimal prix, String devise, Integer capacite) {
+        this(titre, description, dateDebut, lieu, prix, devise, capacite, null);
+    }
+}

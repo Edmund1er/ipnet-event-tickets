@@ -5,7 +5,7 @@ import { Logo } from './Logo'
 export function PublicLayout() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 border-b border-bordure bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <header className="sticky top-0 z-30 border-b border-white/20 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 shadow-sm shadow-slate-900/5">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
           <Logo />
           <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Navigation">

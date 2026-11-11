@@ -10,6 +10,7 @@ export interface DonneesEvenement {
   prix: number
   devise: string
   capacite: number
+  dateLimiteReservation?: string | null
 }
 
 export interface Participant {
@@ -45,6 +46,12 @@ export const adminEvenementService = {
   },
   async cloturer(id: number) {
     return (await http.post<Evenement>(`/admin/evenements/${id}/cloture`)).data
+  },
+  async fermerVentes(id: number) {
+    return (await http.post<Evenement>(`/admin/evenements/${id}/ventes/fermeture`)).data
+  },
+  async rouvrirVentes(id: number) {
+    return (await http.post<Evenement>(`/admin/evenements/${id}/ventes/reouverture`)).data
   },
   async annuler(id: number, motif: string) {
     return (await http.post<Evenement>(`/admin/evenements/${id}/annulation`, { motif })).data

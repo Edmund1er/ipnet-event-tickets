@@ -37,6 +37,9 @@ export interface Evenement {
   placesRestantes: number
   statut: 'BROUILLON' | 'PUBLIE' | 'TERMINE' | 'ANNULE'
   aImage: boolean
+  dateLimiteReservation?: string | null
+  ventesSuspendues?: boolean
+  ventesOuvertes?: boolean
 }
 
 export interface ProfilResponse {

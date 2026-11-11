@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class FiliereVerrouilleeException extends MetierException {
     public FiliereVerrouilleeException(Long utilisateurId) {
-        super("La filiere de l'etudiant " + utilisateurId + " est verrouillee (RG-04).", HttpStatus.BAD_REQUEST, "RG-04");
+        super("Votre filière est verrouillée et ne peut plus être modifiée", HttpStatus.BAD_REQUEST, "RG-04");
     }
 }

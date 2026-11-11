@@ -12,9 +12,8 @@ import { useImageProtegee } from '../../../core/hooks/useRequete'
 import { depuisChampDateHeure, versChampDateHeure } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-const VIDE = { titre: '', description: '', dateDebut: '', lieu: '', prix: '', devise: 'XOF', capacite: '' }
+const VIDE = { titre: '', description: '', dateDebut: '', lieu: '', prix: '', devise: 'XOF', capacite: '', dateLimiteReservation: '' }
 
-/** EF-10 / EF-12 : création et modification d'un événement (seul l'administrateur y a accès). */
 export function FormulaireEvenementPage() {
   const { id } = useParams()
   const edition = !!id
@@ -49,6 +48,7 @@ export function FormulaireEvenementPage() {
           prix: String(e.prix),
           devise: e.devise,
           capacite: String(e.capacite),
+          dateLimiteReservation: e.dateLimiteReservation ? versChampDateHeure(e.dateLimiteReservation) : '',
         })
       })
       .catch((e) => setErreur(messageErreur(e)))
@@ -63,6 +63,9 @@ export function FormulaireEvenementPage() {
     if (!f.titre.trim()) errs.titre = 'Titre obligatoire'
     if (!f.dateDebut) errs.dateDebut = 'Date et heure obligatoires'
     else if (new Date(f.dateDebut).getTime() <= Date.now()) errs.dateDebut = 'La date doit être dans le futur'
+    if (f.dateLimiteReservation && f.dateDebut && new Date(f.dateLimiteReservation).getTime() > new Date(f.dateDebut).getTime()) {
+      errs.dateLimiteReservation = 'La date limite ne peut pas dépasser le début de l’événement'
+    }
     if (f.prix === '' || Number(f.prix) < 0) errs.prix = 'Prix positif ou nul'
     if (!f.capacite || Number(f.capacite) < 1 || !Number.isInteger(Number(f.capacite))) errs.capacite = 'Capacité entière ≥ 1'
     if (evt && Number(f.capacite) < evt.placesReservees) errs.capacite = `Au moins ${evt.placesReservees} (places déjà réservées)`
@@ -78,13 +81,22 @@ export function FormulaireEvenementPage() {
       prix: Number(f.prix),
       devise: f.devise.toUpperCase(),
       capacite: Number(f.capacite),
+      dateLimiteReservation: f.dateLimiteReservation ? depuisChampDateHeure(f.dateLimiteReservation) : null,
     }
     setErreur(null)
     setEnCours(true)
     try {
       if (edition && evt) {
-        setEvt(await adminEvenementService.modifier(evt.id, donnees))
-        toast.succes('Événement enregistré')
+        if (imageChoisie) {
+          try {
+            await adminEvenementService.envoyerImage(evt.id, imageChoisie)
+          } catch (errImage) {
+            toast.erreur(`Image non enregistrée : ${messageErreur(errImage)}`)
+          }
+        }
+        await adminEvenementService.modifier(evt.id, donnees)
+        toast.succes('Événement modifié avec succès')
+        navigate('/admin/evenements')
       } else {
         const cree = await adminEvenementService.creer(donnees)
         if (imageChoisie) {
@@ -94,8 +106,8 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Brouillon créé, mais l'image n'a pas été envoyée : ${messageErreur(errImage)}`)
           }
         }
-        toast.succes('Brouillon créé. Vérifiez-le puis publiez-le.')
-        navigate(`/admin/evenements/${cree.id}`, { replace: true })
+        toast.succes('Événement créé avec succès')
+        navigate('/admin/evenements')
       }
     } catch (err) {
       const api = versErreurApi(err)
@@ -175,8 +187,9 @@ export function FormulaireEvenementPage() {
             <ChampTexte libelle="Description" facultatif value={f.description} onChange={maj('description')} rows={6} />
             <div className="grid gap-4 sm:grid-cols-2">
               <Champ libelle="Date et heure de début" type="datetime-local" min={minDateHeure} value={f.dateDebut} onChange={maj('dateDebut')} erreur={erreurs.dateDebut} />
-              <Champ libelle="Lieu" facultatif value={f.lieu} onChange={maj('lieu')} maxLength={255} />
+              <Champ libelle="Date limite de réservation" type="datetime-local" facultatif min={minDateHeure} max={f.dateDebut || undefined} value={f.dateLimiteReservation} onChange={maj('dateLimiteReservation')} erreur={erreurs.dateLimiteReservation} aide="Par défaut, jusqu'au début de l'événement" />
             </div>
+            <Champ libelle="Lieu" facultatif value={f.lieu} onChange={maj('lieu')} maxLength={255} />
             <div className="grid gap-4 sm:grid-cols-3">
               <Champ libelle="Prix du billet" type="number" min={0} step="1" value={f.prix} onChange={maj('prix')} erreur={erreurs.prix} />
               <Champ libelle="Devise" value={f.devise} onChange={maj('devise')} erreur={erreurs.devise} maxLength={3} aide="XOF = FCFA" />
@@ -184,7 +197,11 @@ export function FormulaireEvenementPage() {
             </div>
           </fieldset>
           {evt?.statut === 'PUBLIE' && (
-            <Alerte ton="info">Modification possible tant qu'aucune réservation n'est confirmée (EF-12).</Alerte>
+            <Alerte ton="info">
+              {evt.placesReservees > 0
+                ? "Des réservations sont déjà enregistrées : seuls le nombre de places (capacité) et la date limite peuvent encore être ajustés."
+                : "Toutes les informations sont modifiables tant qu'aucune réservation n'a été effectuée."}
+            </Alerte>
           )}
           {!verrouille && (
             <div className="flex justify-end">

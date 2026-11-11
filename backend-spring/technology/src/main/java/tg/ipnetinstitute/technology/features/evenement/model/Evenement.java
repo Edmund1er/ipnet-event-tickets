@@ -54,6 +54,12 @@ public class Evenement {
     @Column(name = "cree_le", nullable = false, updatable = false)
     private LocalDateTime creeLe;
 
+    @Column(name = "date_limite_reservation")
+    private LocalDateTime dateLimiteReservation;
+
+    @Column(name = "ventes_suspendues", nullable = false)
+    private boolean ventesSuspendues = false;
+
     @Column(name = "image_chemin", length = 255)
     private String imageChemin;
 
@@ -65,6 +71,15 @@ public class Evenement {
 
     public static Evenement creer(String titre, String description, LocalDateTime dateDebut, String lieu,
                                   BigDecimal prix, String devise, int capacite, Long adminId) {
+        return creer(titre, description, dateDebut, lieu, prix, devise, capacite, null, adminId);
+    }
+
+    public static Evenement creer(String titre, String description, LocalDateTime dateDebut, String lieu,
+                                  BigDecimal prix, String devise, int capacite,
+                                  LocalDateTime dateLimite, Long adminId) {
+        if (dateLimite != null && dateLimite.isAfter(dateDebut)) {
+            throw new IllegalArgumentException("La date limite de réservation ne peut pas dépasser le début de l'événement");
+        }
         if (capacite <= 0) {
             throw new IllegalArgumentException("La capacité de l'événement doit être strictement positive");
         }
@@ -79,6 +94,7 @@ public class Evenement {
         e.prix = prix;
         e.devise = devise;
         e.capacite = capacite;
+        e.dateLimiteReservation = dateLimite;
         e.placesReservees = 0;
         e.statut = StatutEvenement.BROUILLON;
         e.creePar = adminId;
@@ -104,6 +120,61 @@ public class Evenement {
         this.prix = prix;
         this.devise = devise;
         this.capacite = capacite;
+    }
+
+    /**
+     * Ajuste la capacité, y compris sur un événement complet (jamais sous les places déjà réservées).
+     * Si de la place se libère, la vente se rouvre d'elle-même (la condition « ventes ouvertes » est calculée).
+     */
+    public void ajusterCapacite(int nouvelleCapacite) {
+        exigerModifiable();
+        if (nouvelleCapacite <= 0) {
+            throw new IllegalArgumentException("La capacité de l'événement doit être strictement positive");
+        }
+        if (nouvelleCapacite < placesReservees) {
+            throw new IllegalArgumentException("La capacité ne peut pas être inférieure au nombre de places déjà réservées ("
+                    + placesReservees + ")");
+        }
+        this.capacite = nouvelleCapacite;
+    }
+
+    /** Date limite de réservation : facultative, jamais après le début de l'événement. */
+    public void definirDateLimite(LocalDateTime limite) {
+        exigerModifiable();
+        if (limite != null && limite.isAfter(dateDebut)) {
+            throw new IllegalArgumentException("La date limite de réservation ne peut pas dépasser le début de l'événement");
+        }
+        this.dateLimiteReservation = limite;
+    }
+
+    /** Fermeture manuelle des ventes (réversible). */
+    public void suspendreVentes() {
+        exigerModifiable();
+        this.ventesSuspendues = true;
+    }
+
+    /** Réouverture manuelle des ventes. */
+    public void reprendreVentes() {
+        exigerModifiable();
+        this.ventesSuspendues = false;
+    }
+
+    /**
+     * Vente ouverte : événement publié, non commencé, date limite non dépassée,
+     * places disponibles et ventes non suspendues. Entièrement calculé : aucune tâche planifiée.
+     */
+    public boolean ventesOuvertes(LocalDateTime maintenant) {
+        return statut == StatutEvenement.PUBLIE
+                && !ventesSuspendues
+                && placesReservees < capacite
+                && !dateDebut.isBefore(maintenant)
+                && (dateLimiteReservation == null || !dateLimiteReservation.isBefore(maintenant));
+    }
+
+    private void exigerModifiable() {
+        if (statut == StatutEvenement.TERMINE || statut == StatutEvenement.ANNULE) {
+            throw new IllegalStateException("Cet événement est " + (statut == StatutEvenement.ANNULE ? "annulé" : "terminé") + " : cette action n'est plus possible");
+        }
     }
 
     /** Invariant : jamais plus de places réservées que de capacité (RG-08). */
@@ -150,6 +221,8 @@ public class Evenement {
     }
 
     public String getImageChemin() { return imageChemin; }
+    public LocalDateTime getDateLimiteReservation() { return dateLimiteReservation; }
+    public boolean isVentesSuspendues() { return ventesSuspendues; }
 
     private void exigerStatut(StatutEvenement attendu) {
         if (statut != attendu) {

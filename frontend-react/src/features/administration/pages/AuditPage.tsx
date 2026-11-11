@@ -38,7 +38,7 @@ export function AuditPage() {
 
   return (
     <div>
-      <EnteteSection icone="history" titre="Journal d'audit" sousTitre="Traçabilité des actions sensibles (RG-16)" />
+      <EnteteSection icone="history" titre="Journal d'audit" sousTitre="Traçabilité des actions sensibles" />
       {erreur && <Alerte ton="erreur">{erreur}</Alerte>}
       {chargement && <ChargementPage />}
       {!chargement && donnees?.elements.length === 0 && <EtatVide icone="history" titre="Journal vide" />}

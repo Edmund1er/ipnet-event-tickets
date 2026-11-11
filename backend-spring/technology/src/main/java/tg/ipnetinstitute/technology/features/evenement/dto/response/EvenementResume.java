@@ -16,7 +16,10 @@ public record EvenementResume(
         int capacite,
         int placesReservees,
         StatutEvenement statut,
-        boolean aImage
+        boolean aImage,
+        LocalDateTime dateLimiteReservation,
+        boolean ventesSuspendues,
+        boolean ventesOuvertes
 ) {
     @com.fasterxml.jackson.annotation.JsonProperty("placesRestantes")
     public int placesRestantes() {

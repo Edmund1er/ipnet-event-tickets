@@ -60,17 +60,19 @@ public class ServiceEvenement {
         return toResume(evenements.save(nouveau(demande, adminId)));
     }
 
-    /** EF-12 : modifiable tant qu'aucune réservation n'est confirmée. */
+    /**
+     * Modification d'un événement. Une fois des réservations confirmées, seules la capacité et la date limite
+     * restent modifiables. Verrou pessimiste, comme la réservation, pour ne jamais passer sous les places prises.
+     */
     @Transactional
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Auditable(action = "MODIFICATION_EVENEMENT", typeCible = "EVENEMENT")
     public EvenementResume modifier(Long evenementId, ModificationEvenement modif, Long adminId) {
-        Evenement e = charger(evenementId);
-        if (e.getStatut() == StatutEvenement.ANNULE || e.getStatut() == StatutEvenement.TERMINE) {
-            throw new IllegalStateException("Un événement " + e.getStatut() + " ne peut plus être modifié");
-        }
-        if (inscriptions.countByEvenementIdAndStatut(evenementId, StatutInscription.CONFIRMEE) > 0) {
-            throw new IllegalStateException("Cet événement a déjà des réservations confirmées : il ne peut plus être modifié (EF-12)");
+        Evenement e = chargerPourModification(evenementId);
+        if (inscriptions.countByEvenementIdAndStatut(evenementId, StatutInscription.CONFIRMEE) > 0
+                && !memesInformations(e, modif)) {
+            throw new IllegalStateException("Cet événement a déjà des réservations confirmées : "
+                    + "seuls le nombre de places et la date limite de réservation peuvent encore être modifiés");
         }
         e.modifier(
                 modif.titre(),
@@ -78,10 +80,51 @@ public class ServiceEvenement {
                 modif.dateDebut(),
                 modif.lieu(),
                 modif.prix(),
-                modif.devise(),
+                modif.devise().trim().toUpperCase(),
                 modif.capacite()
         );
+        e.definirDateLimite(modif.dateLimiteReservation());
         return toResume(evenements.save(e));
+    }
+
+    /** Fermeture manuelle des ventes (réversible). */
+    @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Auditable(action = "FERMETURE_VENTES", typeCible = "EVENEMENT")
+    public EvenementResume fermerVentes(Long evenementId, Long adminId) {
+        Evenement e = chargerPourModification(evenementId);
+        e.suspendreVentes();
+        return toResume(evenements.save(e));
+    }
+
+    /** Réouverture manuelle des ventes. */
+    @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Auditable(action = "REOUVERTURE_VENTES", typeCible = "EVENEMENT")
+    public EvenementResume rouvrirVentes(Long evenementId, Long adminId) {
+        Evenement e = chargerPourModification(evenementId);
+        e.reprendreVentes();
+        return toResume(evenements.save(e));
+    }
+
+    private Evenement chargerPourModification(Long id) {
+        Evenement e = evenements.findByIdForUpdate(id)
+                .orElseThrow(() -> new RessourceIntrouvableException("Événement", id));
+        if (e.getStatut() == StatutEvenement.ANNULE || e.getStatut() == StatutEvenement.TERMINE) {
+            throw new IllegalStateException("Cet événement est "
+                    + (e.getStatut() == StatutEvenement.ANNULE ? "annulé" : "terminé") + " : il ne peut plus être modifié");
+        }
+        return e;
+    }
+
+    private static boolean memesInformations(Evenement e, ModificationEvenement m) {
+        return java.util.Objects.equals(e.getTitre(), m.titre())
+                && java.util.Objects.toString(e.getDescription(), "").equals(java.util.Objects.toString(m.description(), ""))
+                && java.util.Objects.toString(e.getLieu(), "").equals(java.util.Objects.toString(m.lieu(), ""))
+                && e.getDateDebut().truncatedTo(java.time.temporal.ChronoUnit.MINUTES)
+                        .equals(m.dateDebut().truncatedTo(java.time.temporal.ChronoUnit.MINUTES))
+                && e.getPrix().compareTo(m.prix()) == 0
+                && e.getDevise().equalsIgnoreCase(m.devise().trim());
     }
 
     @Transactional
@@ -234,7 +277,7 @@ public class ServiceEvenement {
 
     private static Evenement nouveau(DemandeEvenement d, Long adminId) {
         return Evenement.creer(d.titre(), d.description(), d.dateDebut(), d.lieu(), d.prix(),
-                d.devise().trim().toUpperCase(), d.capacite(), adminId);
+                d.devise().trim().toUpperCase(), d.capacite(), d.dateLimiteReservation(), adminId);
     }
 
     private Evenement charger(Long id) {
@@ -253,7 +296,10 @@ public class ServiceEvenement {
                 e.getCapacite(),
                 e.getPlacesReservees(),
                 e.getStatut(),
-                e.getImageChemin() != null
+                e.getImageChemin() != null,
+                e.getDateLimiteReservation(),
+                e.isVentesSuspendues(),
+                e.ventesOuvertes(LocalDateTime.now())
         );
     }
 }

@@ -28,13 +28,17 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
   const [saisie, setSaisie] = useState(initial ? initial.formatNational() : '')
   const [touche, setTouche] = useState(false)
 
-  // Région par défaut du serveur (ex. TG) tant que l'utilisateur n'en a pas choisi
+  // Région par défaut : TG (Togo) par défaut ou celle du serveur
+  const regionActive: CountryCode = region ?? politique?.regionParDefaut ?? 'TG'
+
+  // Si la politique charge après le montage et qu'aucune région n'avait été choisie
   useEffect(() => {
-    if (!region && politique) setRegion(politique.regionParDefaut)
+    if (!region && politique?.regionParDefaut) {
+      setRegion(politique.regionParDefaut)
+    }
   }, [politique, region])
 
-  const regionActive = region ?? politique?.regionParDefaut ?? null
-  const analyse = regionActive && saisie.trim() ? analyserTelephone(saisie, regionActive, typesAcceptes) : null
+  const analyse = saisie.trim() ? analyserTelephone(saisie, regionActive, typesAcceptes) : null
 
   function emettre(texte: string, r: CountryCode) {
     const a = analyserTelephone(texte, r, typesAcceptes)
@@ -57,9 +61,8 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
       <div className="flex gap-2">
         <select
           aria-label="Pays de l'indicatif"
-          className="champ !w-40 shrink-0 !px-2"
-          value={regionActive ?? ''}
-          disabled={!regionActive}
+          className="champ !w-32 shrink-0 !px-2 text-xs sm:!w-36 sm:text-sm"
+          value={regionActive}
           onChange={(e) => {
             const r = e.target.value as CountryCode
             setRegion(r)
@@ -72,19 +75,19 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
             </option>
           ))}
         </select>
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <input
             id={id}
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            className={`champ pr-10 ${message ? '!border-erreur' : analyse?.valide ? '!border-succes' : ''}`}
+            className={`champ w-full pr-10 ${message ? '!border-erreur' : analyse?.valide ? '!border-succes' : ''}`}
             value={saisie}
+            placeholder="Ex: 90 12 34 56"
             aria-invalid={!!message || undefined}
             aria-describedby={`${id}-info`}
             onBlur={() => setTouche(true)}
             onChange={(e) => {
-              if (!regionActive) return
               const texte = e.target.value
               // Saisie internationale collée : la région suit le numéro
               const n = texte.trim().startsWith('+') ? parsePhoneNumberFromString(texte) : undefined

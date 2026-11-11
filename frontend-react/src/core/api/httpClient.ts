@@ -47,6 +47,11 @@ export function rafraichirSession(): Promise<SessionResponse | null> {
     rafraichissementEnCours = axios
       .post<SessionResponse>('/api/auth/rafraichir', null, { withCredentials: true })
       .then((r) => {
+        // 204 : visiteur sans session, rien à restaurer
+        if (r.status === 204 || !r.data?.accessToken) {
+          jetonAcces = null
+          return null
+        }
         jetonAcces = r.data.accessToken
         surSessionRenouvelee?.(r.data)
         return r.data

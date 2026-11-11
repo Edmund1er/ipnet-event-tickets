@@ -97,7 +97,7 @@ public class ServicePaiement {
         // RG-14 : une soumission par réservation, sauf après un rejet
         if (inscription.getStatut() != StatutInscription.EN_ATTENTE_PAIEMENT
                 && inscription.getStatut() != StatutInscription.REJETEE) {
-            throw new IllegalStateException("Une référence a déjà été soumise pour cette réservation, ou elle n'est plus active (RG-14)");
+            throw new IllegalStateException("Une référence a déjà été soumise pour cette réservation, ou elle n'est plus active");
         }
 
         String referenceOperateur = ReferencePaiementUtils.normaliser(referenceBrute);
@@ -111,7 +111,7 @@ public class ServicePaiement {
         // RG-21 : référence unique sur la plateforme
         Optional<Paiement> existantRef = paiements.findByReferenceOperateur(referenceOperateur);
         if (existantRef.isPresent() && !existantRef.get().getInscriptionId().equals(inscriptionId)) {
-            throw new IllegalArgumentException("Cette référence opérateur a déjà été utilisée sur une autre réservation (RG-21)");
+            throw new IllegalArgumentException("Cette référence opérateur a déjà été utilisée sur une autre réservation");
         }
 
         String cheminFichier = null;
@@ -135,7 +135,7 @@ public class ServicePaiement {
             }
             empreinteSha256 = sha256(contenu);
             if (paiements.existsByEmpreintePreuve(empreinteSha256)) {
-                throw new IllegalArgumentException("Cette capture a déjà été soumise pour une réservation (RG-13)");
+                throw new IllegalArgumentException("Cette capture a déjà été soumise pour une réservation");
             }
             cheminFichier = stockagePreuve.enregistrer(new ByteArrayInputStream(contenu), extensionPour(typeDetecte), typeDetecte);
         }
@@ -168,7 +168,7 @@ public class ServicePaiement {
 
         // RG-15 : un administrateur ne valide pas sa propre preuve
         if (inscription.getUtilisateurId().equals(adminId)) {
-            throw new AccessDeniedException("Un administrateur ne peut pas valider sa propre preuve (RG-15)");
+            throw new AccessDeniedException("Un administrateur ne peut pas valider sa propre preuve");
         }
 
         p.valider(adminId);

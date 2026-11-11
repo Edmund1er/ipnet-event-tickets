@@ -5,6 +5,6 @@ import tg.ipnetinstitute.technology.features.identite.model.TypeProfil;
 
 public class TypeProfilNonSupporteException extends MetierException {
     public TypeProfilNonSupporteException(TypeProfil type) {
-        super("Type de profil non pris en charge : " + type, HttpStatus.BAD_REQUEST, "RG-04");
+        super("Ce type de profil n'est pas pris en charge", HttpStatus.BAD_REQUEST, "RG-04");
     }
 }

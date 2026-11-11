@@ -7,6 +7,6 @@ import org.springframework.http.HttpStatus;
  */
 public class RessourceIntrouvableException extends MetierException {
     public RessourceIntrouvableException(String typeRessource, Object identifiant) {
-        super(typeRessource + " introuvable : " + identifiant, HttpStatus.NOT_FOUND, "RESSOURCE_INTROUVABLE");
+        super(typeRessource + " introuvable", HttpStatus.NOT_FOUND, "RESSOURCE_INTROUVABLE");
     }
 }
