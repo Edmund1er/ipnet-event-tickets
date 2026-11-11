@@ -73,10 +73,10 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
       <label htmlFor={id} className="etiquette">
         {libelle}
       </label>
-      <div className="flex w-full min-w-0 items-center gap-2">
+      <div className="flex w-full min-w-0 items-stretch rounded-xl border-[1.5px] border-bordure bg-white transition-colors focus-within:border-primaire focus-within:ring-2 focus-within:ring-primaire/20">
         <select
           aria-label="Pays de l'indicatif"
-          className="champ !h-12 !w-28 shrink-0 !px-2 text-xs sm:!w-32 sm:text-sm"
+          className="h-12 w-28 shrink-0 cursor-pointer border-0 border-r border-bordure bg-surface/60 px-2 text-xs font-medium text-encre outline-none hover:bg-surface sm:w-32 sm:text-sm"
           value={regionActive}
           onChange={(e) => {
             const r = e.target.value as CountryCode
@@ -96,7 +96,7 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            className={`champ !h-12 w-full min-w-0 pr-10 text-sm sm:text-base ${message ? '!border-erreur' : analyse?.valide ? '!border-succes' : ''}`}
+            className="h-12 w-full min-w-0 border-0 bg-transparent px-3.5 pr-10 text-sm text-encre outline-none placeholder:text-attenue/70 sm:text-base"
             value={saisie}
             placeholder="Ex: 90 12 34 56"
             aria-invalid={!!message || undefined}
