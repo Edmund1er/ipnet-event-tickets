@@ -28,6 +28,21 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
   const [saisie, setSaisie] = useState(initial ? initial.formatNational() : '')
   const [touche, setTouche] = useState(false)
 
+  // Synchronisation avec la valeur externe (si le parent met à jour la valeur ou réinitialise le formulaire)
+  useEffect(() => {
+    if (!valeur) {
+      setSaisie('')
+      return
+    }
+    const parsed = parsePhoneNumberFromString(valeur)
+    if (parsed) {
+      setSaisie(parsed.formatNational())
+      if (parsed.country && parsed.country !== region) {
+        setRegion(parsed.country as CountryCode)
+      }
+    }
+  }, [valeur]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Région par défaut : TG (Togo) par défaut ou celle du serveur
   const regionActive: CountryCode = region ?? politique?.regionParDefaut ?? 'TG'
 
@@ -54,14 +69,14 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
   const message = erreur ?? messageLocal
 
   return (
-    <div>
+    <div className="w-full min-w-0">
       <label htmlFor={id} className="etiquette">
         {libelle}
       </label>
-      <div className="flex gap-2">
+      <div className="flex w-full min-w-0 items-center gap-2">
         <select
           aria-label="Pays de l'indicatif"
-          className="champ !w-32 shrink-0 !px-2 text-xs sm:!w-36 sm:text-sm"
+          className="champ !h-12 !w-28 shrink-0 !px-2 text-xs sm:!w-32 sm:text-sm"
           value={regionActive}
           onChange={(e) => {
             const r = e.target.value as CountryCode
@@ -81,7 +96,7 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            className={`champ w-full pr-10 ${message ? '!border-erreur' : analyse?.valide ? '!border-succes' : ''}`}
+            className={`champ !h-12 w-full min-w-0 pr-10 text-sm sm:text-base ${message ? '!border-erreur' : analyse?.valide ? '!border-succes' : ''}`}
             value={saisie}
             placeholder="Ex: 90 12 34 56"
             aria-invalid={!!message || undefined}
@@ -99,7 +114,7 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
             }}
           />
           {analyse?.valide && (
-            <Icone nom="check_circle" pleine taille={20} className="absolute right-3 top-3.5 text-succes" />
+            <Icone nom="check_circle" pleine taille={20} className="pointer-events-none absolute right-3 top-3.5 text-succes" />
           )}
         </div>
       </div>
