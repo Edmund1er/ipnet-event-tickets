@@ -11,7 +11,7 @@ import tg.ipnetinstitute.technology.features.identite.model.TypeProfil;
 public record DemandeInscription(
         @NotBlank String email,
         @NotBlank String telephone,
-        @NotBlank @Size(min = 12, message = "Le mot de passe doit comporter au moins 12 caractères") String motDePasse,
+        @NotBlank @Size(min = 6, message = "Le mot de passe doit comporter au moins 6 caractères") String motDePasse,
         @NotNull TypeProfil typeProfil,
         // Données profil étudiant
         Long filiereId,

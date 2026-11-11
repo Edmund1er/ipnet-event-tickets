@@ -114,8 +114,8 @@ public class ServiceInstallation implements ApplicationRunner {
     }
 
     private Long creerAdministrateur(String emailSaisi, String telephoneSaisi, String motDePasse) {
-        if (motDePasse == null || motDePasse.length() < 12) {
-            throw new IllegalArgumentException("Le mot de passe doit comporter au moins 12 caractères.");
+        if (motDePasse == null || motDePasse.length() < 6) {
+            throw new IllegalArgumentException("Le mot de passe doit comporter au moins 6 caractères.");
         }
         String email = validateurEmail.normaliser(emailSaisi);
         String telephone = validateurTelephone.normaliser(telephoneSaisi, UsageTelephone.COMPTE);
