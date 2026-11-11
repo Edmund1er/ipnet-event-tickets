@@ -22,7 +22,7 @@ export const schemaTelephone = z
 
 export const schemaMotDePasse = z
   .string()
-  .min(12, 'Au moins 12 caractères')
+  .min(6, 'Au moins 6 caractères')
   .max(128, '128 caractères maximum')
 
 export const schemaTexteObligatoire = (libelle: string, max: number) =>
@@ -41,11 +41,11 @@ export function erreursChamps(resultat: z.ZodSafeParseResult<unknown>): Record<s
 
 export function robustesse(motDePasse: string): { score: 0 | 1 | 2 | 3 | 4; libelle: string } {
   let s = 0
-  if (motDePasse.length >= 12) s++
+  if (motDePasse.length >= 6) s++
   if (/[a-z]/.test(motDePasse) && /[A-Z]/.test(motDePasse)) s++
   if (/\d/.test(motDePasse)) s++
-  if (/[^A-Za-z0-9]/.test(motDePasse) || motDePasse.length >= 16) s++
+  if (/[^A-Za-z0-9]/.test(motDePasse) || motDePasse.length >= 12) s++
   const libelles = ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent']
-  const score = (motDePasse.length < 12 ? 0 : s) as 0 | 1 | 2 | 3 | 4
+  const score = (motDePasse.length < 6 ? 0 : s) as 0 | 1 | 2 | 3 | 4
   return { score, libelle: libelles[score] }
 }
