@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { LogoImage } from '../../../core/components/layout/Logo'
 import { Icone } from '../../../core/components/ui/Icone'
 
 /**
@@ -28,10 +27,10 @@ export function CadreAuth({ icone, titre, sousTitre, children, large }: { icone:
           </div>
 
           <div className="relative z-10 flex flex-col items-center justify-center py-6 text-center">
-            <LogoImage className="w-full max-w-[15rem] drop-shadow-xl" />
-            <h2 className="mt-4 text-xl font-bold tracking-tight text-white">Billetterie Événements</h2>
-            <p className="mt-2 max-w-[17rem] text-xs leading-relaxed text-blue-100/90">
-              Plateforme officielle de réservation, paiement sécurisé et contrôle d'accès d'IPNET Institute of Technology.
+            <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">IPNET Events</h2>
+            <p className="mt-1 text-sm font-medium text-blue-200">Billetterie Officielle</p>
+            <p className="mt-4 max-w-[17rem] text-xs leading-relaxed text-blue-100/80">
+              Plateforme de réservation, paiement sécurisé et contrôle d'accès d'IPNET Institute of Technology.
             </p>
           </div>
 
