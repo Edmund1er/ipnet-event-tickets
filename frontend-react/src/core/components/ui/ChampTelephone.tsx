@@ -76,17 +76,18 @@ export function ChampTelephone({ libelle = 'Téléphone', valeur, surChangement,
       <div className="flex w-full min-w-0 items-stretch rounded-xl border-[1.5px] border-bordure bg-white transition-colors focus-within:border-primaire focus-within:ring-2 focus-within:ring-primaire/20">
         <select
           aria-label="Pays de l'indicatif"
-          className="h-12 w-28 shrink-0 cursor-pointer border-0 border-r border-bordure bg-surface/60 px-2 text-xs font-medium text-encre outline-none hover:bg-surface sm:w-32 sm:text-sm"
+          className="h-12 w-24 shrink-0 cursor-pointer border-0 border-r border-bordure bg-surface/60 px-1.5 text-xs font-medium text-encre outline-none hover:bg-surface"
           value={regionActive}
           onChange={(e) => {
             const r = e.target.value as CountryCode
             setRegion(r)
             emettre(saisie, r)
           }}
+          title={pays.find((p) => p.region === regionActive)?.nom ?? ''}
         >
           {pays.map((p) => (
             <option key={p.region} value={p.region}>
-              {p.nom} (+{p.indicatif})
+              {p.region} +{p.indicatif}
             </option>
           ))}
         </select>

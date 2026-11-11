@@ -7,8 +7,8 @@ import { Icone } from '../../../core/components/ui/Icone'
  */
 export function CadreAuth({ icone, titre, sousTitre, children, large }: { icone: string; titre: string; sousTitre?: ReactNode; children: ReactNode; large?: boolean }) {
   return (
-    <div className={`mx-auto w-full ${large ? 'max-w-4xl' : 'max-w-md lg:max-w-4xl'}`}>
-      <div className="carte overflow-hidden shadow-xl shadow-primaire/5 lg:grid lg:grid-cols-[1fr_1fr] items-stretch">
+    <div className={`mx-auto w-full ${large ? 'max-w-5xl' : 'max-w-md lg:max-w-5xl'}`}>
+      <div className="carte overflow-hidden shadow-xl shadow-primaire/5 lg:grid lg:grid-cols-[2fr_3fr] items-stretch">
         <aside className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primaire-fonce via-primaire to-[#0a2342] p-8 text-white lg:flex">
           {/* Image en fond dégradé sur toute la hauteur du bloc */}
           <div className="absolute inset-0" aria-hidden>
@@ -42,8 +42,8 @@ export function CadreAuth({ icone, titre, sousTitre, children, large }: { icone:
           <div className="h-1.5 bg-gradient-to-r from-primaire via-primaire to-rouge lg:hidden" />
           <div className="p-5 sm:p-8">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primaire text-white shadow-md shadow-primaire/30">
-                <Icone nom={icone} />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primaire text-white shadow-md shadow-primaire/30">
+                <Icone nom={icone} taille={18} />
               </div>
               <div className="min-w-0">
                 <h1 className="text-[22px] font-extrabold leading-7 tracking-tight">{titre}</h1>
