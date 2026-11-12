@@ -97,7 +97,7 @@
     font-variant-numeric: tabular-nums;
   }
   .carte {
-    @apply rounded-3xl border border-bordure/70 bg-white shadow-sm shadow-slate-900/5;
+    @apply rounded border border-bordure/60 bg-white shadow-[0_0_30px_rgba(10,35,66,0.08)];
   }
   /* Apparition douce des blocs (inspirée du gabarit ScrewFast) */
   .apparition {

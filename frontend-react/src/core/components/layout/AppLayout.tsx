@@ -39,7 +39,7 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
 
       {/* Barre latérale aux couleurs bleues de la marque */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-gradient-to-b from-[#133e70] via-primaire to-[#0c284a] text-white shadow-2xl transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between bg-nuit text-white shadow-2xl transition-transform lg:translate-x-0 ${
           menuOuvert ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Navigation principale"
@@ -63,9 +63,9 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
                         end={e.chemin === '/'}
                         onClick={() => setMenuOuvert(false)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-all ${
+                          `flex items-center gap-3 rounded px-3 py-2.5 text-[15px] font-medium transition-all ${
                             isActive
-                              ? 'bg-white text-primaire font-bold shadow-lg shadow-black/20 ring-1 ring-white/50'
+                              ? 'bg-rouge font-semibold text-white shadow-lg shadow-black/20'
                               : 'text-blue-100/80 hover:bg-white/10 hover:text-white'
                           }`
                         }
@@ -106,7 +106,7 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
               <p className="text-sm font-semibold leading-tight">{nomAffiche}</p>
               <p className="text-xs text-attenue">{role ? ROLES[role] : ''}</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primaire text-sm font-bold text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-rouge text-sm font-bold text-white">
               {initiales(profil?.nom, profil?.prenom) !== '?' ? initiales(profil?.nom, profil?.prenom) : <Icone nom="person" />}
             </div>
           </div>

@@ -13,7 +13,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const STYLES: Record<Variante, string> = {
-  primaire: 'bg-primaire text-white shadow-sm shadow-primaire/30 hover:bg-primaire-fonce disabled:bg-primaire/50 disabled:shadow-none',
+  primaire: 'bg-rouge text-white shadow-sm shadow-rouge/30 hover:bg-rouge-fonce disabled:bg-rouge/50 disabled:shadow-none',
   rouge: 'bg-rouge text-white shadow-sm shadow-rouge/30 hover:bg-rouge-fonce disabled:bg-rouge/50 disabled:shadow-none',
   secondaire:
     'bg-white text-primaire border-[1.5px] border-primaire hover:bg-primaire-clair disabled:text-primaire/50 disabled:border-primaire/40',
