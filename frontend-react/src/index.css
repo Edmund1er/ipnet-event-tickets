@@ -20,6 +20,8 @@
   --color-encre: #14263d;
   --color-nuit: #0a2342;
   --color-fond-clair: #f1f4fa;
+  --color-ciel: #dcebfa;
+  --color-ciel-fonce: #bcd6f0;
   --color-attenue: #5b6b82;
   --color-bordure: #dbe3ee;
 
@@ -41,9 +43,7 @@
     min-height: 100%;
   }
   body {
-    @apply bg-surface text-encre font-sans antialiased;
-    background-image: radial-gradient(60rem 28rem at 100% -10%, rgb(30 91 163 / 0.07), transparent), radial-gradient(40rem 24rem at -10% 0%, rgb(176 50 42 / 0.05), transparent);
-    background-attachment: fixed;
+    @apply bg-fond-clair text-encre font-sans antialiased;
   }
   html {
     overflow-x: hidden;

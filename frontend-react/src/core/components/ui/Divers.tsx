@@ -52,12 +52,12 @@ export function EnteteSection({
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex items-start gap-3">
         {icone && (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primaire-clair text-primaire">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-rouge text-white">
             <Icone nom={icone} />
           </div>
         )}
         <div>
-          <h1 className="text-2xl font-bold text-encre sm:text-[28px] sm:leading-9">{titre}</h1>
+          <h1 className="text-2xl font-extrabold uppercase tracking-tight text-encre sm:text-[28px] sm:leading-9">{titre}</h1>
           {sousTitre && <p className="mt-1 text-sm text-attenue">{sousTitre}</p>}
         </div>
       </div>
@@ -163,7 +163,7 @@ export function Tuile({
   return (
     <div className="carte p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${couleurs}`}>
+        <div className={`flex h-11 w-11 items-center justify-center rounded ${couleurs}`}>
           <Icone nom={icone} />
         </div>
         <p className="titre-section">{libelle}</p>
