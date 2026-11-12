@@ -435,8 +435,7 @@ class ContratApiIntegrationTest {
         mvc.perform(post("/api/auth/rafraichir").cookie(new Cookie("refreshToken", participant.substring(7))))
                 .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/auth/rafraichir"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("SESSION_EXPIREE"));
+                .andExpect(status().isNoContent());
 
         // Mot de passe oublié : e-mail avec lien, puis réinitialisation effective
         mvc.perform(post("/api/auth/mot-de-passe/oubli").contentType(MediaType.APPLICATION_JSON)

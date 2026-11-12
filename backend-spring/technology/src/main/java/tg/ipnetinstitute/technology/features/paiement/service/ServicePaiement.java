@@ -135,7 +135,7 @@ public class ServicePaiement {
             }
             empreinteSha256 = sha256(contenu);
             if (paiements.existsByEmpreintePreuve(empreinteSha256)) {
-                throw new IllegalArgumentException("Cette capture a déjà été soumise pour une réservation");
+                throw new IllegalArgumentException("Cette capture a déjà été soumise pour une réservation (RG-13)");
             }
             cheminFichier = stockagePreuve.enregistrer(new ByteArrayInputStream(contenu), extensionPour(typeDetecte), typeDetecte);
         }

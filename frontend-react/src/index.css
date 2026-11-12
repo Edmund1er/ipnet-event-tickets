@@ -95,6 +95,11 @@
   .champ {
     @apply h-12 w-full rounded-xl border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
   }
+  /* Masquer le bouton natif de mot de passe (Edge, IE, etc.) pour éviter le doublon d'icône */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
   .etiquette {
     @apply mb-1.5 block text-sm font-semibold text-encre;
   }

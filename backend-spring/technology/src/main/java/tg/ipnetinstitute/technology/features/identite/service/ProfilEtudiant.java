@@ -35,10 +35,10 @@ public class ProfilEtudiant implements ProfilParticipant {
             throw new IllegalArgumentException("Demande incompatible avec le profil étudiant");
         }
         if (e.filiereId() == null) {
-            throw new IllegalArgumentException("La filière est obligatoire pour un étudiant interne");
+            throw new IllegalArgumentException("La filière est obligatoire pour un étudiant interne (EF-03)");
         }
         if (e.anneeInscriptionL1() == null) {
-            throw new IllegalArgumentException("L'année d'inscription en L1 est obligatoire pour un étudiant interne");
+            throw new IllegalArgumentException("L'année d'inscription en L1 est obligatoire pour un étudiant interne (EF-03)");
         }
         filieres.findByIdAndActifTrue(e.filiereId())
                 .orElseThrow(() -> new FiliereInvalideException(e.filiereId()));

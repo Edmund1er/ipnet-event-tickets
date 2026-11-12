@@ -32,7 +32,7 @@ public class ProfilVisiteur implements ProfilParticipant {
             throw new IllegalArgumentException("Demande incompatible avec le profil visiteur");
         }
         if (v.categorieId() == null) {
-            throw new IllegalArgumentException("La catégorie est obligatoire pour un visiteur externe");
+            throw new IllegalArgumentException("La catégorie est obligatoire pour un visiteur externe (EF-04)");
         }
         categories.findByIdAndActifTrue(v.categorieId())
                 .orElseThrow(() -> new CategorieInvalideException(v.categorieId()));

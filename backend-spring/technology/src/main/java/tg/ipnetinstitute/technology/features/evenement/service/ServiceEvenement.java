@@ -69,10 +69,8 @@ public class ServiceEvenement {
     @Auditable(action = "MODIFICATION_EVENEMENT", typeCible = "EVENEMENT")
     public EvenementResume modifier(Long evenementId, ModificationEvenement modif, Long adminId) {
         Evenement e = chargerPourModification(evenementId);
-        if (inscriptions.countByEvenementIdAndStatut(evenementId, StatutInscription.CONFIRMEE) > 0
-                && !memesInformations(e, modif)) {
-            throw new IllegalStateException("Cet événement a déjà des réservations confirmées : "
-                    + "seuls le nombre de places et la date limite de réservation peuvent encore être modifiés");
+        if (inscriptions.countByEvenementIdAndStatut(evenementId, StatutInscription.CONFIRMEE) > 0) {
+            throw new IllegalStateException("Cet événement a déjà des réservations confirmées : il ne peut plus être modifié (EF-12)");
         }
         e.modifier(
                 modif.titre(),
