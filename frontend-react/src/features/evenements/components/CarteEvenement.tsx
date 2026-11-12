@@ -32,31 +32,32 @@ export function JaugePlaces({ evenement }: { evenement: Evenement }) {
 
 export function CarteEvenement({ evenement }: { evenement: Evenement }) {
   return (
-    <Link
-      to={`/evenements/${evenement.id}`}
-      className="carte group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primaire/15"
-    >
-      {evenement.aImage && (
-        <div className="relative overflow-hidden">
-          <VisuelEvenement evenement={evenement} className="aspect-[16/9] w-full transition-transform duration-500 group-hover:scale-105" />
-          <span className="absolute left-3 top-3 rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white shadow-md">
-            {montant(evenement.prix, evenement.devise)}
-          </span>
-        </div>
-      )}
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        {!evenement.aImage && (
-          <span className="self-start rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white">{montant(evenement.prix, evenement.devise)}</span>
+    <Link to={`/evenements/${evenement.id}`} className="carte-service group transition-transform duration-300 hover:-translate-y-1">
+      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primaire-fonce to-nuit">
+        {evenement.aImage ? (
+          <VisuelEvenement evenement={evenement} className="h-full w-full transition-transform duration-500 group-hover:scale-110" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-white/30">
+            <Icone nom="confirmation_number" taille={64} />
+          </div>
         )}
-        <h2 className="text-lg font-semibold leading-snug text-balance group-hover:text-primaire">{evenement.titre}</h2>
+        <span className="absolute right-0 top-4 rounded-l bg-rouge px-4 py-1.5 text-sm font-bold text-white shadow-md">
+          {montant(evenement.prix, evenement.devise)}
+        </span>
+      </div>
+      <div className="relative flex flex-1 flex-col gap-3 px-6 pb-6 pt-10">
+        <div className="icone-carre absolute -top-7 left-6 shadow-lg">
+          <Icone nom="event" taille={26} />
+        </div>
+        <h2 className="text-balance text-lg font-bold leading-snug text-encre transition-colors group-hover:text-rouge">{evenement.titre}</h2>
         <div className="flex flex-col gap-1.5 text-sm text-attenue">
           <p className="flex items-center gap-2">
-            <Icone nom="calendar_month" taille={18} className="text-primaire" />
+            <Icone nom="calendar_month" taille={18} className="text-rouge" />
             {dateLongue(evenement.dateDebut)}
           </p>
           {evenement.lieu && (
             <p className="flex items-center gap-2">
-              <Icone nom="location_on" taille={18} className="text-primaire" />
+              <Icone nom="location_on" taille={18} className="text-rouge" />
               {evenement.lieu}
             </p>
           )}

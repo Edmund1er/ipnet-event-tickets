@@ -234,14 +234,14 @@ function CarteType({ icone, titre, texte, onClick }: { icone: string; titre: str
     <button
       type="button"
       onClick={onClick}
-      className="group flex flex-col items-start gap-3 rounded-lg border-[1.5px] border-bordure bg-white p-5 text-left transition-colors hover:border-primaire hover:bg-primaire-clair"
+      className="group flex flex-col items-start gap-3 rounded border-[1.5px] border-bordure bg-white p-6 text-left shadow-[0_0_30px_rgba(10,35,66,0.08)] transition-all hover:-translate-y-0.5 hover:border-rouge"
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-primaire text-white group-hover:bg-rouge">
+      <span className="flex h-12 w-12 items-center justify-center rounded bg-rouge text-white">
         <Icone nom={icone} taille={26} />
       </span>
-      <span className="text-lg font-semibold">{titre}</span>
+      <span className="text-lg font-bold">{titre}</span>
       <span className="text-sm text-attenue">{texte}</span>
-      <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-primaire">
+      <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-rouge">
         Continuer <Icone nom="arrow_forward" taille={18} />
       </span>
     </button>

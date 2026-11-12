@@ -43,7 +43,7 @@ export function Bouton({
       type={type}
       disabled={disabled || enCours}
       aria-busy={enCours || undefined}
-      className={`inline-flex items-center justify-center rounded-full font-semibold transition-all duration-200 hover:-translate-y-px active:scale-[0.98] disabled:cursor-not-allowed ${STYLES[variante]} ${TAILLES[taille]} ${className}`}
+      className={`inline-flex items-center justify-center rounded font-semibold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed ${STYLES[variante]} ${TAILLES[taille]} ${className}`}
       {...reste}
     >
       {enCours ? <Chargement taille={18} clair={variante === 'primaire' || variante === 'rouge'} /> : icone && <Icone nom={icone} taille={20} />}

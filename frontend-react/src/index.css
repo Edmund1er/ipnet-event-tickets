@@ -6,7 +6,7 @@
  */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-titre: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
+  --font-titre: "Raleway", "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
 
   --color-primaire: #1e5ba3;
   --color-primaire-fonce: #133e70;
@@ -14,9 +14,12 @@
   --color-primaire-moyen: #a9c4e6;
   --color-rouge: #b0322a;
   --color-rouge-fonce: #8c241e;
+  --color-rouge-vif: #ff5a4d;
   --color-rouge-clair: #fbeae8;
   --color-surface: #edf2f9;
-  --color-encre: #0f1e33;
+  --color-encre: #14263d;
+  --color-nuit: #0a2342;
+  --color-fond-clair: #f1f4fa;
   --color-attenue: #5b6b82;
   --color-bordure: #dbe3ee;
 
@@ -116,7 +119,7 @@
     @apply inline-flex items-center gap-2 rounded-full border border-primaire/15 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-primaire shadow-sm backdrop-blur;
   }
   .champ {
-    @apply h-12 w-full rounded-xl border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
+    @apply h-12 w-full rounded border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
   }
   /* Masquer le bouton natif de mot de passe (Edge, IE, etc.) pour éviter le doublon d'icône */
   input::-ms-reveal,
@@ -161,5 +164,39 @@
   .apparition,
   .laser {
     animation: none;
+  }
+}
+
+/* ===== Gabarit Dewi : sections, titres, cartes de service ===== */
+@layer components {
+  .titre-bloc {
+    @apply mb-10 text-center sm:mb-14;
+  }
+  .titre-bloc > span {
+    @apply inline-flex items-center gap-3 text-[13px] font-medium uppercase tracking-[0.15em] text-attenue;
+  }
+  .titre-bloc > span::before,
+  .titre-bloc > span::after {
+    content: "";
+    @apply h-px w-10 bg-rouge sm:w-16;
+  }
+  .titre-bloc > h2 {
+    @apply mt-2 text-[26px] font-extrabold uppercase leading-tight tracking-tight text-encre sm:text-4xl;
+  }
+  .btn-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded bg-rouge px-7 py-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-white transition-colors duration-300 hover:bg-rouge-fonce;
+  }
+  .btn-contour {
+    @apply inline-flex items-center justify-center gap-2 rounded border-2 border-white/80 px-6 py-2.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-white transition-colors duration-300 hover:border-rouge hover:bg-rouge;
+  }
+  .carte-service {
+    @apply relative flex h-full flex-col overflow-hidden rounded bg-white shadow-[0_0_30px_rgba(10,35,66,0.10)];
+  }
+  .icone-carre {
+    @apply flex h-14 w-14 items-center justify-center rounded border-2 border-rouge bg-rouge text-white transition-colors duration-300;
+  }
+  .carte-service:hover .icone-carre,
+  .groupe-carte:hover .icone-carre {
+    @apply bg-white text-rouge;
   }
 }
