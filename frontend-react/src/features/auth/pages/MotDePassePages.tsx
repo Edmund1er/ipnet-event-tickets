@@ -100,7 +100,7 @@ export function ReinitialisationPage() {
   }
 
   return (
-    <CadreAuth icone="password" titre="Nouveau mot de passe" sousTitre="Choisissez un mot de passe d'au moins 12 caractères">
+    <CadreAuth icone="password" titre="Nouveau mot de passe" sousTitre="Choisissez un mot de passe d'au moins 6 caractères">
       <form onSubmit={soumettre} noValidate className="flex flex-col gap-4">
         {erreur && <Alerte ton="erreur">{erreur}</Alerte>}
         <ChampMotDePasse libelle="Nouveau mot de passe" valeur={mdp} surChangement={setMdp} erreur={erreurs.mdp} avecJauge autoComplete="new-password" />

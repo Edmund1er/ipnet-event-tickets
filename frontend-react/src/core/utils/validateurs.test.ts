@@ -10,8 +10,8 @@ describe('schémas Zod (mêmes règles que le backend)', () => {
     expect(schemaEmail.safeParse('').success).toBe(false)
   })
 
-  it('exige 12 caractères minimum pour le mot de passe (§5.1)', () => {
-    expect(schemaMotDePasse.safeParse('court').success).toBe(false)
+  it('exige 6 caractères minimum pour le mot de passe', () => {
+    expect(schemaMotDePasse.safeParse('cinq5').success).toBe(false)
     expect(schemaMotDePasse.safeParse('MotDePasseOk12').success).toBe(true)
     expect(schemaMotDePasse.safeParse('x'.repeat(129)).success).toBe(false)
   })

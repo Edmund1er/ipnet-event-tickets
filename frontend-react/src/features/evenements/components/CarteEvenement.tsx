@@ -34,11 +34,11 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
   return (
     <Link
       to={`/evenements/${evenement.id}`}
-      className="carte group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primaire/10"
+      className="carte group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primaire/15"
     >
       {evenement.aImage && (
-        <div className="relative">
-          <VisuelEvenement evenement={evenement} className="aspect-[16/9] w-full" />
+        <div className="relative overflow-hidden">
+          <VisuelEvenement evenement={evenement} className="aspect-[16/9] w-full transition-transform duration-500 group-hover:scale-105" />
           <span className="absolute left-3 top-3 rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white shadow-md">
             {montant(evenement.prix, evenement.devise)}
           </span>
@@ -48,7 +48,7 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
         {!evenement.aImage && (
           <span className="self-start rounded-full bg-rouge px-3 py-1 text-sm font-bold text-white">{montant(evenement.prix, evenement.devise)}</span>
         )}
-        <h2 className="text-lg font-semibold leading-snug group-hover:text-primaire">{evenement.titre}</h2>
+        <h2 className="text-lg font-semibold leading-snug text-balance group-hover:text-primaire">{evenement.titre}</h2>
         <div className="flex flex-col gap-1.5 text-sm text-attenue">
           <p className="flex items-center gap-2">
             <Icone nom="calendar_month" taille={18} className="text-primaire" />

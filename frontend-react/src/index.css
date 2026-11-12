@@ -44,6 +44,10 @@
   }
   html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    background: rgb(30 91 163 / 0.18);
   }
   h1,
   h2,
@@ -90,7 +94,26 @@
     font-variant-numeric: tabular-nums;
   }
   .carte {
-    @apply rounded-2xl border border-bordure/80 bg-white shadow-sm shadow-slate-900/5;
+    @apply rounded-3xl border border-bordure/70 bg-white shadow-sm shadow-slate-900/5;
+  }
+  /* Apparition douce des blocs (inspirée du gabarit ScrewFast) */
+  .apparition {
+    animation: apparition 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .apparition-2 {
+    animation-delay: 0.1s;
+  }
+  .apparition-3 {
+    animation-delay: 0.2s;
+  }
+  .texte-degrade {
+    background-image: linear-gradient(90deg, var(--color-primaire), var(--color-rouge));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .pastille {
+    @apply inline-flex items-center gap-2 rounded-full border border-primaire/15 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-primaire shadow-sm backdrop-blur;
   }
   .champ {
     @apply h-12 w-full rounded-xl border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
@@ -108,6 +131,16 @@
   }
 }
 
+@keyframes apparition {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @keyframes balayage {
   0%,
   100% {
@@ -122,6 +155,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .apparition,
   .laser {
     animation: none;
   }

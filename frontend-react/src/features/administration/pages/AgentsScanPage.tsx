@@ -112,7 +112,7 @@ export function AgentsScanPage() {
             value={f.motDePasse}
             onChange={(e) => setF({ ...f, motDePasse: e.target.value })}
             erreur={erreurs.motDePasse}
-            aide="12 caractères minimum, à transmettre à l'agent. Il confirmera son e-mail à sa première connexion."
+            aide="6 caractères minimum, à transmettre à l'agent. Il confirmera son e-mail à sa première connexion."
           />
           <Bouton type="submit" icone="person_add" enCours={enCours}>
             Créer le compte

@@ -40,39 +40,41 @@ export function ListeEvenementsPage() {
 
   return (
     <div>
-      <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primaire-fonce via-primaire to-[#0a2342] text-white shadow-xl shadow-primaire/20">
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rouge/25 blur-3xl" aria-hidden />
-        <div className="absolute inset-y-0 right-0 w-full sm:w-1/2 md:w-5/12 lg:w-1/3 overflow-hidden pointer-events-none" aria-hidden>
-          <img
-            src="/logo_ipnet.jpg"
-            alt=""
-            className="h-full w-full object-contain object-right opacity-30 md:opacity-40 mix-blend-screen p-4"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-primaire-fonce via-transparent to-transparent hidden sm:block" />
-        </div>
-        <div className="relative z-10 max-w-2xl px-5 py-8 sm:px-10 sm:py-12">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-rouge px-3 py-1 text-xs font-bold shadow-md">
-            <Icone nom="confirmation_number" taille={16} /> Billetterie officielle
+      <section className="apparition relative mb-10 overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 px-5 py-12 text-center shadow-xl shadow-primaire/5 backdrop-blur sm:px-12 sm:py-16">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primaire/15 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-28 -right-20 h-72 w-72 rounded-full bg-rouge/15 blur-3xl" aria-hidden />
+        <div className="relative mx-auto max-w-3xl">
+          <p className="pastille">
+            <Icone nom="confirmation_number" taille={16} className="text-rouge" /> Billetterie officielle
           </p>
-          <h1 className="text-[1.65rem] font-extrabold leading-tight tracking-tight sm:text-4xl">Les événements d'IPNET Institute of Technology</h1>
-          <p className="mt-3 text-[15px] text-white/85 sm:text-base">
+          <h1 className="mt-5 text-balance text-3xl font-extrabold leading-tight tracking-tight text-encre sm:text-5xl sm:leading-[1.1]">
+            Vivez les événements d'<span className="texte-degrade">IPNET Institute of Technology</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-pretty text-base leading-relaxed text-attenue sm:text-lg">
             Réservez votre place, payez par Mobile Money et recevez votre billet avec QR code par e-mail.
           </p>
-          {prochain && (
-            <Link
-              to={`/evenements/${prochain.id}`}
-              className="mt-6 inline-flex max-w-full items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-primaire-fonce shadow-lg transition-transform hover:-translate-y-0.5"
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a
+              href="#evenements"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primaire px-7 text-[15px] font-semibold text-white shadow-lg shadow-primaire/30 transition-all hover:-translate-y-px hover:bg-primaire-fonce"
             >
-              <Icone nom="event" taille={18} className="text-rouge" />
-              <span className="truncate">
-                Prochain : {prochain.titre} — {dateLongue(prochain.dateDebut)}
-              </span>
-            </Link>
-          )}
+              <Icone nom="event" taille={20} /> Voir les événements
+            </a>
+            {prochain && (
+              <Link
+                to={`/evenements/${prochain.id}`}
+                className="inline-flex h-12 max-w-full items-center gap-2 rounded-full border border-bordure bg-white px-5 text-sm font-semibold text-encre transition-all hover:-translate-y-px hover:border-primaire/40"
+              >
+                <span className="truncate">
+                  Prochain : {prochain.titre} — {dateLongue(prochain.dateDebut)}
+                </span>
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
-      <form onSubmit={appliquer} className="carte mb-6 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]" aria-label="Filtrer les événements">
+      <form id="evenements" onSubmit={appliquer} className="carte apparition apparition-2 mb-6 scroll-mt-28 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]" aria-label="Filtrer les événements">
         <Champ libelle="Rechercher" placeholder="Titre de l'événement" value={saisie.titre} onChange={(e) => setSaisie((s) => ({ ...s, titre: e.target.value }))} />
         <Champ libelle="Du" type="date" value={saisie.dateMin} onChange={(e) => setSaisie((s) => ({ ...s, dateMin: e.target.value }))} />
         <Champ libelle="Au" type="date" value={saisie.dateMax} onChange={(e) => setSaisie((s) => ({ ...s, dateMax: e.target.value }))} />
