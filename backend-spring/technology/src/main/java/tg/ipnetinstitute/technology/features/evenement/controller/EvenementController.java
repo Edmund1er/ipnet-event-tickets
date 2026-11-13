@@ -14,6 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tg.ipnetinstitute.technology.common.response.PageResponse;
+import tg.ipnetinstitute.technology.features.evenement.dto.request.ApparenceEvenement;
+import tg.ipnetinstitute.technology.features.evenement.dto.request.DemandeActivite;
+import tg.ipnetinstitute.technology.features.evenement.dto.request.DuplicationJour;
 import tg.ipnetinstitute.technology.features.evenement.dto.request.DemandeEvenement;
 import tg.ipnetinstitute.technology.features.evenement.dto.request.ModificationEvenement;
 import tg.ipnetinstitute.technology.features.evenement.dto.response.EvenementResume;
@@ -47,14 +50,21 @@ public class EvenementController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateMax,
             @RequestParam(required = false) BigDecimal prixMin,
             @RequestParam(required = false) BigDecimal prixMax,
+            @RequestParam(required = false, defaultValue = "false") boolean activites,
             @PageableDefault(size = 12, sort = "dateDebut", direction = Sort.Direction.ASC) Pageable pageable) {
         var filtre = new FiltresEvenementUtils.Filtre(titre, dateMin, dateMax, prixMin, prixMax);
-        return ResponseEntity.ok(PageResponse.de(serviceEvenement.listerPublies(filtre, pageable)));
+        return ResponseEntity.ok(PageResponse.de(serviceEvenement.listerPublies(filtre, pageable, activites)));
     }
 
     @GetMapping("/evenements/{id}")
     public ResponseEntity<EvenementResume> consulter(@PathVariable Long id) {
         return ResponseEntity.ok(serviceEvenement.consulterPublic(id));
+    }
+
+    /** Programme d'un événement-cadre : activités et pass publiés. */
+    @GetMapping("/evenements/{id}/activites")
+    public ResponseEntity<java.util.List<EvenementResume>> activites(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceEvenement.listerActivites(id, false));
     }
 
     @GetMapping("/evenements/{id}/image")
@@ -102,6 +112,45 @@ public class EvenementController {
                                                     @Valid @RequestBody ModificationEvenement demande,
                                                     @AuthenticationPrincipal Long adminId) {
         return ResponseEntity.ok(serviceEvenement.modifier(id, demande, adminId));
+    }
+
+    @GetMapping("/admin/evenements/{id}/activites")
+    public ResponseEntity<java.util.List<EvenementResume>> activitesAdmin(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceEvenement.listerActivites(id, true));
+    }
+
+    @PostMapping("/admin/evenements/{id}/activites")
+    public ResponseEntity<EvenementResume> creerActivite(@PathVariable Long id,
+                                                         @Valid @RequestBody DemandeActivite demande,
+                                                         @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.status(201).body(serviceEvenement.creerActivite(id, demande, adminId));
+    }
+
+    @PutMapping("/admin/evenements/{id}/activite")
+    public ResponseEntity<EvenementResume> modifierActivite(@PathVariable Long id,
+                                                            @Valid @RequestBody DemandeActivite demande,
+                                                            @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceEvenement.modifierActivite(id, demande, adminId));
+    }
+
+    @DeleteMapping("/admin/evenements/{id}/activite")
+    public ResponseEntity<Void> supprimerActivite(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
+        serviceEvenement.supprimerActivite(id, adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admin/evenements/{id}/activites/duplication")
+    public ResponseEntity<java.util.List<EvenementResume>> dupliquerJour(@PathVariable Long id,
+                                                                         @Valid @RequestBody DuplicationJour demande,
+                                                                         @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceEvenement.dupliquerJour(id, demande.source(), demande.cibles(), adminId));
+    }
+
+    @PutMapping("/admin/evenements/{id}/apparence")
+    public ResponseEntity<EvenementResume> apparence(@PathVariable Long id,
+                                                     @Valid @RequestBody ApparenceEvenement apparence,
+                                                     @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceEvenement.definirApparence(id, apparence, adminId));
     }
 
     @PostMapping(value = "/admin/evenements/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

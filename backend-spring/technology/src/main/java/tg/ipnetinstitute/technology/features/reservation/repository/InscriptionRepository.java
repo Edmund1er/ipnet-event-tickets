@@ -20,4 +20,5 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
     List<Inscription> findByEvenementIdOrderByCreeLeAsc(Long evenementId);
     long countByEvenementIdAndStatut(Long evenementId, StatutInscription statut);
     long countByStatut(StatutInscription statut);
+    boolean existsByEvenementId(Long evenementId);
 }

@@ -11,6 +11,26 @@ export interface DonneesEvenement {
   devise: string
   capacite: number
   dateLimiteReservation?: string | null
+  /** Programme multi-jours : fin du programme. */
+  dateFin?: string | null
+  type?: 'EVENEMENT' | 'CADRE'
+}
+
+export interface DonneesActivite {
+  type: 'ACTIVITE' | 'PASS'
+  titre: string
+  description: string
+  categorie: string | null
+  dateDebut: string
+  dateFin: string
+  lieu: string
+  prix: number
+  capacite: number | null
+  accesLibre: boolean
+  passPortee: 'GLOBAL' | 'JOURNEE' | null
+  passJour: string | null
+  ambiance: string | null
+  couleurPrincipale: string | null
 }
 
 export interface Participant {
@@ -40,6 +60,24 @@ export const adminEvenementService = {
   },
   async modifier(id: number, d: DonneesEvenement) {
     return (await http.put<Evenement>(`/admin/evenements/${id}`, d)).data
+  },
+  async activites(id: number) {
+    return (await http.get<Evenement[]>(`/admin/evenements/${id}/activites`)).data
+  },
+  async creerActivite(cadreId: number, d: DonneesActivite) {
+    return (await http.post<Evenement>(`/admin/evenements/${cadreId}/activites`, d)).data
+  },
+  async modifierActivite(id: number, d: DonneesActivite) {
+    return (await http.put<Evenement>(`/admin/evenements/${id}/activite`, d)).data
+  },
+  async supprimerActivite(id: number) {
+    await http.delete(`/admin/evenements/${id}/activite`)
+  },
+  async dupliquerJour(cadreId: number, source: string, cibles: string[]) {
+    return (await http.post<Evenement[]>(`/admin/evenements/${cadreId}/activites/duplication`, { source, cibles })).data
+  },
+  async definirApparence(id: number, ambiance: string | null, couleurPrincipale: string | null) {
+    return (await http.put<Evenement>(`/admin/evenements/${id}/apparence`, { ambiance, couleurPrincipale })).data
   },
   async publier(id: number) {
     return (await http.post<Evenement>(`/admin/evenements/${id}/publication`)).data

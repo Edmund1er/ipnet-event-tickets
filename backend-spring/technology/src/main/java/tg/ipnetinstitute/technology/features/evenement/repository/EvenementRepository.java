@@ -30,4 +30,11 @@ public interface EvenementRepository extends JpaRepository<Evenement, Long>,
     java.util.List<Evenement> findByStatutAndDateDebutBefore(StatutEvenement statut, java.time.LocalDateTime limite);
 
     long countByStatut(StatutEvenement statut);
+
+    java.util.List<Evenement> findByParentIdOrderByDateDebutAsc(Long parentId);
+
+    /** Événements publiés dont la fin (ou le début, sans fin) est antérieure à la limite : clôture automatique. */
+    @Query("SELECT e FROM Evenement e WHERE e.statut = :statut AND COALESCE(e.dateFin, e.dateDebut) < :limite")
+    java.util.List<Evenement> findACloturer(@Param("statut") StatutEvenement statut,
+                                            @Param("limite") java.time.LocalDateTime limite);
 }

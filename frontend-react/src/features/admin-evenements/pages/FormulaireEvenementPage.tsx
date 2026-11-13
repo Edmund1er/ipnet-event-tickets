@@ -8,11 +8,12 @@ import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte, EnteteSection } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
+import { AMBIANCES, CLES_AMBIANCE, COULEUR_DEFAUT, ambianceDe, themeEvenement, type CleAmbiance } from '../../evenements/theme/ambiances'
 import { useImageProtegee } from '../../../core/hooks/useRequete'
 import { depuisChampDateHeure, versChampDateHeure } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-const VIDE = { titre: '', description: '', dateDebut: '', lieu: '', prix: '', devise: 'XOF', capacite: '', dateLimiteReservation: '' }
+const VIDE = { titre: '', description: '', dateDebut: '', dateFin: '', lieu: '', prix: '', devise: 'XOF', capacite: '', dateLimiteReservation: '' }
 
 export function FormulaireEvenementPage() {
   const { id } = useParams()
@@ -25,6 +26,10 @@ export function FormulaireEvenementPage() {
   const [erreur, setErreur] = useState<string | null>(null)
   const [chargement, setChargement] = useState(edition)
   const [enCours, setEnCours] = useState(false)
+  // Programme multi-jours (semaine culturelle…) ou événement simple : choisi à la création, figé ensuite
+  const [programme, setProgramme] = useState(false)
+  const [ambiance, setAmbiance] = useState<CleAmbiance>('SOBRE')
+  const [couleur, setCouleur] = useState<string | null>(null)
   const [imageEnCours, setImageEnCours] = useState(false)
   const [versionImage, setVersionImage] = useState(0)
   // Création : l'image est choisie tout de suite, envoyée juste après la création du brouillon
@@ -40,10 +45,14 @@ export function FormulaireEvenementPage() {
       .detail(Number(id))
       .then((e) => {
         setEvt(e)
+        setProgramme(e.type === 'CADRE')
+        setAmbiance((e.ambiance as CleAmbiance) ?? 'SOBRE')
+        setCouleur(e.couleurPrincipale ?? null)
         setF({
           titre: e.titre,
           description: e.description ?? '',
           dateDebut: versChampDateHeure(e.dateDebut),
+          dateFin: versChampDateHeure(e.dateFin),
           lieu: e.lieu ?? '',
           prix: String(e.prix),
           devise: e.devise,
@@ -66,9 +75,14 @@ export function FormulaireEvenementPage() {
     if (f.dateLimiteReservation && f.dateDebut && new Date(f.dateLimiteReservation).getTime() > new Date(f.dateDebut).getTime()) {
       errs.dateLimiteReservation = 'La date limite ne peut pas dépasser le début de l’événement'
     }
-    if (f.prix === '' || Number(f.prix) < 0) errs.prix = 'Prix positif ou nul'
-    if (!f.capacite || Number(f.capacite) < 1 || !Number.isInteger(Number(f.capacite))) errs.capacite = 'Capacité entière ≥ 1'
-    if (evt && Number(f.capacite) < evt.placesReservees) errs.capacite = `Au moins ${evt.placesReservees} (places déjà réservées)`
+    if (programme) {
+      if (!f.dateFin) errs.dateFin = 'Date de fin obligatoire'
+      else if (f.dateDebut && new Date(f.dateFin).getTime() < new Date(f.dateDebut).getTime()) errs.dateFin = 'La fin doit suivre le début'
+    } else {
+      if (f.prix === '' || Number(f.prix) < 0) errs.prix = 'Prix positif ou nul'
+      if (!f.capacite || Number(f.capacite) < 1 || !Number.isInteger(Number(f.capacite))) errs.capacite = 'Capacité entière ≥ 1'
+    }
+    if (!programme && evt && Number(f.capacite) < evt.placesReservees) errs.capacite = `Au moins ${evt.placesReservees} (places déjà réservées)`
     if (!/^[A-Za-z]{3}$/.test(f.devise)) errs.devise = 'Code à 3 lettres'
     setErreurs(errs)
     if (Object.keys(errs).length) return
@@ -78,9 +92,11 @@ export function FormulaireEvenementPage() {
       description: f.description.trim(),
       dateDebut: depuisChampDateHeure(f.dateDebut),
       lieu: f.lieu.trim(),
-      prix: Number(f.prix),
+      prix: programme ? 0 : Number(f.prix),
       devise: f.devise.toUpperCase(),
-      capacite: Number(f.capacite),
+      capacite: programme ? 1 : Number(f.capacite),
+      dateFin: programme && f.dateFin ? depuisChampDateHeure(f.dateFin) : null,
+      type: programme ? ('CADRE' as const) : ('EVENEMENT' as const),
       dateLimiteReservation: f.dateLimiteReservation ? depuisChampDateHeure(f.dateLimiteReservation) : null,
     }
     setErreur(null)
@@ -94,11 +110,17 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Image non enregistrée : ${messageErreur(errImage)}`)
           }
         }
+        await adminEvenementService.definirApparence(evt.id, ambiance, couleur)
         await adminEvenementService.modifier(evt.id, donnees)
         toast.succes('Événement modifié avec succès')
         navigate('/admin/evenements')
       } else {
         const cree = await adminEvenementService.creer(donnees)
+        try {
+          await adminEvenementService.definirApparence(cree.id, ambiance, couleur)
+        } catch (errApp) {
+          toast.erreur(`Brouillon créé, mais l'apparence n'a pas été enregistrée : ${messageErreur(errApp)}`)
+        }
         if (imageChoisie) {
           try {
             await adminEvenementService.envoyerImage(cree.id, imageChoisie)
@@ -106,8 +128,8 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Brouillon créé, mais l'image n'a pas été envoyée : ${messageErreur(errImage)}`)
           }
         }
-        toast.succes('Événement créé avec succès')
-        navigate('/admin/evenements')
+        toast.succes(programme ? 'Programme créé : ajoutez maintenant ses activités' : 'Événement créé avec succès')
+        navigate(programme ? `/admin/evenements/${cree.id}/programme` : '/admin/evenements')
       }
     } catch (err) {
       const api = versErreurApi(err)
@@ -183,20 +205,56 @@ export function FormulaireEvenementPage() {
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <form onSubmit={enregistrer} noValidate className="carte flex flex-col gap-4 p-5">
           <fieldset disabled={!!verrouille || enCours} className="flex flex-col gap-4">
+            {!edition && (
+              <div role="radiogroup" aria-label="Type d'événement" className="grid gap-2 sm:grid-cols-2">
+                {[
+                  { v: false, titre: 'Événement simple', texte: 'Une soirée, une conférence : une date, un billet.', icone: 'confirmation_number' },
+                  { v: true, titre: 'Programme sur plusieurs jours', texte: 'Semaine culturelle, festival : plusieurs activités, des pass.', icone: 'calendar_view_week' },
+                ].map((o) => (
+                  <button
+                    key={o.titre}
+                    type="button"
+                    role="radio"
+                    aria-checked={programme === o.v}
+                    onClick={() => setProgramme(o.v)}
+                    className={`flex items-start gap-3 rounded-lg border-2 p-3 text-left ${programme === o.v ? 'border-primaire bg-primaire-clair' : 'border-black/10'}`}
+                  >
+                    <Icone nom={o.icone} className="text-primaire" />
+                    <span>
+                      <span className="block font-semibold">{o.titre}</span>
+                      <span className="block text-xs text-attenue">{o.texte}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
             <Champ libelle="Titre" value={f.titre} onChange={maj('titre')} erreur={erreurs.titre} maxLength={200} />
             <ChampTexte libelle="Description" facultatif value={f.description} onChange={maj('description')} rows={6} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <Champ libelle="Date et heure de début" type="datetime-local" min={minDateHeure} value={f.dateDebut} onChange={maj('dateDebut')} erreur={erreurs.dateDebut} />
-              <Champ libelle="Date limite de réservation" type="datetime-local" facultatif min={minDateHeure} max={f.dateDebut || undefined} value={f.dateLimiteReservation} onChange={maj('dateLimiteReservation')} erreur={erreurs.dateLimiteReservation} aide="Par défaut, jusqu'au début de l'événement" />
+              <Champ libelle={programme ? 'Début du programme' : 'Date et heure de début'} type="datetime-local" min={minDateHeure} value={f.dateDebut} onChange={maj('dateDebut')} erreur={erreurs.dateDebut} />
+              {programme ? (
+                <Champ libelle="Fin du programme" type="datetime-local" min={f.dateDebut || minDateHeure} value={f.dateFin} onChange={maj('dateFin')} erreur={erreurs.dateFin} />
+              ) : (
+                <Champ libelle="Date limite de réservation" type="datetime-local" facultatif min={minDateHeure} max={f.dateDebut || undefined} value={f.dateLimiteReservation} onChange={maj('dateLimiteReservation')} erreur={erreurs.dateLimiteReservation} aide="Par défaut, jusqu'au début de l'événement" />
+              )}
             </div>
             <Champ libelle="Lieu" facultatif value={f.lieu} onChange={maj('lieu')} maxLength={255} />
+            {programme ? (
+              <Champ libelle="Devise" value={f.devise} onChange={maj('devise')} erreur={erreurs.devise} maxLength={3} aide="XOF = FCFA. Prix et places se règlent activité par activité." />
+            ) : (
             <div className="grid gap-4 sm:grid-cols-3">
               <Champ libelle="Prix du billet" type="number" min={0} step="1" value={f.prix} onChange={maj('prix')} erreur={erreurs.prix} />
               <Champ libelle="Devise" value={f.devise} onChange={maj('devise')} erreur={erreurs.devise} maxLength={3} aide="XOF = FCFA" />
               <Champ libelle="Capacité" type="number" min={1} step="1" value={f.capacite} onChange={maj('capacite')} erreur={erreurs.capacite} />
             </div>
+            )}
           </fieldset>
-          {evt?.statut === 'PUBLIE' && (
+          {evt && programme && (
+            <Link to={`/admin/evenements/${evt.id}/programme`} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[1.5px] border-primaire font-semibold text-primaire hover:bg-primaire-clair">
+              <Icone nom="calendar_view_week" taille={20} /> Gérer les activités et les pass
+            </Link>
+          )}
+          {evt?.statut === 'PUBLIE' && !programme && (
             <Alerte ton="info">
               {evt.placesReservees > 0
                 ? "Des réservations sont déjà enregistrées : seuls le nombre de places (capacité) et la date limite peuvent encore être ajustés."
@@ -212,6 +270,7 @@ export function FormulaireEvenementPage() {
           )}
         </form>
 
+        <div className="flex flex-col gap-5">
         <aside className="carte flex flex-col gap-3 p-5">
           <h2 className="text-lg font-semibold">Image</h2>
           {!evt ? (
@@ -258,6 +317,46 @@ export function FormulaireEvenementPage() {
             </>
           )}
         </aside>
+
+        <section className="carte flex flex-col gap-3 p-5" aria-label="Apparence de la page">
+          <h2 className="text-lg font-semibold">Ambiance</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {CLES_AMBIANCE.map((cle) => (
+              <button
+                key={cle}
+                type="button"
+                disabled={!!verrouille}
+                onClick={() => setAmbiance(cle)}
+                aria-pressed={ambiance === cle}
+                className={`h-16 rounded-lg border-2 text-sm font-bold ${ambiance === cle ? 'border-primaire' : 'border-transparent'}`}
+                style={{
+                  ...themeEvenement(cle, couleur),
+                  backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))',
+                  color: 'var(--ev-sur-primaire)',
+                }}
+              >
+                {AMBIANCES[cle].libelle}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center gap-3 text-sm font-semibold">
+            Couleur
+            <input
+              type="color"
+              disabled={!!verrouille}
+              value={couleur ?? ambianceDe(ambiance).couleur ?? COULEUR_DEFAUT}
+              onChange={(e) => setCouleur(e.target.value)}
+              className="h-10 w-14 cursor-pointer rounded border"
+            />
+            {couleur && (
+              <button type="button" className="text-xs font-semibold text-primaire underline" onClick={() => setCouleur(null)}>
+                Couleur de l'ambiance
+              </button>
+            )}
+          </label>
+          <p className="text-xs text-attenue">Sans photo, le fond est généré automatiquement. Le texte reste lisible quelle que soit la couleur.</p>
+        </section>
+        </div>
       </div>
     </div>
   )

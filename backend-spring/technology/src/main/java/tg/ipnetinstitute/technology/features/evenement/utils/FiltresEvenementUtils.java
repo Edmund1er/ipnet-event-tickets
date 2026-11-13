@@ -17,7 +17,15 @@ public final class FiltresEvenementUtils {
     public record Filtre(String titre, LocalDate dateMin, LocalDate dateMax, BigDecimal prixMin, BigDecimal prixMax) {}
 
     public static Specification<Evenement> specification(StatutEvenement statut, Filtre f) {
+        return specification(statut, f, false);
+    }
+
+    /** Par défaut, seules les entrées principales sont listées : activités et pass se consultent via leur cadre. */
+    public static Specification<Evenement> specification(StatutEvenement statut, Filtre f, boolean inclureActivites) {
         Specification<Evenement> spec = (root, q, cb) -> cb.conjunction();
+        if (!inclureActivites) {
+            spec = spec.and((root, q, cb) -> cb.isNull(root.get("parentId")));
+        }
         if (statut != null) {
             spec = spec.and((root, q, cb) -> cb.equal(root.get("statut"), statut));
         }

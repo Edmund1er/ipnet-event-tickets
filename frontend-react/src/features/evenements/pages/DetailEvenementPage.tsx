@@ -9,9 +9,11 @@ import { Alerte } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { STATUTS_EVENEMENT, STATUTS_INSCRIPTION, type StatutInscription } from '../../../core/constants/statuts'
 import { useRequete } from '../../../core/hooks/useRequete'
-import { dateLongue, montant, versDate } from '../../../core/utils/format'
+import { dateCourte, dateLongue, heure, montant, versDate } from '../../../core/utils/format'
 import { JaugePlaces, VisuelEvenement } from '../components/CarteEvenement'
+import { ProgrammeEvenement } from '../components/ProgrammeEvenement'
 import { evenementService } from '../services/evenementService'
+import { themeEvenement } from '../theme/ambiances'
 
 export function DetailEvenementPage() {
   const { id } = useParams()
@@ -23,6 +25,16 @@ export function DetailEvenementPage() {
     () => (estParticipant ? evenementService.maReservation(Number(id)) : Promise.resolve(null)),
     [id, estParticipant],
   )
+  const estCadre = evt?.type === 'CADRE'
+  const { donnees: elements } = useRequete(
+    () => (estCadre ? evenementService.activites(Number(id)) : Promise.resolve([])),
+    [id, estCadre],
+  )
+  const parentId = evt?.parentId ?? null
+  const { donnees: parent } = useRequete(
+    () => (parentId ? evenementService.detail(parentId) : Promise.resolve(null)),
+    [parentId],
+  )
   const [erreurResa, setErreurResa] = useState<string | null>(null)
   const [dejaReserve, setDejaReserve] = useState(false)
   const [enCours, setEnCours] = useState(false)
@@ -30,7 +42,11 @@ export function DetailEvenementPage() {
   if (chargement) return <ChargementPage />
   if (erreur || !evt) return <Alerte ton="erreur">{erreur ?? 'Événement introuvable'}</Alerte>
 
-  const passe = (versDate(evt.dateDebut)?.getTime() ?? 0) < Date.now()
+  // Un pass reste en vente jusqu'à la fin du programme
+  const finVente = evt.type === 'PASS' && evt.dateFin ? evt.dateFin : evt.dateDebut
+  const passe = (versDate(finVente)?.getTime() ?? 0) < Date.now()
+  const gratuit = evt.prix === 0
+  const estPass = evt.type === 'PASS'
   const reservable = evt.statut === 'PUBLIE' && !passe && evt.placesRestantes > 0
   const statut = STATUTS_EVENEMENT[evt.statut]
 
@@ -39,7 +55,8 @@ export function DetailEvenementPage() {
     setEnCours(true)
     try {
       const r = await evenementService.reserver(evt!.id)
-      navigate(`/reservations/${r.id}/paiement`)
+      // Inscription gratuite : déjà confirmée, le billet est disponible sans paiement
+      navigate(r.statut === 'CONFIRMEE' ? '/billets' : `/reservations/${r.id}/paiement`)
     } catch (e) {
       const api = versErreurApi(e)
       if (api.code === 'RG-06') setDejaReserve(true)
@@ -49,19 +66,60 @@ export function DetailEvenementPage() {
     }
   }
 
+  if (estCadre) {
+    return (
+      <div className="mx-auto max-w-4xl" style={themeEvenement(evt.ambiance, evt.couleurPrincipale)}>
+        <Link to="/" className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-encre transition-colors hover:text-rouge">
+          <Icone nom="arrow_back" taille={18} /> Tous les événements
+        </Link>
+        <header
+          className="mb-8 overflow-hidden rounded-xl"
+          style={{ backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))', color: 'var(--ev-sur-primaire)' }}
+        >
+          {evt.aImage && <VisuelEvenement evenement={evt} className="aspect-[16/6] w-full" />}
+          <div className="p-6 sm:p-8">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge ton={statut.ton}>{statut.libelle}</Badge>
+            </div>
+            <h1 className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl">{evt.titre}</h1>
+            <p className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm font-semibold opacity-90">
+              <span className="inline-flex items-center gap-1"><Icone nom="calendar_month" taille={18} /> {dateCourte(evt.dateDebut)} → {dateCourte(evt.dateFin)}</span>
+              {evt.lieu && <span className="inline-flex items-center gap-1"><Icone nom="location_on" taille={18} /> {evt.lieu}</span>}
+            </p>
+            {evt.description && <p className="mt-4 max-w-2xl whitespace-pre-line leading-relaxed opacity-95">{evt.description}</p>}
+          </div>
+        </header>
+        <ProgrammeEvenement cadre={evt} elements={elements ?? []} />
+      </div>
+    )
+  }
+
   return (
-    <div className="mx-auto max-w-5xl">
-      <Link to="/" className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-encre transition-colors hover:text-rouge">
-        <Icone nom="arrow_back" taille={18} /> Tous les événements
+    <div className="mx-auto max-w-5xl" style={themeEvenement(evt.ambiance, evt.couleurPrincipale)}>
+      <Link to={parent ? `/evenements/${parent.id}` : '/'} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-encre transition-colors hover:text-rouge">
+        <Icone nom="arrow_back" taille={18} /> {parent ? parent.titre : 'Tous les événements'}
       </Link>
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <article className="carte overflow-hidden">
           <VisuelEvenement evenement={evt} className="aspect-[16/8] w-full" />
-          {!evt.aImage && <div className="h-2 bg-rouge" aria-hidden />}
+          {!evt.aImage && (
+            <div
+              className="flex aspect-[16/6] items-end p-6"
+              style={{
+                backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))',
+                color: 'var(--ev-sur-primaire)',
+              }}
+              aria-hidden
+            >
+              <Icone nom="event" taille={44} className="opacity-60" />
+            </div>
+          )}
           <div className="p-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <Badge ton={statut.ton}>{statut.libelle}</Badge>
               {passe && evt.statut === 'PUBLIE' && <Badge ton="gris">Date passée</Badge>}
+              {estPass && <Badge ton="violet">Pass</Badge>}
+              {estCadre && <Badge ton="violet">Programme</Badge>}
             </div>
             <h1 className="text-balance text-2xl font-extrabold tracking-tight sm:text-3xl">{evt.titre}</h1>
             {evt.description && <p className="mt-4 whitespace-pre-line leading-relaxed text-encre/85">{evt.description}</p>}
@@ -70,12 +128,16 @@ export function DetailEvenementPage() {
 
         <aside className="flex flex-col gap-4">
           <div className="carte p-5">
-            <p className="titre-section">Tarif unique</p>
-            <p className="mt-1 font-titre text-3xl font-extrabold text-rouge">{montant(evt.prix, evt.devise)}</p>
+            <p className="titre-section">{estPass ? 'Pass' : 'Tarif unique'}</p>
+            <p className="mt-1 font-titre text-3xl font-extrabold text-rouge">{evt.accesLibre ? 'Accès libre' : gratuit ? 'Gratuit' : montant(evt.prix, evt.devise)}</p>
             <ul className="mt-4 flex flex-col gap-3 text-sm">
               <li className="flex gap-3">
                 <Icone nom="calendar_month" className="text-rouge" />
-                <span>{dateLongue(evt.dateDebut)}</span>
+                <span>
+                  {dateLongue(evt.dateDebut)}
+                  {evt.dateFin && !estPass && <> — {heure(evt.dateFin)}</>}
+                  {estPass && evt.passPortee === 'GLOBAL' && ' · valable pendant tout le programme'}
+                </span>
               </li>
               {evt.lieu && (
                 <li className="flex gap-3">
@@ -84,11 +146,16 @@ export function DetailEvenementPage() {
                 </li>
               )}
             </ul>
-            <div className="mt-5">
-              <JaugePlaces evenement={evt} />
-            </div>
+            {!evt.accesLibre && (
+              <div className="mt-5">
+                <JaugePlaces evenement={evt} />
+              </div>
+            )}
           </div>
 
+          {evt.accesLibre ? (
+            <Alerte ton="info">Accès libre : aucune réservation nécessaire, venez directement.</Alerte>
+          ) : (
           <div className="carte flex flex-col gap-3 p-5">
             {erreurResa && <Alerte ton="erreur">{erreurResa}</Alerte>}
             {!session ? (
@@ -128,15 +195,16 @@ export function DetailEvenementPage() {
               </Link>
             ) : (
               <Bouton taille="grand" variante="rouge" icone="confirmation_number" enCours={enCours} disabled={!reservable} onClick={reserver}>
-                {reservable ? 'Réserver ma place' : evt.placesRestantes === 0 ? 'Complet' : 'Réservation fermée'}
+                {reservable ? (gratuit ? 'M’inscrire gratuitement' : estPass ? 'Acheter ce pass' : 'Réserver ma place') : evt.placesRestantes === 0 ? 'Complet' : 'Réservation fermée'}
               </Bouton>
             )}
-            {session?.role === 'PARTICIPANT' && reservable && (
+            {session?.role === 'PARTICIPANT' && reservable && !gratuit && (
               <p className="text-xs text-attenue">
                 Votre place est retenue pendant le délai de paiement. Le billet est émis après validation du paiement.
               </p>
             )}
           </div>
+          )}
         </aside>
       </div>
     </div>

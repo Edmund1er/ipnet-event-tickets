@@ -151,6 +151,11 @@ export function AdminEvenementsPage() {
                             <Icone nom="edit" taille={18} /> Modifier
                           </Link>
                         )}
+                        {e.type === 'CADRE' && (
+                          <Link to={`/admin/evenements/${e.id}/programme`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair">
+                            <Icone nom="calendar_view_week" taille={18} /> Programme
+                          </Link>
+                        )}
                         {e.statut === 'BROUILLON' && (
                           <Bouton taille="petit" variante="fantome" icone="publish" onClick={() => setAction({ type: 'publier', evt: e })}>
                             Publier

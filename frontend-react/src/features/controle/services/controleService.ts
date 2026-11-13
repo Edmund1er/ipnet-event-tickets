@@ -29,7 +29,7 @@ export interface Statistiques {
 export const controleService = {
   /** Événements ouverts au contrôle (publiés). */
   async evenements() {
-    return (await http.get<PageResponse<Evenement>>('/evenements', { params: { size: 100, sort: 'dateDebut,asc' } })).data.elements
+    return (await http.get<PageResponse<Evenement>>('/evenements', { params: { size: 100, sort: 'dateDebut,asc', activites: true } })).data.elements.filter((e) => e.type !== 'CADRE')
   },
   async scanner(jeton: string, evenementId: number) {
     return (await http.post<ReponseScan>('/scan', { jeton, evenementId })).data

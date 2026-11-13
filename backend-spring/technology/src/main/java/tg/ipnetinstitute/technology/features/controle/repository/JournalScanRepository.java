@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface JournalScanRepository extends JpaRepository<JournalScan, Long> {
     long countByEvenementIdAndResultat(Long evenementId, ResultatScanEnum resultat);
+    java.util.Optional<JournalScan> findFirstByBilletIdAndEvenementIdAndResultatOrderByHorodatageAsc(java.util.UUID billetId, Long evenementId, ResultatScanEnum resultat);
     List<JournalScan> findByEvenementIdAndResultatOrderByHorodatageAsc(Long evenementId, ResultatScanEnum resultat);
 }

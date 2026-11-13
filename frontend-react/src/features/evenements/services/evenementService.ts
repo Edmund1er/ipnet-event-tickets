@@ -5,14 +5,21 @@ export interface FiltresEvenements {
   titre?: string
   dateMin?: string
   dateMax?: string
+  /** Poste de contrôle : inclut les activités et pass des programmes. */
+  activites?: boolean
   prixMin?: string
   prixMax?: string
   page?: number
 }
 
 export const evenementService = {
+  /** Programme d'un événement-cadre : activités et pass publiés. */
+  async activites(id: number) {
+    return (await http.get<Evenement[]>(`/evenements/${id}/activites`)).data
+  },
   async lister(f: FiltresEvenements) {
     const params: Record<string, string | number> = { page: f.page ?? 0, size: 12, sort: 'dateDebut,asc' }
+    if (f.activites) params.activites = 'true'
     for (const cle of ['titre', 'dateMin', 'dateMax', 'prixMin', 'prixMax'] as const) {
       const v = f[cle]?.toString().trim()
       if (v) params[cle] = v
@@ -30,7 +37,7 @@ export const evenementService = {
     return r.data.elements.find((x) => x.evenement.id === evenementId) ?? null
   },
   async reserver(evenementId: number) {
-    return (await http.post<{ id: number }>('/reservations', { evenementId })).data
+    return (await http.post<{ id: number; statut: string }>('/reservations', { evenementId })).data
   },
 }
 

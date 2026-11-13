@@ -66,14 +66,15 @@ public class ServiceReservation {
         Utilisateur utilisateur = utilisateurs.findById(utilisateurId)
                 .orElseThrow(() -> new RessourceIntrouvableException("Utilisateur", utilisateurId));
 
-        // EF-07 : sans numéro de paiement réel, aucune réservation ne pourrait être réglée
-        if (!serviceParametres.paiementConfigure()) {
-            throw new tg.ipnetinstitute.technology.common.exception.PaiementNonConfigureException();
-        }
-
         // Sérialisation des réservations sur l'événement pour éviter la surréservation
         Evenement evenement = evenements.findByIdForUpdate(evenementId)
                 .orElseThrow(() -> new RessourceIntrouvableException("Événement", evenementId));
+
+        // EF-07 : sans numéro de paiement réel, une réservation payante ne pourrait être réglée
+        boolean gratuit = evenement.getPrix().signum() == 0;
+        if (!gratuit && !serviceParametres.paiementConfigure()) {
+            throw new tg.ipnetinstitute.technology.common.exception.PaiementNonConfigureException();
+        }
 
         // Chaîne de responsabilité des règles (Chain of Responsibility)
         regles.forEach(r -> r.verifier(utilisateur, evenement));
@@ -86,7 +87,15 @@ public class ServiceReservation {
         Inscription inscription = inscriptions.save(Inscription.nouvelle(utilisateurId, evenementId,
                 delaiExpirationHeures, evenement.getPrix(), evenement.getDevise()));
 
-        publieur.publishEvent(new ReservationCreeeEvent(inscription.getId()));
+        if (gratuit) {
+            // Inscription gratuite : confirmée tout de suite, le billet est émis sans passer par le paiement
+            inscription.confirmerGratuite();
+            inscription = inscriptions.save(inscription);
+            publieur.publishEvent(new tg.ipnetinstitute.technology.features.paiement.service.PaiementConfirmeEvent(
+                    inscription.getId(), null, null));
+        } else {
+            publieur.publishEvent(new ReservationCreeeEvent(inscription.getId()));
+        }
         return versResponse(inscription);
     }
 

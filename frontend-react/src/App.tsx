@@ -14,6 +14,7 @@ import { navigation as navAdminEvenements } from './features/admin-evenements/na
 import { AdminEvenementsPage } from './features/admin-evenements/pages/AdminEvenementsPage'
 import { FormulaireEvenementPage } from './features/admin-evenements/pages/FormulaireEvenementPage'
 import { ParticipantsPage } from './features/admin-evenements/pages/ParticipantsPage'
+import { ProgrammeAdminPage } from './features/admin-evenements/pages/ProgrammeAdminPage'
 import { navigation as navAdminPaiements } from './features/admin-paiements/navigation'
 import { ImportRelevePage } from './features/admin-paiements/pages/ImportRelevePage'
 import { PaiementsPage } from './features/admin-paiements/pages/PaiementsPage'
@@ -109,6 +110,7 @@ export default function App() {
               <Route path="admin/evenements" element={admin(<AdminEvenementsPage />)} />
               <Route path="admin/evenements/nouveau" element={admin(<FormulaireEvenementPage />)} />
               <Route path="admin/evenements/:id" element={admin(<FormulaireEvenementPage />)} />
+              <Route path="admin/evenements/:id/programme" element={admin(<ProgrammeAdminPage />)} />
               <Route path="admin/evenements/:id/participants" element={admin(<ParticipantsPage />)} />
               <Route path="admin/paiements" element={admin(<PaiementsPage />)} />
               <Route path="admin/releve" element={admin(<ImportRelevePage />)} />

@@ -63,6 +63,34 @@ public class Evenement {
     @Column(name = "image_chemin", length = 255)
     private String imageChemin;
 
+    @Column(name = "parent_id")
+    private Long parentId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 15)
+    private TypeEvenement type = TypeEvenement.EVENEMENT;
+
+    @Column(name = "date_fin")
+    private LocalDateTime dateFin;
+
+    @Column(length = 30)
+    private String categorie;
+
+    @Column(name = "acces_libre", nullable = false)
+    private boolean accesLibre = false;
+
+    @Column(name = "pass_portee", length = 10)
+    private String passPortee;
+
+    @Column(name = "pass_jour")
+    private java.time.LocalDate passJour;
+
+    @Column(length = 30)
+    private String ambiance;
+
+    @Column(name = "couleur_principale", length = 7)
+    private String couleurPrincipale;
+
     @Version
     @Column(nullable = false)
     private Long version;
@@ -167,7 +195,8 @@ public class Evenement {
         return statut == StatutEvenement.PUBLIE
                 && !ventesSuspendues
                 && placesReservees < capacite
-                && !dateDebut.isBefore(maintenant)
+                && !finDeVente().isBefore(maintenant)
+                && estReservable()
                 && (dateLimiteReservation == null || !dateLimiteReservation.isBefore(maintenant));
     }
 
@@ -194,7 +223,7 @@ public class Evenement {
     }
 
     public void publier(Clock horloge) {
-        if (dateDebut.isBefore(LocalDateTime.now(horloge))) {
+        if (finDeVente().isBefore(LocalDateTime.now(horloge))) {
             throw new DateEvenementPasseeException(id);
         }
         statut = StatutEvenement.PUBLIE;
@@ -220,6 +249,52 @@ public class Evenement {
         this.imageChemin = cheminImage;
     }
 
+    /** Structure : cadre, activité ou pass. */
+    public void definirStructure(TypeEvenement type, Long parentId, LocalDateTime dateFin, String categorie,
+                                 boolean accesLibre, String passPortee, java.time.LocalDate passJour) {
+        if (dateFin != null && dateFin.isBefore(dateDebut)) {
+            throw new IllegalArgumentException("La date de fin ne peut pas précéder la date de début");
+        }
+        this.type = type;
+        this.parentId = parentId;
+        this.dateFin = dateFin;
+        this.categorie = categorie;
+        this.accesLibre = accesLibre;
+        this.passPortee = passPortee;
+        this.passJour = passJour;
+    }
+
+    /** Un pass reste en vente pendant tout le programme ; les autres événements jusqu'à leur début. */
+    public LocalDateTime finDeVente() {
+        return (type == TypeEvenement.PASS && dateFin != null) ? dateFin : dateDebut;
+    }
+
+    /** Référence de la clôture automatique : la fin si elle existe, sinon le début. */
+    public LocalDateTime finEffective() {
+        return dateFin != null ? dateFin : dateDebut;
+    }
+
+    /** Un cadre ne se vend pas ; une activité en accès libre non plus. */
+    public boolean estReservable() {
+        return type != TypeEvenement.CADRE && !accesLibre;
+    }
+
+    public Long getParentId() { return parentId; }
+    public TypeEvenement getType() { return type; }
+    public LocalDateTime getDateFin() { return dateFin; }
+    public String getCategorie() { return categorie; }
+    public boolean isAccesLibre() { return accesLibre; }
+    public String getPassPortee() { return passPortee; }
+    public java.time.LocalDate getPassJour() { return passJour; }
+
+    /** Apparence de la page publique (purement visuelle, modifiable à tout moment). */
+    public void definirApparence(String ambiance, String couleurPrincipale) {
+        this.ambiance = ambiance;
+        this.couleurPrincipale = couleurPrincipale == null ? null : couleurPrincipale.toLowerCase();
+    }
+
+    public String getAmbiance() { return ambiance; }
+    public String getCouleurPrincipale() { return couleurPrincipale; }
     public String getImageChemin() { return imageChemin; }
     public LocalDateTime getDateLimiteReservation() { return dateLimiteReservation; }
     public boolean isVentesSuspendues() { return ventesSuspendues; }

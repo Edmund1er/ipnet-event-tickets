@@ -73,6 +73,15 @@ public class Inscription {
         }
     }
 
+    /** Inscription gratuite : aucun paiement à attendre, la place est confirmée tout de suite. */
+    public void confirmerGratuite() {
+        if (montant != null && montant.signum() > 0) {
+            throw new IllegalStateException("Cette réservation est payante");
+        }
+        this.statut = StatutInscription.CONFIRMEE;
+        this.expireLe = null;
+    }
+
     public Long getId() { return id; }
     public Long getUtilisateurId() { return utilisateurId; }
     public Long getEvenementId() { return evenementId; }

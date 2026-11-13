@@ -40,6 +40,15 @@ export interface Evenement {
   dateLimiteReservation?: string | null
   ventesSuspendues?: boolean
   ventesOuvertes?: boolean
+  ambiance?: string | null
+  couleurPrincipale?: string | null
+  type?: 'EVENEMENT' | 'CADRE' | 'ACTIVITE' | 'PASS'
+  parentId?: number | null
+  dateFin?: string | null
+  categorie?: string | null
+  accesLibre?: boolean
+  passPortee?: 'GLOBAL' | 'JOURNEE' | null
+  passJour?: string | null
 }
 
 export interface ProfilResponse {

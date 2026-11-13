@@ -15,7 +15,7 @@ public class RegleEvenementOuvert implements RegleReservation {
 
     @Override
     public void verifier(Utilisateur u, Evenement e) {
-        if (e.getStatut() != StatutEvenement.PUBLIE || e.getDateDebut().isBefore(LocalDateTime.now())) {
+        if (e.getStatut() != StatutEvenement.PUBLIE || e.finDeVente().isBefore(LocalDateTime.now()) || !e.estReservable()) {
             throw new EvenementNonReservableException(e.getId(), e.getStatut());
         }
         if (e.isVentesSuspendues()) {

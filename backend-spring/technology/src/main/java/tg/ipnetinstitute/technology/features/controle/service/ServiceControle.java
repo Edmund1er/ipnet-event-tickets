@@ -18,6 +18,7 @@ import tg.ipnetinstitute.technology.features.controle.model.ResultatScanEnum;
 import tg.ipnetinstitute.technology.features.controle.repository.JournalScanRepository;
 import tg.ipnetinstitute.technology.features.evenement.model.Evenement;
 import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
+import tg.ipnetinstitute.technology.features.evenement.model.TypeEvenement;
 import tg.ipnetinstitute.technology.features.evenement.repository.EvenementRepository;
 import tg.ipnetinstitute.technology.features.identite.service.ServiceIdentite;
 import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
@@ -102,7 +103,17 @@ public class ServiceControle {
         // 4. Vérification de l'événement et de son statut (RG-19)
         Evenement evenement = evenements.findById(inscription.getEvenementId()).orElseThrow();
 
-        if (!evenement.getId().equals(evenementId)) {
+        boolean pass = evenement.getType() == TypeEvenement.PASS;
+        if (pass) {
+            // Un pass ouvre le programme (cadre) et toutes ses activités
+            Evenement scanne = evenements.findById(evenementId).orElse(null);
+            boolean dansLeProgramme = scanne != null && evenement.getParentId() != null
+                    && (evenement.getParentId().equals(scanne.getId()) || evenement.getParentId().equals(scanne.getParentId()));
+            if (!dansLeProgramme) {
+                journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.MAUVAIS_EVENEMENT, now));
+                return new ResultatScan.MauvaisEvenement();
+            }
+        } else if (!evenement.getId().equals(evenementId)) {
             journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.MAUVAIS_EVENEMENT, now));
             return new ResultatScan.MauvaisEvenement();
         }
@@ -110,6 +121,26 @@ public class ServiceControle {
         if (evenement.getStatut() == StatutEvenement.ANNULE || billet.isInvalide()) {
             journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.EVENEMENT_ANNULE, now));
             return new ResultatScan.EvenementAnnule();
+        }
+
+        if (pass) {
+            // Pass : valable seulement pendant sa période, une entrée par activité (jamais deux fois à la même)
+            boolean valide = "JOURNEE".equals(evenement.getPassPortee())
+                    ? now.toLocalDate().equals(evenement.getPassJour())
+                    : !now.isBefore(evenement.getDateDebut().toLocalDate().atStartOfDay()) && !now.isAfter(evenement.getDateFin());
+            if (!valide) {
+                journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.INVALIDE, now));
+                return new ResultatScan.Invalide();
+            }
+            var deja = journalScans.findFirstByBilletIdAndEvenementIdAndResultatOrderByHorodatageAsc(
+                    billet.getId(), evenementId, ResultatScanEnum.ACCEPTE);
+            if (deja.isPresent()) {
+                journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.DEJA_UTILISE, now));
+                return new ResultatScan.DejaUtilise(deja.get().getHorodatage());
+            }
+            journalScans.save(new JournalScan(billet.getId(), evenementId, agentId, ResultatScanEnum.ACCEPTE, now));
+            ResumePersonne porteur = serviceIdentite.resumer(inscription.getUtilisateurId());
+            return new ResultatScan.Accepte(porteur.nom(), porteur.prenom(), porteur.detail(), now);
         }
 
         // 5. Vérification si déjà scanné (RG-11)
