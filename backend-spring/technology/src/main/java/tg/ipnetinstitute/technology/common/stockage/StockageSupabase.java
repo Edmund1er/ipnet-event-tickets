@@ -111,10 +111,14 @@ public class StockageSupabase {
     }
 
     private HttpRequest.Builder requete(String suffixe) {
-        return HttpRequest.newBuilder(URI.create(urlBase + "/storage/v1" + suffixe))
+        var req = HttpRequest.newBuilder(URI.create(urlBase + "/storage/v1" + suffixe))
                 .timeout(Duration.ofSeconds(30))
-                .header("Authorization", "Bearer " + cle)
                 .header("apikey", cle);
+        // Anciennes clés (JWT, « eyJ… ») : aussi en Bearer. Nouvelles clés « sb_secret_… » : l'en-tête apikey suffit.
+        if (cle.startsWith("eyJ")) {
+            req.header("Authorization", "Bearer " + cle);
+        }
+        return req;
     }
 
     private HttpResponse<String> envoyer(HttpRequest req) {

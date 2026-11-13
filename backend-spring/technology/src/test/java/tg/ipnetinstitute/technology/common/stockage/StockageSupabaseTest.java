@@ -33,7 +33,7 @@ class StockageSupabaseTest {
         serveur = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         serveur.createContext("/storage/v1", ex -> {
             String chemin = ex.getRequestURI().getPath().substring("/storage/v1".length());
-            appels.add(ex.getRequestMethod() + " " + chemin + " auth=" + ex.getRequestHeaders().getFirst("Authorization"));
+            appels.add(ex.getRequestMethod() + " " + chemin + " apikey=" + ex.getRequestHeaders().getFirst("apikey") + " auth=" + ex.getRequestHeaders().getFirst("Authorization"));
             byte[] corps = ex.getRequestBody().readAllBytes();
             int code = 200;
             byte[] reponse = new byte[0];
@@ -62,14 +62,14 @@ class StockageSupabaseTest {
 
     @Test
     void imageEnvoyeeLueEtSupprimeeViaSupabase() throws IOException {
-        var distant = new StockageSupabase(url, "cle-secrete", "ipnet-fichiers");
+        var distant = new StockageSupabase(url, "sb_secret_exemple", "ipnet-fichiers");
         assertThat(distant.actif()).isTrue();
         var wrapper = new StockageImageWrapper("./uploads/test-inutilise", distant);
 
         String nom = wrapper.enregistrer(PNG);
         assertThat(nom).endsWith(".png");
         assertThat(fichiers).containsKey("/object/ipnet-fichiers/images/" + nom);
-        assertThat(appels).anyMatch(a -> a.contains("auth=Bearer cle-secrete"));
+        assertThat(appels).allMatch(a -> a.contains("apikey=sb_secret_exemple") && a.endsWith("auth=null"));
 
         assertThat(wrapper.lire(nom).getContentAsByteArray()).isEqualTo(PNG);
 
