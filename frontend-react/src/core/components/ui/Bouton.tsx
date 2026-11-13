@@ -2,29 +2,32 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Icone } from './Icone'
 import { Chargement } from './Chargement'
 
-type Variante = 'primaire' | 'secondaire' | 'danger' | 'fantome' | 'rouge'
+export type VarianteBouton = 'primaire' | 'secondaire' | 'danger' | 'fantome' | 'rouge' | 'succes' | 'sombre'
+export type TailleBouton = 'normal' | 'grand' | 'petit'
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variante?: Variante
+  variante?: VarianteBouton
   icone?: string
   enCours?: boolean
-  taille?: 'normal' | 'grand' | 'petit'
+  taille?: TailleBouton
   children?: ReactNode
 }
 
-const STYLES: Record<Variante, string> = {
-  primaire: 'bg-rouge text-white shadow-sm shadow-rouge/30 hover:bg-rouge-fonce hover:shadow-md active:translate-y-px disabled:bg-rouge/50 disabled:shadow-none',
-  rouge: 'bg-rouge text-white shadow-sm shadow-rouge/30 hover:bg-rouge-fonce hover:shadow-md active:translate-y-px disabled:bg-rouge/50 disabled:shadow-none',
-  secondaire:
-    'bg-white text-primaire border-[1.5px] border-primaire hover:border-primaire-fonce hover:bg-primaire-clair hover:text-primaire-fonce disabled:text-primaire/50 disabled:border-primaire/40',
-  danger: 'bg-erreur-clair text-erreur border border-erreur hover:bg-erreur hover:text-white disabled:opacity-50',
-  fantome: 'bg-transparent text-attenue hover:bg-black/5 hover:text-encre disabled:opacity-50',
+/** « rouge » désigne la couleur de l'événement affiché : classe .btn-theme. */
+const VARIANTES: Record<VarianteBouton, string> = {
+  primaire: 'btn-primaire',
+  rouge: 'btn-theme',
+  succes: 'btn-succes',
+  sombre: 'btn-sombre',
+  secondaire: 'btn-secondaire',
+  danger: 'btn-danger',
+  fantome: 'btn-fantome',
 }
+const TAILLES: Record<TailleBouton, string> = { petit: 'btn-petit', normal: '', grand: 'btn-grand' }
 
-const TAILLES = {
-  petit: 'h-9 px-3 text-sm gap-1.5',
-  normal: 'h-11 px-4 text-[15px] gap-2',
-  grand: 'h-[52px] px-6 text-base gap-2',
+/** Classes d'un bouton, utilisables aussi sur un <Link> pour un rendu strictement identique. */
+export function classeBouton(variante: VarianteBouton = 'primaire', taille: TailleBouton = 'normal', extra = '') {
+  return `btn ${VARIANTES[variante]} ${TAILLES[taille]} ${extra}`.trim()
 }
 
 export function Bouton({
@@ -39,14 +42,8 @@ export function Bouton({
   ...reste
 }: Props) {
   return (
-    <button
-      type={type}
-      disabled={disabled || enCours}
-      aria-busy={enCours || undefined}
-      className={`inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:cursor-not-allowed ${STYLES[variante]} ${TAILLES[taille]} ${className}`}
-      {...reste}
-    >
-      {enCours ? <Chargement taille={18} clair={variante === 'primaire' || variante === 'rouge'} /> : icone && <Icone nom={icone} taille={20} />}
+    <button type={type} disabled={disabled || enCours} aria-busy={enCours || undefined} className={classeBouton(variante, taille, className)} {...reste}>
+      {enCours ? <Chargement taille={18} clair={variante !== 'secondaire' && variante !== 'fantome'} /> : icone && <Icone nom={icone} taille={20} />}
       {children}
     </button>
   )

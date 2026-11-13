@@ -8,7 +8,8 @@ import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte, EnteteSection } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
-import { AMBIANCES, CLES_AMBIANCE, COULEUR_DEFAUT, ambianceDe, themeEvenement, type CleAmbiance } from '../../evenements/theme/ambiances'
+import type { CleAmbiance } from '../../evenements/theme/ambiances'
+import { PanneauApparence, type Apparence } from '../components/PanneauApparence'
 import { useImageProtegee } from '../../../core/hooks/useRequete'
 import { depuisChampDateHeure, versChampDateHeure } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
@@ -28,8 +29,7 @@ export function FormulaireEvenementPage() {
   const [enCours, setEnCours] = useState(false)
   // Programme multi-jours (semaine culturelle…) ou événement simple : choisi à la création, figé ensuite
   const [programme, setProgramme] = useState(false)
-  const [ambiance, setAmbiance] = useState<CleAmbiance>('SOBRE')
-  const [couleur, setCouleur] = useState<string | null>(null)
+  const [apparence, setApparence] = useState<Apparence>({ modele: 'CLASSIQUE', couleur: null, ambiance: 'SOBRE' })
   const [imageEnCours, setImageEnCours] = useState(false)
   const [versionImage, setVersionImage] = useState(0)
   // Création : l'image est choisie tout de suite, envoyée juste après la création du brouillon
@@ -46,8 +46,7 @@ export function FormulaireEvenementPage() {
       .then((e) => {
         setEvt(e)
         setProgramme(e.type === 'CADRE')
-        setAmbiance((e.ambiance as CleAmbiance) ?? 'SOBRE')
-        setCouleur(e.couleurPrincipale ?? null)
+        setApparence({ modele: e.modele ?? 'CLASSIQUE', couleur: e.couleurPrincipale ?? null, ambiance: (e.ambiance as CleAmbiance) ?? 'SOBRE' })
         setF({
           titre: e.titre,
           description: e.description ?? '',
@@ -110,14 +109,14 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Image non enregistrée : ${messageErreur(errImage)}`)
           }
         }
-        await adminEvenementService.definirApparence(evt.id, ambiance, couleur)
+        await adminEvenementService.definirApparence(evt.id, apparence.ambiance, apparence.couleur, apparence.modele)
         await adminEvenementService.modifier(evt.id, donnees)
         toast.succes('Événement modifié avec succès')
         navigate('/admin/evenements')
       } else {
         const cree = await adminEvenementService.creer(donnees)
         try {
-          await adminEvenementService.definirApparence(cree.id, ambiance, couleur)
+          await adminEvenementService.definirApparence(cree.id, apparence.ambiance, apparence.couleur, apparence.modele)
         } catch (errApp) {
           toast.erreur(`Brouillon créé, mais l'apparence n'a pas été enregistrée : ${messageErreur(errApp)}`)
         }
@@ -318,45 +317,10 @@ export function FormulaireEvenementPage() {
           )}
         </aside>
 
-        <section className="carte flex flex-col gap-3 p-5" aria-label="Apparence de la page">
-          <h2 className="text-lg font-semibold">Ambiance</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {CLES_AMBIANCE.map((cle) => (
-              <button
-                key={cle}
-                type="button"
-                disabled={!!verrouille}
-                onClick={() => setAmbiance(cle)}
-                aria-pressed={ambiance === cle}
-                className={`h-16 rounded-lg border-2 text-sm font-bold ${ambiance === cle ? 'border-primaire' : 'border-transparent'}`}
-                style={{
-                  ...themeEvenement(cle, couleur),
-                  backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))',
-                  color: 'var(--ev-sur-primaire)',
-                }}
-              >
-                {AMBIANCES[cle].libelle}
-              </button>
-            ))}
-          </div>
-          <label className="flex items-center gap-3 text-sm font-semibold">
-            Couleur
-            <input
-              type="color"
-              disabled={!!verrouille}
-              value={couleur ?? ambianceDe(ambiance).couleur ?? COULEUR_DEFAUT}
-              onChange={(e) => setCouleur(e.target.value)}
-              className="h-10 w-14 cursor-pointer rounded border"
-            />
-            {couleur && (
-              <button type="button" className="text-xs font-semibold text-primaire underline" onClick={() => setCouleur(null)}>
-                Couleur de l'ambiance
-              </button>
-            )}
-          </label>
-          <p className="text-xs text-attenue">Sans photo, le fond est généré automatiquement. Le texte reste lisible quelle que soit la couleur.</p>
-        </section>
         </div>
+      </div>
+      <div className="mt-5">
+        <PanneauApparence valeur={apparence} surChangement={setApparence} desactive={!!verrouille} />
       </div>
     </div>
   )

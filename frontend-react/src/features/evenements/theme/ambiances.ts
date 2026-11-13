@@ -1,4 +1,6 @@
 import type { CSSProperties } from 'react'
+import type { Evenement } from '../../../core/api/types'
+import { couleurParDefaut } from './palettes'
 
 export type CleAmbiance = 'SOBRE' | 'ACADEMIQUE' | 'CEREMONIE' | 'SOIREE' | 'SPORT' | 'CULTURE' | 'FESTIF'
 
@@ -64,4 +66,9 @@ export function themeEvenement(cle?: string | null, couleur?: string | null): CS
     '--ev-fonce': assombrir(primaire, 0.55),
     '--ev-motif': a.motif,
   } as CSSProperties
+}
+
+/** Thème d'un événement : sa couleur, sinon celle de son ambiance, sinon une couleur stable propre à l'événement. */
+export function themeDe(e: Pick<Evenement, 'id' | 'ambiance' | 'couleurPrincipale'>): CSSProperties {
+  return themeEvenement(e.ambiance, e.couleurPrincipale ?? (e.ambiance ? null : couleurParDefaut(e.id)))
 }

@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { messageErreur } from '../../../core/api/httpClient'
 import type { Evenement } from '../../../core/api/types'
-import { Badge } from '../../../core/components/ui/Badge'
-import { Bouton } from '../../../core/components/ui/Bouton'
+import { Bouton, classeBouton } from '../../../core/components/ui/Bouton'
 import { ChampSelection, ChampTexte } from '../../../core/components/ui/Champ'
 import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte, EnteteSection, EtatVide, Modale, Pagination } from '../../../core/components/ui/Divers'
@@ -11,10 +10,10 @@ import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
 import { STATUTS_EVENEMENT, type StatutEvenement } from '../../../core/constants/statuts'
 import { useRequete } from '../../../core/hooks/useRequete'
-import { dateCourte, heure, montant } from '../../../core/utils/format'
+import { TableEvenements, type TypeAction } from '../components/TableEvenements'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-type Action = { type: 'publier' | 'cloturer' | 'annuler' | 'fermer_ventes' | 'rouvrir_ventes' | 'masquer'; evt: Evenement }
+type Action = { type: TypeAction; evt: Evenement }
 
 export function AdminEvenementsPage() {
   const [statut, setStatut] = useState<StatutEvenement | ''>('')
@@ -71,7 +70,7 @@ export function AdminEvenementsPage() {
         titre="Événements"
         sousTitre="Création, publication, modification et annulation"
         actions={
-          <Link to="/admin/evenements/nouveau" className="inline-flex h-11 items-center gap-2 rounded-lg bg-primaire px-4 font-semibold text-white hover:bg-primaire-fonce">
+          <Link to="/admin/evenements/nouveau" className={classeBouton('primaire')}>
             <Icone nom="add" /> Nouvel événement
           </Link>
         }
@@ -116,98 +115,7 @@ export function AdminEvenementsPage() {
       {chargement && <ChargementPage />}
       {!chargement && donnees?.elements.length === 0 && <EtatVide icone="event_busy" titre="Aucun événement" texte="Créez votre premier événement." />}
       {!chargement && donnees && donnees.elements.length > 0 && (
-        <div className="carte overflow-x-auto">
-          <table className="w-full min-w-[880px] text-sm">
-            <thead>
-              <tr className="border-b border-bordure bg-surface text-left">
-                {['Événement', 'Date', 'Prix', 'Remplissage', 'Statut', ''].map((h) => (
-                  <th key={h} scope="col" className="titre-section px-4 py-3">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {donnees.elements.map((e) => {
-                const s = STATUTS_EVENEMENT[e.statut]
-                return (
-                  <tr key={e.id} className="border-b border-bordure last:border-0">
-                    <td className="px-4 py-3">
-                      <p className="font-semibold">{e.titre}</p>
-                      {e.lieu && <p className="text-xs text-attenue">{e.lieu}</p>}
-                    </td>
-                    <td className="chiffres whitespace-nowrap px-4 py-3">
-                      {dateCourte(e.dateDebut)}
-                      <span className="block text-xs text-attenue">{heure(e.dateDebut)}</span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">{montant(e.prix, e.devise)}</td>
-                    <td className="chiffres px-4 py-3">
-                      {e.placesReservees} / {e.capacite}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge ton={s.ton}>{s.libelle}</Badge>
-                      {e.passe && e.statut === 'PUBLIE' && (
-                        <span className="ml-1 inline-block align-middle">
-                          <Badge ton="gris">Passé</Badge>
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap justify-end gap-1">
-                        {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
-                          <Link to={`/admin/evenements/${e.id}`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair" title="Modifier">
-                            <Icone nom="edit" taille={18} /> Modifier
-                          </Link>
-                        )}
-                        {e.type === 'CADRE' && (
-                          <Link to={`/admin/evenements/${e.id}/programme`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair">
-                            <Icone nom="calendar_view_week" taille={18} /> Programme
-                          </Link>
-                        )}
-                        {e.statut === 'BROUILLON' && (
-                          <Bouton taille="petit" variante="fantome" icone="publish" onClick={() => setAction({ type: 'publier', evt: e })}>
-                            Publier
-                          </Bouton>
-                        )}
-                        {e.statut !== 'BROUILLON' && (
-                          <Link to={`/admin/evenements/${e.id}/participants`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair">
-                            <Icone nom="group" taille={18} /> Participants
-                          </Link>
-                        )}
-                        {e.statut === 'PUBLIE' && (
-                          e.ventesSuspendues ? (
-                            <Bouton taille="petit" variante="fantome" icone="play_arrow" onClick={() => setAction({ type: 'rouvrir_ventes', evt: e })}>
-                              Rouvrir les ventes
-                            </Bouton>
-                          ) : (
-                            <Bouton taille="petit" variante="fantome" icone="pause" onClick={() => setAction({ type: 'fermer_ventes', evt: e })}>
-                              Fermer les ventes
-                            </Bouton>
-                          )
-                        )}
-                        {e.statut === 'PUBLIE' && (
-                          <Bouton taille="petit" variante="fantome" icone="flag" onClick={() => setAction({ type: 'cloturer', evt: e })}>
-                            Clôturer
-                          </Bouton>
-                        )}
-                        {(e.passe || e.statut === 'TERMINE' || e.statut === 'ANNULE') && (
-                          <Bouton taille="petit" variante="fantome" icone="visibility_off" onClick={() => setAction({ type: 'masquer', evt: e })}>
-                            Masquer
-                          </Bouton>
-                        )}
-                        {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
-                          <Bouton taille="petit" variante="fantome" icone="cancel" className="!text-rouge" onClick={() => setAction({ type: 'annuler', evt: e })}>
-                            Annuler
-                          </Bouton>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <TableEvenements elements={donnees.elements} surAction={(type, evt) => setAction({ type, evt })} />
       )}
       {donnees && <Pagination page={donnees.page} totalPages={donnees.totalPages} surChangement={setPage} />}
 

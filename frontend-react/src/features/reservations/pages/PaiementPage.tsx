@@ -8,7 +8,7 @@ import { Alerte } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useRequete } from '../../../core/hooks/useRequete'
 import { dateLongue, montant, tempsRestant } from '../../../core/utils/format'
-import { themeEvenement } from '../../evenements/theme/ambiances'
+import { themeDe } from '../../evenements/theme/ambiances'
 import { reservationService } from '../services/reservationService'
 
 const TAILLE_MAX = 5 * 1024 * 1024
@@ -91,7 +91,7 @@ export function PaiementPage() {
   const etape = envoye ? 3 : 2
 
   return (
-    <div className="mx-auto max-w-3xl" style={themeEvenement(reservation.donnees.evenement.ambiance, reservation.donnees.evenement.couleurPrincipale)}>
+    <div className="mx-auto max-w-3xl" style={themeDe(reservation.donnees.evenement)}>
       <Link to="/reservations" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primaire hover:underline">
         <Icone nom="arrow_back" taille={18} /> Mes réservations
       </Link>

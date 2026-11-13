@@ -31,7 +31,8 @@ public record EvenementResume(
         String passPortee,
         java.time.LocalDate passJour,
         boolean passe,
-        boolean masque
+        boolean masque,
+        String modele
 ) {
     @com.fasterxml.jackson.annotation.JsonProperty("placesRestantes")
     public int placesRestantes() {

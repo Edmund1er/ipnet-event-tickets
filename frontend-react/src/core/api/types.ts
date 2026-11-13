@@ -52,6 +52,7 @@ export interface Evenement {
   /** Terminé : la fin (ou le début) est derrière nous. */
   passe?: boolean
   masque?: boolean
+  modele?: 'CLASSIQUE' | 'AFFICHE' | 'MAGAZINE' | 'EPURE' | null
 }
 
 export interface ProfilResponse {

@@ -3,6 +3,7 @@ import type { Evenement } from '../../../core/api/types'
 import { Icone } from '../../../core/components/ui/Icone'
 import { dateLongue, montant } from '../../../core/utils/format'
 import { urlImageEvenement } from '../services/evenementService'
+import { themeDe } from '../theme/ambiances'
 
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
   // Les images sont ajoutées par l'administrateur : sans image, on n'affiche rien.
@@ -32,17 +33,25 @@ export function JaugePlaces({ evenement }: { evenement: Evenement }) {
 
 export function CarteEvenement({ evenement }: { evenement: Evenement }) {
   return (
-    <Link to={`/evenements/${evenement.id}`} className="carte-service group transition-transform duration-300 hover:-translate-y-1">
-      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primaire-fonce to-nuit">
+    <Link
+      to={`/evenements/${evenement.id}`}
+      className="carte-service group transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+      style={themeDe(evenement)}
+    >
+      {/* Sans photo : fond généré dans la couleur de l'événement (variée d'un événement à l'autre) */}
+      <div
+        className="relative aspect-[16/10] overflow-hidden"
+        style={{ backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))' }}
+      >
         {evenement.aImage ? (
           <VisuelEvenement evenement={evenement} className="h-full w-full transition-transform duration-500 group-hover:scale-110" />
         ) : (
-          <div className="flex h-full items-center justify-center text-white/30">
-            <Icone nom="confirmation_number" taille={64} />
+          <div className="flex h-full items-center justify-center" style={{ color: 'var(--ev-sur-primaire)' }}>
+            <Icone nom={evenement.type === 'CADRE' ? 'calendar_view_week' : 'confirmation_number'} taille={64} className="opacity-30" />
           </div>
         )}
-        <span className="absolute right-0 top-4 rounded-l bg-rouge px-4 py-1.5 text-sm font-bold text-white shadow-md">
-          {montant(evenement.prix, evenement.devise)}
+        <span className="absolute right-0 top-4 rounded-l bg-white px-4 py-1.5 text-sm font-bold text-encre shadow-md">
+          {evenement.type === 'CADRE' ? 'Programme' : evenement.prix === 0 ? 'Gratuit' : montant(evenement.prix, evenement.devise)}
         </span>
       </div>
       <div className="relative flex flex-1 flex-col gap-3 px-6 pb-6 pt-10">
@@ -62,9 +71,11 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
             </p>
           )}
         </div>
-        <div className="mt-auto pt-2">
-          <JaugePlaces evenement={evenement} />
-        </div>
+        {evenement.type !== 'CADRE' && !evenement.accesLibre && (
+          <div className="mt-auto pt-2">
+            <JaugePlaces evenement={evenement} />
+          </div>
+        )}
       </div>
     </Link>
   )

@@ -32,12 +32,12 @@ export function VitrineHaut() {
             La billetterie officielle des événements d'IPNET Institute of Technology : places en quelques clics, paiement Mobile Money, billet QR code.
           </p>
           <div className="apparition apparition-3 mt-7 grid w-full gap-3 sm:inline-flex">
-            <a href="#evenements" className="btn-cta">
+            <a href="#evenements" className="btn btn-sombre btn-grand">
               Voir les événements
               <Icone nom="arrow_forward" taille={18} />
             </a>
             {prochain && (
-              <Link to={`/evenements/${prochain.id}`} className="btn-contour max-w-full">
+              <Link to={`/evenements/${prochain.id}`} className="btn btn-secondaire btn-grand max-w-full">
                 <span className="truncate">Prochain : {prochain.titre}</span>
               </Link>
             )}
@@ -159,8 +159,8 @@ export function VitrineBas() {
           <h2 className="text-2xl font-bold text-neutral-50 sm:text-4xl">Prêt à réserver <span className="text-yellow-400">votre place</span> ?</h2>
           <p className="mx-auto mt-3 max-w-xl text-neutral-300">Créez votre compte en moins d'une minute et recevez votre billet par e-mail.</p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link to="/inscription" className="btn-cta">Créer un compte <Icone nom="arrow_forward" taille={18} /></Link>
-            <Link to="/connexion" className="btn-contour">Se connecter</Link>
+            <Link to="/inscription" className="btn btn-sombre btn-grand">Créer un compte <Icone nom="arrow_forward" taille={18} /></Link>
+            <Link to="/connexion" className="btn btn-secondaire btn-grand">Se connecter</Link>
           </div>
         </div>
       </section>

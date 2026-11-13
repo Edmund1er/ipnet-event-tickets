@@ -80,8 +80,8 @@ export const adminEvenementService = {
   async dupliquerJour(cadreId: number, source: string, cibles: string[]) {
     return (await http.post<Evenement[]>(`/admin/evenements/${cadreId}/activites/duplication`, { source, cibles })).data
   },
-  async definirApparence(id: number, ambiance: string | null, couleurPrincipale: string | null) {
-    return (await http.put<Evenement>(`/admin/evenements/${id}/apparence`, { ambiance, couleurPrincipale })).data
+  async definirApparence(id: number, ambiance: string | null, couleurPrincipale: string | null, modele: string | null = null) {
+    return (await http.put<Evenement>(`/admin/evenements/${id}/apparence`, { ambiance, couleurPrincipale, modele })).data
   },
   async publier(id: number) {
     return (await http.post<Evenement>(`/admin/evenements/${id}/publication`)).data

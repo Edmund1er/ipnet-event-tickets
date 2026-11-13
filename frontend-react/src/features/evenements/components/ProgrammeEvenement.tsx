@@ -1,17 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Evenement } from '../../../core/api/types'
+import { classeBouton } from '../../../core/components/ui/Bouton'
 import { Icone } from '../../../core/components/ui/Icone'
 import { heure, montant } from '../../../core/utils/format'
-import { categorieDe } from '../theme/categories'
 import { themeEvenement } from '../theme/ambiances'
+import { categorieDe } from '../theme/categories'
 
 /** "2026-06-03T07:00:00" → "2026-06-03" */
 const cleJour = (iso: string) => iso.slice(0, 10)
-
-function jourDe(cle: string) {
-  return new Date(`${cle}T12:00:00`)
-}
+const jourDe = (cle: string) => new Date(`${cle}T12:00:00`)
 
 /** Tous les jours du programme, du premier au dernier. */
 function joursEntre(debut: string, fin: string): string[] {
@@ -33,51 +31,50 @@ export function libelleTarif(e: Evenement): string {
   return montant(e.prix, e.devise)
 }
 
-function CarteActivite({ a }: { a: Evenement }) {
+/** Une activité : une ligne du programme (heure, titre, lieu, tarif), pas une carte. */
+function LigneActivite({ a }: { a: Evenement }) {
   const cat = categorieDe(a.categorie)
-  const complet = !a.accesLibre && a.placesRestantes === 0
-  // Une activité peut avoir sa propre couleur ; sinon, celle de sa catégorie
   const couleur = a.couleurPrincipale ?? cat.couleur
+  const complet = !a.accesLibre && a.placesRestantes === 0
   return (
-    <Link
-      to={`/evenements/${a.id}`}
-      className="carte group flex gap-4 overflow-hidden p-0 transition-transform duration-200 hover:-translate-y-0.5"
-      style={themeEvenement(a.ambiance, couleur)}
-    >
-      <div
-        className="flex w-24 shrink-0 flex-col items-center justify-center gap-1 px-2 py-4 text-center sm:w-28"
-        style={{
-          backgroundImage: 'var(--ev-motif), linear-gradient(160deg, var(--ev-primaire), var(--ev-fonce))',
-          color: 'var(--ev-sur-primaire)',
-        }}
+    <li style={themeEvenement(a.ambiance, couleur)}>
+      <Link
+        to={`/evenements/${a.id}`}
+        className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-4 transition-colors hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-indigo-500 sm:gap-5"
       >
-        <Icone nom={cat.icone} taille={26} />
-        <span className="chiffres text-base font-extrabold leading-tight">{heure(a.dateDebut)}</span>
-        {a.dateFin && <span className="chiffres text-xs opacity-80">→ {heure(a.dateFin)}</span>}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1 py-3 pr-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span style={{ color: couleur }}>{cat.libelle}</span>
-          {a.statut === 'ANNULE' && <span className="rounded bg-erreur-clair px-1.5 py-0.5 text-erreur">Annulé</span>}
-          {complet && a.statut !== 'ANNULE' && <span className="rounded bg-erreur-clair px-1.5 py-0.5 text-erreur">Complet</span>}
+        <div className="w-[4.5rem] shrink-0 text-right sm:w-20">
+          <p className="chiffres text-base font-extrabold leading-tight text-encre">{heure(a.dateDebut)}</p>
+          {a.dateFin && <p className="chiffres text-xs text-attenue">{heure(a.dateFin)}</p>}
         </div>
-        <h3 className="text-balance font-bold leading-snug text-encre group-hover:text-rouge">{a.titre}</h3>
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-attenue">
+        <span className="w-1 self-stretch rounded-full" style={{ background: couleur }} aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide" style={{ color: couleur }}>
+            <Icone nom={cat.icone} taille={16} /> {cat.libelle}
+            {a.statut === 'ANNULE' && <span className="ml-1 rounded bg-erreur-clair px-1.5 py-0.5 normal-case text-erreur">Annulé</span>}
+            {complet && a.statut !== 'ANNULE' && <span className="ml-1 rounded bg-erreur-clair px-1.5 py-0.5 normal-case text-erreur">Complet</span>}
+          </p>
+          <p className="mt-0.5 text-balance font-bold leading-snug text-encre group-hover:text-rouge">{a.titre}</p>
           {a.lieu && (
-            <span className="inline-flex items-center gap-1">
+            <p className="mt-0.5 flex items-center gap-1 text-sm text-attenue">
               <Icone nom="location_on" taille={16} /> {a.lieu}
-            </span>
+            </p>
           )}
-          <span className="inline-flex items-center gap-1 font-semibold text-encre">
-            <Icone nom={a.accesLibre ? 'lock_open' : a.prix === 0 ? 'how_to_reg' : 'payments'} taille={16} /> {libelleTarif(a)}
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span className="text-sm font-bold text-encre">{libelleTarif(a)}</span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-rouge">
+            {a.accesLibre ? 'Détails' : 'Réserver'} <Icone nom="arrow_forward" taille={16} className="transition-transform group-hover:translate-x-0.5" />
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </li>
   )
 }
 
-/** Programme d'un événement-cadre : pass, bande de dates, filtres par catégorie, journée en détail. */
+/**
+ * Programme d'un événement-cadre, dans le conteneur de la page : liste des pass, puis jours à gauche
+ * (défilement horizontal sur mobile) et activités du jour à droite. Les contenus défilent au lieu d'être compressés.
+ */
 export function ProgrammeEvenement({ cadre, elements }: { cadre: Evenement; elements: Evenement[] }) {
   const pass = elements.filter((e) => e.type === 'PASS')
   const activites = useMemo(() => elements.filter((e) => e.type === 'ACTIVITE'), [elements])
@@ -97,50 +94,53 @@ export function ProgrammeEvenement({ cadre, elements }: { cadre: Evenement; elem
   const categories = useMemo(() => [...new Set(activites.map((a) => a.categorie ?? 'AUTRE'))], [activites])
   const visibles = (j: string) =>
     (parJour.get(j) ?? []).filter((a) => !categorie || (a.categorie ?? 'AUTRE') === categorie).sort((x, y) => x.dateDebut.localeCompare(y.dateDebut))
+  const joursAffiches = toutVoir ? jours.filter((j) => visibles(j).length > 0) : [jour]
 
   return (
-    <section className="flex flex-col gap-8" aria-label="Programme">
+    <div className="flex flex-col gap-12" aria-label="Programme">
       {pass.length > 0 && (
-        <div>
-          <h2 className="mb-3 text-lg font-extrabold uppercase tracking-wide text-encre">Pass</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {pass.map((p) => {
-              const complet = p.placesRestantes === 0
-              return (
-                <Link key={p.id} to={`/evenements/${p.id}`} className="carte flex items-center gap-4 p-4 transition-transform hover:-translate-y-0.5" style={themeEvenement(p.ambiance, p.couleurPrincipale)}>
-                  <div className="icone-carre shrink-0">
-                    <Icone nom="confirmation_number" taille={26} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold leading-snug">{p.titre}</p>
-                    <p className="text-sm text-attenue">
-                      {p.passPortee === 'JOURNEE' && p.passJour ? `Valable le ${jourDe(p.passJour).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}` : 'Valable pendant tout le programme'}
-                    </p>
-                    {complet && <p className="text-xs font-semibold text-erreur">Complet</p>}
-                  </div>
-                  <span className="font-titre text-xl font-extrabold text-rouge">{montant(p.prix, p.devise)}</span>
+        <section>
+          <h2 className="mb-1 text-xl font-extrabold tracking-tight text-encre">Pass</h2>
+          <p className="mb-3 text-sm text-attenue">Un pass donne accès aux activités du programme, sans billet par activité.</p>
+          <ul className="divide-y divide-black/10 border-y border-black/10">
+            {pass.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-x-5 gap-y-3 py-4" style={themeEvenement(p.ambiance, p.couleurPrincipale ?? cadre.couleurPrincipale)}>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rouge text-[color:var(--ev-sur-primaire,#fff)]">
+                  <Icone nom="confirmation_number" taille={22} />
+                </span>
+                <div className="min-w-0 flex-1 basis-48">
+                  <p className="font-bold text-encre">{p.titre}</p>
+                  <p className="text-sm text-attenue">
+                    {p.passPortee === 'JOURNEE' && p.passJour
+                      ? `Valable le ${jourDe(p.passJour).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}`
+                      : 'Valable pendant tout le programme'}
+                    {p.placesRestantes === 0 && <span className="ml-2 font-semibold text-erreur">Complet</span>}
+                  </p>
+                </div>
+                <span className="font-titre text-2xl font-extrabold text-rouge">{montant(p.prix, p.devise)}</span>
+                <Link to={`/evenements/${p.id}`} className={classeBouton('rouge')}>
+                  Choisir ce pass
                 </Link>
-              )
-            })}
-          </div>
-          <p className="mt-2 text-xs text-attenue">Un pass donne accès aux activités du programme, sans billet par activité.</p>
-        </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {activites.length === 0 ? (
-        <p className="carte p-6 text-center text-attenue">Le programme détaillé sera bientôt disponible.</p>
+        <p className="border-y border-black/10 py-8 text-center text-attenue">Le programme détaillé sera bientôt disponible.</p>
       ) : (
-        <div>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-extrabold uppercase tracking-wide text-encre">Programme</h2>
-            <button type="button" onClick={() => setToutVoir((v) => !v)} className="text-sm font-semibold text-rouge underline">
-              {toutVoir ? 'Voir par jour' : 'Tout le programme'}
+        <section>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-extrabold tracking-tight text-encre">Programme</h2>
+            <button type="button" onClick={() => setToutVoir((v) => !v)} className={classeBouton('fantome', 'petit')}>
+              <Icone nom={toutVoir ? 'calendar_view_day' : 'list'} taille={18} /> {toutVoir ? 'Voir par jour' : 'Tout le programme'}
             </button>
           </div>
 
           {categories.length > 1 && (
-            <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrer par catégorie">
-              <button type="button" onClick={() => setCategorie(null)} aria-pressed={!categorie} className={`rounded-full border px-3 py-1 text-sm font-semibold ${!categorie ? 'border-rouge bg-rouge text-white' : 'border-black/10'}`}>
+            <div className="-mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Filtrer par catégorie">
+              <button type="button" onClick={() => setCategorie(null)} aria-pressed={!categorie} className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${!categorie ? 'border-neutral-800 bg-neutral-800 text-white' : 'border-black/15 bg-white hover:bg-neutral-100'}`}>
                 Tout
               </button>
               {categories.map((c) => {
@@ -152,8 +152,8 @@ export function ProgrammeEvenement({ cadre, elements }: { cadre: Evenement; elem
                     type="button"
                     onClick={() => setCategorie(actif ? null : c)}
                     aria-pressed={actif}
-                    className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold"
-                    style={actif ? { background: info.couleur, borderColor: info.couleur, color: '#fff' } : { borderColor: 'rgba(0,0,0,.1)' }}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors hover:brightness-95"
+                    style={actif ? { background: info.couleur, borderColor: info.couleur, color: '#fff' } : { borderColor: 'rgba(0,0,0,.15)', background: '#fff' }}
                   >
                     <Icone nom={info.icone} taille={16} /> {info.libelle}
                   </button>
@@ -162,51 +162,60 @@ export function ProgrammeEvenement({ cadre, elements }: { cadre: Evenement; elem
             </div>
           )}
 
-          {!toutVoir && (
-            <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-2" role="tablist" aria-label="Jours du programme">
-              {jours.map((j) => {
-                const d = jourDe(j)
-                const actif = j === jour
-                const nb = (parJour.get(j) ?? []).length
+          <div className={toutVoir ? '' : 'grid gap-8 lg:grid-cols-[240px_1fr]'}>
+            {!toutVoir && (
+              <nav className="-mx-6 overflow-x-auto px-6 pb-2 sm:-mx-10 sm:px-10 lg:mx-0 lg:overflow-visible lg:px-0 lg:pb-0" aria-label="Jours du programme">
+                <div className="flex gap-2 lg:flex-col lg:gap-1" role="tablist">
+                  {jours.map((j) => {
+                    const d = jourDe(j)
+                    const actif = j === jour
+                    const nb = (parJour.get(j) ?? []).length
+                    return (
+                      <button
+                        key={j}
+                        type="button"
+                        role="tab"
+                        aria-selected={actif}
+                        onClick={() => setJour(j)}
+                        className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-left transition duration-150 lg:w-full ${actif ? 'bg-neutral-800 text-white shadow-md' : 'bg-neutral-100 text-encre hover:bg-neutral-200'} ${nb === 0 ? 'opacity-55' : ''}`}
+                      >
+                        <span className="w-9 text-center leading-none">
+                          <span className="chiffres block text-2xl font-extrabold">{d.getDate()}</span>
+                          <span className="block text-[11px] font-bold uppercase">{d.toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold capitalize">{d.toLocaleDateString('fr-FR', { weekday: 'long' })}</span>
+                          <span className={`block text-xs ${actif ? 'text-white/70' : 'text-attenue'}`}>{nb} activité{nb > 1 ? 's' : ''}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </nav>
+            )}
+
+            <div role="tabpanel">
+              {joursAffiches.map((j) => {
+                const liste = visibles(j)
                 return (
-                  <button
-                    key={j}
-                    type="button"
-                    role="tab"
-                    aria-selected={actif}
-                    onClick={() => setJour(j)}
-                    className={`relative flex w-16 shrink-0 flex-col items-center rounded-xl border px-2 py-2 ${actif ? 'border-rouge bg-rouge text-white' : 'border-black/10 bg-white'} ${nb === 0 ? 'opacity-50' : ''}`}
-                  >
-                    <span className="text-[11px] font-bold uppercase">{d.toLocaleDateString('fr-FR', { weekday: 'short' })}</span>
-                    <span className="chiffres text-xl font-extrabold leading-tight">{d.getDate()}</span>
-                    <span className="text-[11px]">{d.toLocaleDateString('fr-FR', { month: 'short' })}</span>
-                    {nb > 0 && <span className={`absolute right-1.5 top-1.5 h-2 w-2 rounded-full ${actif ? 'bg-white' : 'bg-rouge'}`} aria-label={`${nb} activités`} />}
-                  </button>
+                  <div key={j} className="mb-8 last:mb-0">
+                    <h3 className="mb-1 text-lg font-bold capitalize text-encre">{jourDe(j).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+                    {liste.length === 0 ? (
+                      <p className="border-y border-black/10 py-8 text-center text-attenue">Aucune activité ce jour-là{categorie ? ' dans cette catégorie' : ''}.</p>
+                    ) : (
+                      <ul className="divide-y divide-black/10 border-y border-black/10">
+                        {liste.map((a) => (
+                          <LigneActivite key={a.id} a={a} />
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 )
               })}
             </div>
-          )}
-
-          {(toutVoir ? jours : [jour]).map((j) => {
-            const liste = visibles(j)
-            if (toutVoir && liste.length === 0) return null
-            return (
-              <div key={j} className="mb-6">
-                <h3 className="mb-3 font-bold capitalize text-encre">{jourDe(j).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
-                {liste.length === 0 ? (
-                  <p className="carte p-5 text-center text-attenue">Aucune activité ce jour-là{categorie ? ' dans cette catégorie' : ''}.</p>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    {liste.map((a) => (
-                      <CarteActivite key={a.id} a={a} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+          </div>
+        </section>
       )}
-    </section>
+    </div>
   )
 }

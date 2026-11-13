@@ -106,7 +106,7 @@ public class ServiceEvenement {
     @Auditable(action = "APPARENCE_EVENEMENT", typeCible = "EVENEMENT")
     public EvenementResume definirApparence(Long evenementId, ApparenceEvenement apparence, Long adminId) {
         Evenement e = acces.chargerPourModification(evenementId);
-        e.definirApparence(apparence.ambiance(), apparence.couleurPrincipale());
+        e.definirApparence(apparence.ambiance(), apparence.couleurPrincipale(), apparence.modele());
         return mapper.resume(evenements.save(e));
     }
 

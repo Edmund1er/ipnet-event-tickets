@@ -37,7 +37,8 @@ public class EvenementResumeMapper {
                 e.getPassPortee(),
                 e.getPassJour(),
                 e.estPasse(maintenant),
-                e.isMasque()
+                e.isMasque(),
+                e.getModele()
         );
     }
 }

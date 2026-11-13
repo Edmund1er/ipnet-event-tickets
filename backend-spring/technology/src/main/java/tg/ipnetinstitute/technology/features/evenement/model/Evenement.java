@@ -91,6 +91,9 @@ public class Evenement {
     @Column(length = 30)
     private String ambiance;
 
+    @Column(length = 20)
+    private String modele;
+
     @Column(name = "couleur_principale", length = 7)
     private String couleurPrincipale;
 
@@ -310,6 +313,12 @@ public class Evenement {
         this.couleurPrincipale = couleurPrincipale == null ? null : couleurPrincipale.toLowerCase();
     }
 
+    public void definirApparence(String ambiance, String couleurPrincipale, String modele) {
+        definirApparence(ambiance, couleurPrincipale);
+        this.modele = modele;
+    }
+
+    public String getModele() { return modele; }
     public String getAmbiance() { return ambiance; }
     public String getCouleurPrincipale() { return couleurPrincipale; }
     public String getImageChemin() { return imageChemin; }
