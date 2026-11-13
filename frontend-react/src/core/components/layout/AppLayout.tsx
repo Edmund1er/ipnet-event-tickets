@@ -70,7 +70,7 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
                         onClick={() => setMenuOuvert(false)}
                         className={({ isActive }) =>
                           `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-all duration-200 ${
-                            isActive ? 'bg-rouge font-semibold text-white shadow-md shadow-rouge/30' : 'text-encre/80 hover:bg-white/70 hover:text-nuit'
+                            isActive ? 'bg-orange-400 font-bold text-neutral-50' : 'text-encre/80 hover:bg-white/70 hover:text-nuit'
                           }`
                         }
                       >
@@ -98,9 +98,9 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
 
       <div className="lg:pl-72">
         {/* En-tête bleu nuit, texte blanc : bien lisible sur toute la largeur */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 bg-nuit px-4 text-white shadow-lg shadow-nuit/20 sm:px-6">
+        <header className="sticky top-3 z-30 mx-3 mt-3 flex h-16 items-center justify-between gap-3 rounded-[36px] border border-yellow-100/40 bg-yellow-50/70 px-5 text-neutral-800 shadow-xs backdrop-blur-md sm:mx-6 sm:px-6">
           <div className="flex items-center gap-3">
-            <button className="rounded-lg p-2 text-white lg:hidden" onClick={() => setMenuOuvert(true)} aria-label="Ouvrir le menu">
+            <button className="rounded-lg p-2 text-neutral-800 lg:hidden" onClick={() => setMenuOuvert(true)} aria-label="Ouvrir le menu">
               <Icone nom="menu" />
             </button>
             <FilAriane chemin={location.pathname} entrees={visibles} />
@@ -108,9 +108,9 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-semibold leading-tight">{nomAffiche}</p>
-              <p className="text-xs text-white/65">{role ? ROLES[role] : ''}</p>
+              <p className="text-xs text-neutral-600">{role ? ROLES[role] : ''}</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rouge text-sm font-bold text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-neutral-50">
               {initiales(profil?.nom, profil?.prenom) !== '?' ? initiales(profil?.nom, profil?.prenom) : <Icone nom="person" />}
             </div>
           </div>
@@ -129,7 +129,7 @@ function FilAriane({ chemin, entrees }: { chemin: string; entrees: EntreeNavigat
     .sort((a, b) => b.chemin.length - a.chemin.length)
     .find((e) => (e.chemin === '/' ? chemin === '/' : chemin.startsWith(e.chemin)))
   return (
-    <p className="hidden items-center gap-2 font-titre text-base font-bold tracking-wide text-white sm:flex">
+    <p className="hidden items-center gap-2 font-titre text-base font-bold tracking-wide text-neutral-800 sm:flex">
       <span className="inline-block h-2 w-2 rounded-full bg-rouge-vif" aria-hidden />
       {actuelle?.libelle ?? 'IPNET Events'}
     </p>

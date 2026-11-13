@@ -97,6 +97,39 @@ export function ListeEvenementsPage() {
         </div>
       </section>
 
+
+      {/* POURQUOI */}
+      <section className="py-16">
+        <div className="mx-auto max-w-[85rem]">
+          <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">
+            <div>
+              <h2 className="text-balance text-2xl font-bold text-neutral-800 md:text-3xl">Une billetterie pensée pour le campus</h2>
+              <p className="mt-2 text-pretty text-neutral-600 md:mt-4">
+                Du choix de l'événement au contrôle à l'entrée, tout se fait au même endroit, sans papier et sans file d'attente.
+              </p>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:col-span-2">
+              {[
+                { i: 'bolt', t: 'Réservation instantanée', d: 'Votre place est bloquée dès la validation, avec le suivi des places restantes en direct.' },
+                { i: 'smartphone', t: 'Paiement Mobile Money', d: 'Réglez avec les moyens de paiement locaux, en toute sécurité.' },
+                { i: 'qr_code_2', t: 'Billet QR code', d: 'Le billet arrive par e-mail et se présente directement sur votre téléphone.' },
+                { i: 'verified_user', t: 'Entrée contrôlée', d: 'Chaque QR code est vérifié une seule fois pour éviter les fraudes.' },
+              ].map((f) => (
+                <div key={f.t} className="flex gap-x-5">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-neutral-800">
+                    <Icone nom={f.i} taille={24} />
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-neutral-800">{f.t}</h3>
+                    <p className="mt-1 text-sm text-neutral-600">{f.d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* COMMENT ÇA MARCHE */}
       <section className="py-16">
         <div className="mx-auto max-w-[85rem]">
@@ -179,6 +212,44 @@ export function ListeEvenementsPage() {
               />
             </>
           )}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16">
+        <div className="mx-auto grid max-w-[85rem] gap-10 md:grid-cols-5">
+          <div className="md:col-span-2">
+            <h2 className="text-2xl font-bold text-neutral-800 md:text-4xl md:leading-tight">Questions<br />fréquentes</h2>
+            <p className="mt-3 text-neutral-600">Tout ce qu'il faut savoir avant de réserver.</p>
+          </div>
+          <div className="flex flex-col gap-3 md:col-span-3">
+            {[
+              ['Comment recevoir mon billet ?', "Après le paiement, votre billet avec QR code est envoyé par e-mail et reste disponible dans « Mes billets »."],
+              ['Quels moyens de paiement ?', 'Le paiement se fait par Mobile Money, directement depuis la page de réservation.'],
+              ['Puis-je annuler ma réservation ?', "Tant que l'événement n'a pas commencé et selon les conditions affichées, depuis votre espace."],
+              ['Que faire si je perds mon billet ?', 'Reconnectez-vous : votre QR code est toujours accessible dans votre espace personnel.'],
+            ].map(([q, r]) => (
+              <details key={q} className="group rounded-xl bg-neutral-100 p-5 ring-1 ring-neutral-300/60 open:shadow-xs">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-neutral-800">
+                  {q}
+                  <Icone nom="expand_more" className="transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="mt-3 text-sm text-neutral-600">{r}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* APPEL FINAL */}
+      <section className="pb-16">
+        <div className="mx-auto max-w-[85rem] rounded-xl bg-neutral-800 px-6 py-12 text-center sm:px-12">
+          <h2 className="text-2xl font-bold text-neutral-50 sm:text-4xl">Prêt à réserver <span className="text-yellow-400">votre place</span> ?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-neutral-300">Créez votre compte en moins d'une minute et recevez votre billet par e-mail.</p>
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link to="/inscription" className="btn-cta">Créer un compte <Icone nom="arrow_forward" taille={18} /></Link>
+            <Link to="/connexion" className="btn-contour">Se connecter</Link>
+          </div>
         </div>
       </section>
     </div>
