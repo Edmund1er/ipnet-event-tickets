@@ -50,7 +50,7 @@ export function PublicLayout() {
             </Link>
             <Link
               to="/inscription"
-              className="rounded border-2 border-white/80 px-3.5 py-1.5 text-[12px] font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:border-rouge hover:bg-rouge sm:px-5 sm:text-[13px]"
+              className="rounded-lg border-2 border-white/70 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors duration-300 hover:border-rouge hover:bg-rouge sm:px-5 sm:text-[13px]"
             >
               S'inscrire
             </Link>
@@ -111,7 +111,7 @@ export function PublicLayout() {
           e.preventDefault()
           window.scrollTo({ top: 0, behavior: 'smooth' })
         }}
-        className={`fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded bg-rouge text-white shadow-lg transition-all duration-300 hover:bg-rouge-fonce ${defile ? 'visible opacity-100' : 'invisible opacity-0'}`}
+        className={`fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-lg bg-rouge text-white shadow-lg transition-all duration-300 hover:bg-rouge-fonce ${defile ? 'visible opacity-100' : 'invisible opacity-0'}`}
       >
         <Icone nom="keyboard_arrow_up" taille={24} />
       </a>

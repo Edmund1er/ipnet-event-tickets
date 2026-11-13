@@ -220,7 +220,7 @@ export function FormulaireEvenementPage() {
                 {apercu ? <img src={apercu} alt="Aperçu de l'image choisie" className="h-full w-full object-cover" /> : <Icone nom="image" taille={48} className="text-attenue" />}
               </div>
               <div className="flex flex-wrap gap-2">
-                <label className="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair">
+                <label className="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-lg border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair">
                   <Icone nom="upload" taille={18} /> {imageChoisie ? 'Changer' : 'Choisir une image'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={envoyerImage} />
                 </label>
@@ -243,7 +243,7 @@ export function FormulaireEvenementPage() {
               </div>
               {!verrouille && (
                 <div className="flex flex-wrap gap-2">
-                  <label className={`inline-flex h-11 cursor-pointer items-center gap-1.5 rounded border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair ${imageEnCours ? 'pointer-events-none opacity-50' : ''}`}>
+                  <label className={`inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-lg border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair ${imageEnCours ? 'pointer-events-none opacity-50' : ''}`}>
                     <Icone nom="upload" taille={18} /> {evt.aImage ? 'Remplacer' : 'Ajouter'}
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={envoyerImage} />
                   </label>

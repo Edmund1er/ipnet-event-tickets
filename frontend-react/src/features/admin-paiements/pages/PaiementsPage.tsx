@@ -29,7 +29,7 @@ export function PaiementsPage() {
         titre="Paiements"
         sousTitre="Références Mobile Money à vérifier"
         actions={
-          <Link to="/admin/releve" className="inline-flex h-11 items-center gap-2 rounded border-[1.5px] border-primaire px-4 font-semibold text-primaire hover:bg-primaire-clair">
+          <Link to="/admin/releve" className="inline-flex h-11 items-center gap-2 rounded-lg border-[1.5px] border-primaire px-4 font-semibold text-primaire hover:bg-primaire-clair">
             <Icone nom="upload_file" /> Importer un relevé
           </Link>
         }
@@ -215,7 +215,7 @@ function PanneauPaiement({ paiement: p, surFermeture, surTraite }: { paiement: P
               <Chargement />
             </div>
           ) : capture.type === 'application/pdf' ? (
-            <a href={capture.url} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded border-[1.5px] border-primaire px-4 font-semibold text-primaire">
+            <a href={capture.url} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg border-[1.5px] border-primaire px-4 font-semibold text-primaire">
               <Icone nom="picture_as_pdf" /> Ouvrir le PDF
             </a>
           ) : (

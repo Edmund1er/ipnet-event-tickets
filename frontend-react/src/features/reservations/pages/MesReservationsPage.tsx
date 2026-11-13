@@ -51,7 +51,7 @@ export function MesReservationsPage() {
           titre="Aucune réservation"
           texte="Choisissez un événement pour réserver votre place."
           action={
-            <Link to="/" className="inline-flex h-11 items-center rounded bg-primaire px-4 font-semibold text-white">
+            <Link to="/" className="inline-flex h-11 items-center rounded-lg bg-primaire px-4 font-semibold text-white">
               Voir les événements
             </Link>
           }
@@ -132,13 +132,13 @@ function LigneReservation({ r, surAnnulation }: { r: Reservation; surAnnulation:
         <p className="font-titre text-xl font-bold text-encre">{montant(r.montant, r.devise)}</p>
         <div className="flex flex-wrap gap-2">
           {attente && (
-            <Link to={`/reservations/${r.id}/paiement`} className="inline-flex h-10 items-center gap-1.5 rounded bg-rouge px-3 text-sm font-semibold text-white hover:bg-rouge-fonce">
+            <Link to={`/reservations/${r.id}/paiement`} className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-rouge px-3 text-sm font-semibold text-white hover:bg-rouge-fonce">
               <Icone nom="payments" taille={18} />
               {r.statut === 'REJETEE' ? 'Renvoyer une référence' : 'Payer'}
             </Link>
           )}
           {r.statut === 'CONFIRMEE' && (
-            <Link to="/billets" className="inline-flex h-10 items-center gap-1.5 rounded bg-primaire px-3 text-sm font-semibold text-white">
+            <Link to="/billets" className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primaire px-3 text-sm font-semibold text-white">
               <Icone nom="qr_code_2" taille={18} /> Voir le billet
             </Link>
           )}

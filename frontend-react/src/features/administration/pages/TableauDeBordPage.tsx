@@ -89,15 +89,15 @@ export function TableauDeBordPage() {
                     </span>
                     <span className="chiffres font-semibold text-primaire">{pct}%</span>
                   </div>
-                  <div className="h-2 rounded bg-primaire-clair">
-                    <div className="h-full rounded bg-primaire" style={{ width: `${pct}%` }} />
+                  <div className="h-2 rounded-lg bg-primaire-clair">
+                    <div className="h-full rounded-lg bg-primaire" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Link to={`/admin/evenements/${e.id}/participants`} className="inline-flex h-9 items-center gap-1 rounded px-2 text-sm font-semibold text-primaire hover:bg-primaire-clair">
+                  <Link to={`/admin/evenements/${e.id}/participants`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primaire hover:bg-primaire-clair">
                     <Icone nom="group" taille={18} /> Participants
                   </Link>
-                  <Link to={`/controle/temps-reel?evenement=${e.id}`} className="inline-flex h-9 items-center gap-1 rounded px-2 text-sm font-semibold text-primaire hover:bg-primaire-clair">
+                  <Link to={`/controle/temps-reel?evenement=${e.id}`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primaire hover:bg-primaire-clair">
                     <Icone nom="monitoring" taille={18} /> Entrées
                   </Link>
                 </div>

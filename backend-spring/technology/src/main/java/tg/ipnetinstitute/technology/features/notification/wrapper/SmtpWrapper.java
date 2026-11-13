@@ -30,7 +30,9 @@ public class SmtpWrapper implements CanalNotification {
     private final String hote;
     private final int port;
     private final String nomExpediteur;
+    private static final String URL_API_DEFAUT = "https://api.brevo.com/v3/smtp/email";
     private final String cleApi;
+    private final String urlApi;
     private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
     private final java.net.http.HttpClient http = java.net.http.HttpClient.newBuilder()
             .connectTimeout(java.time.Duration.ofSeconds(10)).build();
@@ -40,8 +42,11 @@ public class SmtpWrapper implements CanalNotification {
                        @Value("${app.mail.nom-expediteur:IPNET Billetterie}") String nomExpediteur,
                        @Value("${spring.mail.host:}") String hote,
                        @Value("${spring.mail.port:587}") int port,
-                       @Value("${app.mail.brevo.api-key:}") String cleApi) {
+                       @Value("${app.mail.brevo.api-key:}") String cleApi,
+                       @Value("${app.mail.brevo.api-url:}") String urlApi) {
         this.cleApi = cleApi == null ? "" : cleApi.trim();
+        // Seule une URL pointant vers l'endpoint d'envoi est acceptée ; sinon (ex. « https://brevo.com »), l'URL officielle
+        this.urlApi = urlApi != null && urlApi.trim().endsWith("/smtp/email") ? urlApi.trim() : URL_API_DEFAUT;
         this.mailSender = mailSender;
         this.hote = hote;
         this.port = port;
@@ -116,7 +121,7 @@ public class SmtpWrapper implements CanalNotification {
                         .put("content", java.util.Base64.getEncoder().encodeToString(pj.contenu()));
             }
         }
-        var requete = java.net.http.HttpRequest.newBuilder(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+        var requete = java.net.http.HttpRequest.newBuilder(java.net.URI.create(urlApi))
                 .timeout(java.time.Duration.ofSeconds(20))
                 .header("api-key", cleApi)
                 .header("accept", "application/json")

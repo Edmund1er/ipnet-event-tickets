@@ -63,7 +63,7 @@ export function DetailEvenementPage() {
               <Badge ton={statut.ton}>{statut.libelle}</Badge>
               {passe && evt.statut === 'PUBLIE' && <Badge ton="gris">Date passée</Badge>}
             </div>
-            <h1 className="text-balance text-2xl font-extrabold uppercase tracking-tight sm:text-3xl">{evt.titre}</h1>
+            <h1 className="text-balance text-2xl font-extrabold tracking-tight sm:text-3xl">{evt.titre}</h1>
             {evt.description && <p className="mt-4 whitespace-pre-line leading-relaxed text-encre/85">{evt.description}</p>}
           </div>
         </article>
@@ -94,7 +94,7 @@ export function DetailEvenementPage() {
             {!session ? (
               <>
                 <p className="text-sm text-attenue">Connectez-vous ou créez un compte pour réserver votre place.</p>
-                <Link to="/connexion" state={{ depuis: `/evenements/${evt.id}` }} className="inline-flex h-[52px] items-center justify-center rounded bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
+                <Link to="/connexion" state={{ depuis: `/evenements/${evt.id}` }} className="inline-flex h-[52px] items-center justify-center rounded-lg bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
                   Se connecter pour réserver
                 </Link>
                 <Link to="/inscription" className="text-center text-sm font-semibold text-rouge hover:underline">
@@ -106,7 +106,7 @@ export function DetailEvenementPage() {
             ) : !profil?.emailVerifie ? (
               <>
                 <Alerte ton="attention">Confirmez votre adresse e-mail avant de réserver (code envoyé par e-mail).</Alerte>
-                <Link to="/verification" className="inline-flex h-11 items-center justify-center rounded bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
+                <Link to="/verification" className="inline-flex h-11 items-center justify-center rounded-lg bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
                   Vérifier mon compte
                 </Link>
               </>
@@ -117,13 +117,13 @@ export function DetailEvenementPage() {
                 </Alerte>
                 <Link
                   to={existante.statut === 'CONFIRMEE' ? '/billets' : existante.statut === 'PREUVE_ENVOYEE' ? '/reservations' : `/reservations/${existante.id}/paiement`}
-                  className="inline-flex h-[52px] items-center justify-center rounded bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce"
+                  className="inline-flex h-[52px] items-center justify-center rounded-lg bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce"
                 >
                   {existante.statut === 'CONFIRMEE' ? 'Voir mon billet' : existante.statut === 'PREUVE_ENVOYEE' ? 'Suivre ma réservation' : 'Payer ma réservation'}
                 </Link>
               </>
             ) : dejaReserve ? (
-              <Link to="/reservations" className="inline-flex h-[52px] items-center justify-center rounded bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
+              <Link to="/reservations" className="inline-flex h-[52px] items-center justify-center rounded-lg bg-rouge font-semibold text-white transition-colors hover:bg-rouge-fonce">
                 Voir mes réservations
               </Link>
             ) : (

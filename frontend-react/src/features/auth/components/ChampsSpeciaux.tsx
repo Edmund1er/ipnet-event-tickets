@@ -53,7 +53,7 @@ export function ChampMotDePasse({
         <div className="mt-2">
           <div className="flex gap-1" aria-hidden>
             {[1, 2, 3, 4].map((n) => (
-              <span key={n} className={`h-1.5 flex-1 rounded ${r.score >= n ? couleurs[r.score] : 'bg-bordure'}`} />
+              <span key={n} className={`h-1.5 flex-1 rounded-lg ${r.score >= n ? couleurs[r.score] : 'bg-bordure'}`} />
             ))}
           </div>
           <p className="mt-1 text-xs text-attenue">Robustesse : {r.libelle} (6 caractères minimum)</p>

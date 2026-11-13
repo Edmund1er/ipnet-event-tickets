@@ -253,7 +253,7 @@ export function ProfilPage() {
                 Changer d'adresse e-mail
               </Bouton>
               {!profil.emailVerifie && (
-                <Link to="/verification" className="inline-flex h-9 items-center justify-center gap-1.5 rounded bg-primaire px-3 text-sm font-semibold text-white">
+                <Link to="/verification" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primaire px-3 text-sm font-semibold text-white">
                   <Icone nom="verified" taille={18} /> Vérifier mon adresse
                 </Link>
               )}

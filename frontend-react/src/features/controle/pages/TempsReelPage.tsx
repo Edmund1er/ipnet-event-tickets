@@ -123,7 +123,7 @@ export function TempsReelPage() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primaire-clair text-primaire">
                   <Icone nom="how_to_reg" />
                 </span>
-                <h2 className="text-base font-semibold uppercase tracking-wide">Participants admis</h2>
+                <h2 className="text-base font-semibold tracking-wide">Participants admis</h2>
               </div>
               <p className="mt-5 flex items-baseline gap-3">
                 <span className="chiffres font-titre text-6xl font-extrabold text-encre">{entres}</span>
@@ -136,8 +136,8 @@ export function TempsReelPage() {
                   </span>
                   <span className="chiffres font-titre text-lg font-bold text-primaire">{pctEntres}%</span>
                 </div>
-                <div className="h-2.5 rounded bg-primaire-clair">
-                  <div className="h-full rounded bg-primaire transition-all" style={{ width: `${Math.min(100, pctEntres)}%` }} />
+                <div className="h-2.5 rounded-lg bg-primaire-clair">
+                  <div className="h-full rounded-lg bg-primaire transition-all" style={{ width: `${Math.min(100, pctEntres)}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-attenue">Part des billets confirmés déjà présentés</p>
               </div>
@@ -148,7 +148,7 @@ export function TempsReelPage() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-rouge-clair text-rouge">
                   <Icone nom="confirmation_number" />
                 </span>
-                <h2 className="text-base font-semibold uppercase tracking-wide">Attente &amp; disponibilité</h2>
+                <h2 className="text-base font-semibold tracking-wide">Attente &amp; disponibilité</h2>
               </div>
               <p className="mt-5 flex items-baseline gap-3">
                 <span className="chiffres font-titre text-6xl font-extrabold text-rouge">{restants}</span>
@@ -159,8 +159,8 @@ export function TempsReelPage() {
                   <span>Billets confirmés</span>
                   <span className="chiffres font-titre text-lg font-bold">{confirmes}</span>
                 </div>
-                <div className="h-2.5 rounded bg-rouge-clair">
-                  <div className="h-full rounded bg-rouge transition-all" style={{ width: `${confirmes ? (restants / confirmes) * 100 : 0}%` }} />
+                <div className="h-2.5 rounded-lg bg-rouge-clair">
+                  <div className="h-full rounded-lg bg-rouge transition-all" style={{ width: `${confirmes ? (restants / confirmes) * 100 : 0}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-attenue">Billets payés pas encore présentés à l'entrée</p>
               </div>
@@ -258,7 +258,7 @@ export function TempsReelPage() {
                           </td>
                           <td className="px-3 py-3">{p.detail}</td>
                           <td className="px-3 py-3">
-                            <span className={`chiffres rounded px-2 py-1 ${i === 0 ? 'bg-white font-semibold text-primaire' : ''}`}>{heureSecondes(p.entreeLe)}</span>
+                            <span className={`chiffres rounded-lg px-2 py-1 ${i === 0 ? 'bg-white font-semibold text-primaire' : ''}`}>{heureSecondes(p.entreeLe)}</span>
                           </td>
                         </tr>
                       ))}

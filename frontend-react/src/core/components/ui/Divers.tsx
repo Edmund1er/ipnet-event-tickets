@@ -14,7 +14,7 @@ const ALERTES: Record<TonAlerte, { classe: string; icone: string }> = {
 export function Alerte({ ton = 'info', titre, children }: { ton?: TonAlerte; titre?: string; children?: ReactNode }) {
   const a = ALERTES[ton]
   return (
-    <div role={ton === 'erreur' ? 'alert' : 'status'} className={`flex gap-3 rounded border p-3.5 text-sm ${a.classe}`}>
+    <div role={ton === 'erreur' ? 'alert' : 'status'} className={`flex gap-3 rounded-lg border p-3.5 text-sm ${a.classe}`}>
       <Icone nom={a.icone} pleine className="mt-0.5 shrink-0" taille={20} />
       <div className="min-w-0">
         {titre && <p className="font-semibold">{titre}</p>}
@@ -27,7 +27,7 @@ export function Alerte({ ton = 'info', titre, children }: { ton?: TonAlerte; tit
 export function EtatVide({ icone, titre, texte, action }: { icone: string; titre: string; texte?: string; action?: ReactNode }) {
   return (
     <div className="carte flex flex-col items-center px-6 py-14 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded bg-primaire-clair text-primaire ring-8 ring-primaire-clair/50">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-primaire-clair text-primaire ring-8 ring-primaire-clair/50">
         <Icone nom={icone} taille={30} />
       </div>
       <h2 className="text-lg font-semibold">{titre}</h2>
@@ -52,12 +52,12 @@ export function EnteteSection({
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex items-start gap-3">
         {icone && (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-rouge text-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-rouge text-white">
             <Icone nom={icone} />
           </div>
         )}
         <div>
-          <h1 className="text-2xl font-extrabold uppercase tracking-tight text-encre sm:text-[28px] sm:leading-9">{titre}</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-encre sm:text-[28px] sm:leading-9">{titre}</h1>
           {sousTitre && <p className="mt-1 text-sm text-attenue">{sousTitre}</p>}
         </div>
       </div>
@@ -123,13 +123,13 @@ export function Modale({
         e.preventDefault()
         surFermeture()
       }}
-      className={`m-auto w-[calc(100%-2rem)] rounded border border-slate-200 bg-white p-0 text-encre shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] backdrop:bg-slate-900/50 ${large ? 'max-w-3xl' : 'max-w-lg'}`}
+      className={`m-auto w-[calc(100%-2rem)] rounded-lg border border-slate-200 bg-white p-0 text-encre shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] backdrop:bg-slate-900/50 ${large ? 'max-w-3xl' : 'max-w-lg'}`}
     >
       {ouverte && (
         <>
           <div className="flex items-center justify-between border-b border-bordure px-5 py-4">
             <h2 className="text-lg font-semibold">{titre}</h2>
-            <button type="button" onClick={surFermeture} aria-label="Fermer" className="rounded p-1 text-attenue hover:bg-surface">
+            <button type="button" onClick={surFermeture} aria-label="Fermer" className="rounded-lg p-1 text-attenue hover:bg-surface">
               <Icone nom="close" />
             </button>
           </div>
@@ -163,7 +163,7 @@ export function Tuile({
   return (
     <div className="carte p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <div className={`flex h-11 w-11 items-center justify-center rounded ${couleurs}`}>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${couleurs}`}>
           <Icone nom={icone} />
         </div>
         <p className="titre-section">{libelle}</p>

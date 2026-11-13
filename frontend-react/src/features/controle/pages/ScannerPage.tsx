@@ -196,7 +196,7 @@ export function ScannerPage() {
               )}
               <Link
                 to={`/controle/temps-reel?evenement=${evenement.id}`}
-                className="inline-flex h-11 items-center gap-2 rounded border-[1.5px] border-primaire px-4 font-semibold text-primaire hover:bg-primaire-clair"
+                className="inline-flex h-11 items-center gap-2 rounded-lg border-[1.5px] border-primaire px-4 font-semibold text-primaire hover:bg-primaire-clair"
               >
                 <Icone nom="monitoring" /> Tableau temps réel
               </Link>

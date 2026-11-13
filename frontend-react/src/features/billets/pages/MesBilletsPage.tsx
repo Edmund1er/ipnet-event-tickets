@@ -28,7 +28,7 @@ export function MesBilletsPage() {
           titre="Aucun billet pour le moment"
           texte="Un billet est émis dès que votre paiement est validé."
           action={
-            <Link to="/reservations" className="inline-flex h-11 items-center rounded bg-primaire px-4 font-semibold text-white">
+            <Link to="/reservations" className="inline-flex h-11 items-center rounded-lg bg-primaire px-4 font-semibold text-white">
               Mes réservations
             </Link>
           }
@@ -101,7 +101,7 @@ function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran:
               <a
                 href={url}
                 download={`billet-${billet.evenementTitre.replace(/[^\w-]+/g, '-').toLowerCase()}.png`}
-                className="inline-flex h-9 items-center gap-1.5 rounded border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border-[1.5px] border-primaire px-3 text-sm font-semibold text-primaire hover:bg-primaire-clair"
               >
                 <Icone nom="download" taille={18} /> Télécharger
               </a>
@@ -122,11 +122,11 @@ function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran:
       {/* QR */}
       <div className="flex flex-col items-center justify-center gap-2 border-t-2 border-dashed border-bordure bg-white p-5 sm:w-56 sm:border-t-0">
         {billet.invalide ? (
-          <div className="flex h-40 w-40 items-center justify-center rounded bg-rouge-clair text-rouge">
+          <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-rouge-clair text-rouge">
             <Icone nom="block" taille={56} />
           </div>
         ) : url ? (
-          <button type="button" onClick={surPleinEcran} className="rounded focus-visible:outline-2" aria-label="Afficher le QR code en plein écran">
+          <button type="button" onClick={surPleinEcran} className="rounded-lg focus-visible:outline-2" aria-label="Afficher le QR code en plein écran">
             <img src={url} alt={`QR code du billet ${billet.evenementTitre}`} className="h-40 w-40" />
           </button>
         ) : erreur ? (

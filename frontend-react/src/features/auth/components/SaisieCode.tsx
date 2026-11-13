@@ -42,7 +42,7 @@ export function SaisieCode({ valeur, surChangement }: { valeur: string; surChang
             value={d}
             onChange={(e) => saisir(i, e.target.value)}
             onKeyDown={(e) => touche(i, e)}
-            className="chiffres h-14 w-12 rounded border-[1.5px] border-bordure text-center font-titre text-2xl font-bold text-primaire outline-none focus:border-primaire focus:ring-2 focus:ring-primaire/20 sm:w-14"
+            className="chiffres h-14 w-12 rounded-lg border-[1.5px] border-bordure text-center font-titre text-2xl font-bold text-primaire outline-none focus:border-primaire focus:ring-2 focus:ring-primaire/20 sm:w-14"
           />
         ))}
       </div>

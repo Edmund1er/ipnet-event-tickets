@@ -14,7 +14,7 @@ export function Badge({ ton, children }: { ton: Ton; children: React.ReactNode }
   return (
     <span
       role="status"
-      className={`inline-flex items-center gap-1 whitespace-nowrap rounded px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${TONS[ton]}`}
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] font-bold tracking-wide ${TONS[ton]}`}
     >
       {children}
     </span>

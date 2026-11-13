@@ -58,7 +58,7 @@ export function ListeEvenementsPage() {
         <img src="/logo_ipnet.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-nuit/85 via-nuit/70 to-nuit/95" aria-hidden />
         <div className="relative z-10 mx-auto max-w-3xl">
-          <h1 className="apparition text-[2rem] font-extrabold uppercase leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="apparition text-[2rem] font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
             Réservez. Payez. <span className="text-rouge-vif">Entrez.</span>
           </h1>
           <p className="apparition apparition-2 mx-auto mt-5 max-w-xl text-base text-white/85 sm:text-xl">
@@ -83,7 +83,7 @@ export function ListeEvenementsPage() {
       <section className="bg-fond-clair py-12">
         <div className="mx-auto grid max-w-6xl gap-5 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           {chiffres.map((c) => (
-            <div key={c.libelle} className="flex items-center gap-4 rounded bg-white p-6 shadow-[0_0_30px_rgba(10,35,66,0.10)]">
+            <div key={c.libelle} className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0_0_30px_rgba(10,35,66,0.10)]">
               <Icone nom={c.icone} taille={42} className="text-rouge" />
               <div className="min-w-0">
                 <p className="font-titre text-xl font-bold leading-tight text-encre">{c.valeur}</p>
@@ -125,7 +125,7 @@ export function ListeEvenementsPage() {
 
           <form
             onSubmit={appliquer}
-            className="mb-8 grid gap-3 rounded bg-white p-4 shadow-[0_0_30px_rgba(10,35,66,0.10)] sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]"
+            className="mb-8 grid gap-3 rounded-lg bg-white p-4 shadow-[0_0_30px_rgba(10,35,66,0.10)] sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]"
             aria-label="Filtrer les événements"
           >
             <Champ libelle="Rechercher" placeholder="Titre de l'événement" value={saisie.titre} onChange={(e) => setSaisie((s) => ({ ...s, titre: e.target.value }))} />

@@ -68,7 +68,7 @@ export function AdminEvenementsPage() {
         titre="Événements"
         sousTitre="Création, publication, modification et annulation"
         actions={
-          <Link to="/admin/evenements/nouveau" className="inline-flex h-11 items-center gap-2 rounded bg-primaire px-4 font-semibold text-white hover:bg-primaire-fonce">
+          <Link to="/admin/evenements/nouveau" className="inline-flex h-11 items-center gap-2 rounded-lg bg-primaire px-4 font-semibold text-white hover:bg-primaire-fonce">
             <Icone nom="add" /> Nouvel événement
           </Link>
         }
@@ -147,7 +147,7 @@ export function AdminEvenementsPage() {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap justify-end gap-1">
                         {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
-                          <Link to={`/admin/evenements/${e.id}`} className="inline-flex h-9 items-center gap-1 rounded px-2 font-semibold text-primaire hover:bg-primaire-clair" title="Modifier">
+                          <Link to={`/admin/evenements/${e.id}`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair" title="Modifier">
                             <Icone nom="edit" taille={18} /> Modifier
                           </Link>
                         )}
@@ -157,7 +157,7 @@ export function AdminEvenementsPage() {
                           </Bouton>
                         )}
                         {e.statut !== 'BROUILLON' && (
-                          <Link to={`/admin/evenements/${e.id}/participants`} className="inline-flex h-9 items-center gap-1 rounded px-2 font-semibold text-primaire hover:bg-primaire-clair">
+                          <Link to={`/admin/evenements/${e.id}/participants`} className="inline-flex h-9 items-center gap-1 rounded-lg px-2 font-semibold text-primaire hover:bg-primaire-clair">
                             <Icone nom="group" taille={18} /> Participants
                           </Link>
                         )}

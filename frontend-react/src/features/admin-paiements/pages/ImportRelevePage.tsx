@@ -68,7 +68,7 @@ export function ImportRelevePage() {
         {apercu.length > 0 && (
           <div>
             <p className="titre-section mb-2">Aperçu</p>
-            <div className="overflow-x-auto rounded border border-bordure">
+            <div className="overflow-x-auto rounded-lg border border-bordure">
               <table className="w-full text-sm">
                 <tbody>
                   {apercu.map((l, i) => (
@@ -103,7 +103,7 @@ export function ImportRelevePage() {
             <Tuile icone="pending_actions" ton="orange" libelle="À traiter manuellement" valeur={rapport.aTraiterManuellement} detail="Dans la file des paiements" />
           </div>
           {rapport.aTraiterManuellement > 0 && (
-            <Link to="/admin/paiements" className="mt-4 inline-flex h-11 items-center gap-2 rounded bg-primaire px-4 font-semibold text-white">
+            <Link to="/admin/paiements" className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-primaire px-4 font-semibold text-white">
               <Icone nom="arrow_forward" /> Traiter les paiements restants
             </Link>
           )}

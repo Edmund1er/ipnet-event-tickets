@@ -102,7 +102,7 @@ export function PaiementPage() {
       <ol className="my-6 grid grid-cols-3 gap-2" aria-label="Étapes du paiement">
         {['Payer', 'Saisir la référence', 'Confirmation'].map((libelle, i) => (
           <li key={libelle} className="flex flex-col gap-2">
-            <span className={`h-1.5 rounded ${i + 1 <= etape ? 'bg-primaire' : 'bg-bordure'}`} />
+            <span className={`h-1.5 rounded-lg ${i + 1 <= etape ? 'bg-primaire' : 'bg-bordure'}`} />
             <span className={`text-xs font-semibold sm:text-sm ${i + 1 === etape ? 'text-primaire' : 'text-attenue'}`}>
               {i + 1}. {libelle}
             </span>
@@ -121,10 +121,10 @@ export function PaiementPage() {
             apparaît dans « Mes billets ».
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Link to="/reservations" className="inline-flex h-11 items-center rounded bg-primaire px-4 font-semibold text-white">
+            <Link to="/reservations" className="inline-flex h-11 items-center rounded-lg bg-primaire px-4 font-semibold text-white">
               Mes réservations
             </Link>
-            <Link to="/billets" className="inline-flex h-11 items-center rounded border-[1.5px] border-primaire px-4 font-semibold text-primaire">
+            <Link to="/billets" className="inline-flex h-11 items-center rounded-lg border-[1.5px] border-primaire px-4 font-semibold text-primaire">
               Mes billets
             </Link>
           </div>
@@ -197,7 +197,7 @@ export function PaiementPage() {
                 className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-[1.5px] border-dashed border-primaire-moyen bg-surface p-4 text-center text-sm text-attenue hover:border-primaire"
               >
                 {apercu ? (
-                  <img src={apercu} alt="Aperçu de la capture" className="max-h-40 rounded" />
+                  <img src={apercu} alt="Aperçu de la capture" className="max-h-40 rounded-lg" />
                 ) : (
                   <Icone nom={capture ? 'picture_as_pdf' : 'upload_file'} taille={32} className="text-primaire" />
                 )}
