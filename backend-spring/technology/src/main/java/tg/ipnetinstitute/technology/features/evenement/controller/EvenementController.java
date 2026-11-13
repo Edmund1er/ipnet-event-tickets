@@ -22,6 +22,7 @@ import tg.ipnetinstitute.technology.features.evenement.dto.request.ModificationE
 import tg.ipnetinstitute.technology.features.evenement.dto.response.EvenementResume;
 import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
+import tg.ipnetinstitute.technology.features.evenement.service.ServiceProgramme;
 import tg.ipnetinstitute.technology.features.evenement.utils.FiltresEvenementUtils;
 
 import java.io.IOException;
@@ -35,9 +36,11 @@ import java.util.Map;
 public class EvenementController {
 
     private final ServiceEvenement serviceEvenement;
+    private final ServiceProgramme serviceProgramme;
 
-    public EvenementController(ServiceEvenement serviceEvenement) {
+    public EvenementController(ServiceEvenement serviceEvenement, ServiceProgramme serviceProgramme) {
         this.serviceEvenement = serviceEvenement;
+        this.serviceProgramme = serviceProgramme;
     }
 
     // ---------- Public ----------
@@ -64,7 +67,7 @@ public class EvenementController {
     /** Programme d'un événement-cadre : activités et pass publiés. */
     @GetMapping("/evenements/{id}/activites")
     public ResponseEntity<java.util.List<EvenementResume>> activites(@PathVariable Long id) {
-        return ResponseEntity.ok(serviceEvenement.listerActivites(id, false));
+        return ResponseEntity.ok(serviceProgramme.listerActivites(id, false));
     }
 
     @GetMapping("/evenements/{id}/image")
@@ -116,26 +119,26 @@ public class EvenementController {
 
     @GetMapping("/admin/evenements/{id}/activites")
     public ResponseEntity<java.util.List<EvenementResume>> activitesAdmin(@PathVariable Long id) {
-        return ResponseEntity.ok(serviceEvenement.listerActivites(id, true));
+        return ResponseEntity.ok(serviceProgramme.listerActivites(id, true));
     }
 
     @PostMapping("/admin/evenements/{id}/activites")
     public ResponseEntity<EvenementResume> creerActivite(@PathVariable Long id,
                                                          @Valid @RequestBody DemandeActivite demande,
                                                          @AuthenticationPrincipal Long adminId) {
-        return ResponseEntity.status(201).body(serviceEvenement.creerActivite(id, demande, adminId));
+        return ResponseEntity.status(201).body(serviceProgramme.creerActivite(id, demande, adminId));
     }
 
     @PutMapping("/admin/evenements/{id}/activite")
     public ResponseEntity<EvenementResume> modifierActivite(@PathVariable Long id,
                                                             @Valid @RequestBody DemandeActivite demande,
                                                             @AuthenticationPrincipal Long adminId) {
-        return ResponseEntity.ok(serviceEvenement.modifierActivite(id, demande, adminId));
+        return ResponseEntity.ok(serviceProgramme.modifierActivite(id, demande, adminId));
     }
 
     @DeleteMapping("/admin/evenements/{id}/activite")
     public ResponseEntity<Void> supprimerActivite(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
-        serviceEvenement.supprimerActivite(id, adminId);
+        serviceProgramme.supprimerActivite(id, adminId);
         return ResponseEntity.noContent().build();
     }
 
@@ -143,7 +146,14 @@ public class EvenementController {
     public ResponseEntity<java.util.List<EvenementResume>> dupliquerJour(@PathVariable Long id,
                                                                          @Valid @RequestBody DuplicationJour demande,
                                                                          @AuthenticationPrincipal Long adminId) {
-        return ResponseEntity.ok(serviceEvenement.dupliquerJour(id, demande.source(), demande.cibles(), adminId));
+        return ResponseEntity.ok(serviceProgramme.dupliquerJour(id, demande.source(), demande.cibles(), adminId));
+    }
+
+    /** Masquage définitif d'un événement passé. */
+    @PostMapping("/admin/evenements/{id}/masquage")
+    public ResponseEntity<Void> masquer(@PathVariable Long id, @AuthenticationPrincipal Long adminId) {
+        serviceEvenement.masquer(id, adminId);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/admin/evenements/{id}/apparence")

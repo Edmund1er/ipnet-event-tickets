@@ -47,6 +47,8 @@ export function DetailEvenementPage() {
   const passe = (versDate(finVente)?.getTime() ?? 0) < Date.now()
   const gratuit = evt.prix === 0
   const estPass = evt.type === 'PASS'
+  // Page construite avec ce que l'admin a rempli : sans description ni image, une simple carte suffit
+  const aPresentation = !!evt.description?.trim() || evt.aImage
   const reservable = evt.statut === 'PUBLIE' && !passe && evt.placesRestantes > 0
   const statut = STATUTS_EVENEMENT[evt.statut]
 
@@ -99,7 +101,8 @@ export function DetailEvenementPage() {
       <Link to={parent ? `/evenements/${parent.id}` : '/'} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-encre transition-colors hover:text-rouge">
         <Icone nom="arrow_back" taille={18} /> {parent ? parent.titre : 'Tous les événements'}
       </Link>
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className={aPresentation ? 'grid gap-6 lg:grid-cols-[1fr_360px]' : 'mx-auto max-w-md'}>
+        {aPresentation && (
         <article className="carte overflow-hidden">
           <VisuelEvenement evenement={evt} className="aspect-[16/8] w-full" />
           {!evt.aImage && (
@@ -125,9 +128,19 @@ export function DetailEvenementPage() {
             {evt.description && <p className="mt-4 whitespace-pre-line leading-relaxed text-encre/85">{evt.description}</p>}
           </div>
         </article>
+        )}
 
         <aside className="flex flex-col gap-4">
           <div className="carte p-5">
+            {!aPresentation && (
+              <div className="mb-4 border-b border-bordure pb-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <Badge ton={statut.ton}>{statut.libelle}</Badge>
+                  {estPass && <Badge ton="violet">Pass</Badge>}
+                </div>
+                <h1 className="text-balance text-2xl font-extrabold tracking-tight">{evt.titre}</h1>
+              </div>
+            )}
             <p className="titre-section">{estPass ? 'Pass' : 'Tarif unique'}</p>
             <p className="mt-1 font-titre text-3xl font-extrabold text-rouge">{evt.accesLibre ? 'Accès libre' : gratuit ? 'Gratuit' : montant(evt.prix, evt.devise)}</p>
             <ul className="mt-4 flex flex-col gap-3 text-sm">

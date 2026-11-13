@@ -16,15 +16,26 @@ public final class FiltresEvenementUtils {
 
     public record Filtre(String titre, LocalDate dateMin, LocalDate dateMax, BigDecimal prixMin, BigDecimal prixMax) {}
 
+    /**
+     * Qui regarde la liste :
+     * PUBLIC (clients) : événements principaux à venir, jamais les masqués ni les passés ;
+     * CONTROLE (scan) : activités et pass inclus, même déjà commencés ;
+     * ADMIN : événements principaux de tous âges, sauf les masqués.
+     */
+    public enum Visibilite { PUBLIC, CONTROLE, ADMIN }
+
     public static Specification<Evenement> specification(StatutEvenement statut, Filtre f) {
-        return specification(statut, f, false);
+        return specification(statut, f, Visibilite.ADMIN);
     }
 
-    /** Par défaut, seules les entrées principales sont listées : activités et pass se consultent via leur cadre. */
-    public static Specification<Evenement> specification(StatutEvenement statut, Filtre f, boolean inclureActivites) {
-        Specification<Evenement> spec = (root, q, cb) -> cb.conjunction();
-        if (!inclureActivites) {
+    public static Specification<Evenement> specification(StatutEvenement statut, Filtre f, Visibilite visibilite) {
+        Specification<Evenement> spec = (root, q, cb) -> cb.isFalse(root.get("masque"));
+        if (visibilite != Visibilite.CONTROLE) {
             spec = spec.and((root, q, cb) -> cb.isNull(root.get("parentId")));
+        }
+        if (visibilite == Visibilite.PUBLIC) {
+            var maintenant = java.time.LocalDateTime.now();
+            spec = spec.and((root, q, cb) -> cb.greaterThanOrEqualTo(cb.coalesce(root.<java.time.LocalDateTime>get("dateFin"), root.<java.time.LocalDateTime>get("dateDebut")), maintenant));
         }
         if (statut != null) {
             spec = spec.and((root, q, cb) -> cb.equal(root.get("statut"), statut));

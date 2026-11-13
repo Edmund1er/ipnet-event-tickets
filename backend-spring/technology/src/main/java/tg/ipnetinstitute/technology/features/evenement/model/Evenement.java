@@ -63,6 +63,9 @@ public class Evenement {
     @Column(name = "image_chemin", length = 255)
     private String imageChemin;
 
+    @Column(nullable = false)
+    private boolean masque = false;
+
     @Column(name = "parent_id")
     private Long parentId;
 
@@ -279,6 +282,20 @@ public class Evenement {
         return type != TypeEvenement.CADRE && !accesLibre;
     }
 
+    /** Un événement est « passé » quand sa fin (ou son début, sans fin) est derrière nous. */
+    public boolean estPasse(LocalDateTime maintenant) {
+        return finEffective().isBefore(maintenant);
+    }
+
+    /** Masquage définitif : réservé aux événements passés, terminés ou annulés. */
+    public void masquer(LocalDateTime maintenant) {
+        if (!estPasse(maintenant) && statut != StatutEvenement.TERMINE && statut != StatutEvenement.ANNULE) {
+            throw new IllegalStateException("Seul un événement passé, terminé ou annulé peut être masqué");
+        }
+        this.masque = true;
+    }
+
+    public boolean isMasque() { return masque; }
     public Long getParentId() { return parentId; }
     public TypeEvenement getType() { return type; }
     public LocalDateTime getDateFin() { return dateFin; }

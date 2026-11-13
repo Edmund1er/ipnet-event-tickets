@@ -28,6 +28,7 @@ import tg.ipnetinstitute.technology.features.evenement.dto.response.EvenementRes
 import tg.ipnetinstitute.technology.features.evenement.model.StatutEvenement;
 import tg.ipnetinstitute.technology.features.evenement.model.TypeEvenement;
 import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
+import tg.ipnetinstitute.technology.features.evenement.service.ServiceProgramme;
 import tg.ipnetinstitute.technology.features.evenement.utils.FiltresEvenementUtils;
 import tg.ipnetinstitute.technology.features.identite.model.Role;
 import tg.ipnetinstitute.technology.features.identite.model.TypeProfil;
@@ -63,6 +64,7 @@ class ProgrammeActivitesTest {
 
     @Autowired UtilisateurRepository utilisateurs;
     @Autowired ServiceEvenement serviceEvenement;
+    @Autowired ServiceProgramme serviceProgramme;
     @Autowired ServiceReservation serviceReservation;
     @Autowired ServicePaiement servicePaiement;
     @Autowired ServiceControle serviceControle;
@@ -140,7 +142,7 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        var act = serviceEvenement.creerActivite(cadre.id(),
+        var act = serviceProgramme.creerActivite(cadre.id(),
                 activite("Tournoi", LocalDateTime.now().plusHours(3), new BigDecimal("1000"), 20, false), a);
         serviceEvenement.publier(cadre.id(), a);
 
@@ -161,7 +163,7 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        assertThatThrownBy(() -> serviceEvenement.creerActivite(cadre.id(),
+        assertThatThrownBy(() -> serviceProgramme.creerActivite(cadre.id(),
                 activite("Trop tard", LocalDateTime.now().plusDays(10), new BigDecimal("500"), 5, false), a))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -171,7 +173,7 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        var act = serviceEvenement.creerActivite(cadre.id(),
+        var act = serviceProgramme.creerActivite(cadre.id(),
                 activite("Jeux de société", LocalDateTime.now().plusHours(4), BigDecimal.ZERO, 10, false), a);
         serviceEvenement.publier(cadre.id(), a);
 
@@ -189,7 +191,7 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        var act = serviceEvenement.creerActivite(cadre.id(),
+        var act = serviceProgramme.creerActivite(cadre.id(),
                 activite("Exposition", LocalDateTime.now().plusHours(5), BigDecimal.ZERO, null, true), a);
         serviceEvenement.publier(cadre.id(), a);
 
@@ -203,9 +205,9 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        var a1 = serviceEvenement.creerActivite(cadre.id(), activite("Concert", LocalDateTime.now().plusHours(3), new BigDecimal("2000"), 50, false), a);
-        var a2 = serviceEvenement.creerActivite(cadre.id(), activite("Tournoi", LocalDateTime.now().plusDays(1), new BigDecimal("1000"), 50, false), a);
-        var pass = serviceEvenement.creerActivite(cadre.id(), new DemandeActivite("PASS", "Pass complet", null, null,
+        var a1 = serviceProgramme.creerActivite(cadre.id(), activite("Concert", LocalDateTime.now().plusHours(3), new BigDecimal("2000"), 50, false), a);
+        var a2 = serviceProgramme.creerActivite(cadre.id(), activite("Tournoi", LocalDateTime.now().plusDays(1), new BigDecimal("1000"), 50, false), a);
+        var pass = serviceProgramme.creerActivite(cadre.id(), new DemandeActivite("PASS", "Pass complet", null, null,
                 cadre.dateDebut(), cadre.dateFin(), null, new BigDecimal("5000"), 30, false, "GLOBAL", null, null, null, null), a);
         serviceEvenement.publier(cadre.id(), a);
         assertThat(serviceEvenement.consulter(pass.id()).type()).isEqualTo(TypeEvenement.PASS);
@@ -231,10 +233,42 @@ class ProgrammeActivitesTest {
         var cadre = cadrePublie();
         Long a = admin();
         agir(a, "ROLE_ADMIN");
-        var act = serviceEvenement.creerActivite(cadre.id(), activite("Danse", LocalDateTime.now().plusHours(6), new BigDecimal("500"), 10, false), a);
+        var act = serviceProgramme.creerActivite(cadre.id(), activite("Danse", LocalDateTime.now().plusHours(6), new BigDecimal("500"), 10, false), a);
         serviceEvenement.publier(cadre.id(), a);
         serviceEvenement.annuler(cadre.id(), a, "Imprévu");
         assertThat(serviceEvenement.consulter(act.id()).statut()).isEqualTo(StatutEvenement.ANNULE);
+    }
+
+    @Test
+    void evenementPasse_masqueDefinitivement_disparaitDesListes() {
+        Long a = admin();
+        agir(a, "ROLE_ADMIN");
+        var filtre = new FiltresEvenementUtils.Filtre(null, null, null, null, null);
+        var futur = serviceEvenement.creer(new DemandeEvenement("A venir " + SEQ.incrementAndGet(), "d",
+                LocalDateTime.now().plusDays(4), "Lomé", new BigDecimal("1000"), "XOF", 10), a);
+        assertThatThrownBy(() -> serviceEvenement.masquer(futur.id(), a)).isInstanceOf(IllegalStateException.class);
+
+        var passe = serviceEvenement.creer(new DemandeEvenement("Passe " + SEQ.incrementAndGet(), "d",
+                LocalDateTime.now().minusDays(2), "Lomé", new BigDecimal("1000"), "XOF", 10), a);
+        assertThat(serviceEvenement.consulter(passe.id()).passe()).isTrue();
+        serviceEvenement.masquer(passe.id(), a);
+
+        assertThat(serviceEvenement.listerAdmin(null, filtre, Pageable.unpaged()).getContent())
+                .extracting(EvenementResume::id).contains(futur.id()).doesNotContain(passe.id());
+        assertThatThrownBy(() -> serviceEvenement.consulterPublic(passe.id()))
+                .isInstanceOf(tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException.class);
+    }
+
+    @Test
+    void listePublique_cacheLesEvenementsPasses() {
+        Long a = admin();
+        agir(a, "ROLE_ADMIN");
+        var filtre = new FiltresEvenementUtils.Filtre(null, null, null, null, null);
+        var encours = serviceEvenement.creer(new DemandeEvenement("Demain " + SEQ.incrementAndGet(), "d",
+                LocalDateTime.now().plusDays(1), "Lomé", new BigDecimal("1000"), "XOF", 10), a);
+        serviceEvenement.publier(encours.id(), a);
+        assertThat(serviceEvenement.listerPublies(filtre, Pageable.unpaged()).getContent())
+                .extracting(EvenementResume::id).contains(encours.id());
     }
 
     private static String numeroTogo(int rang) {

@@ -14,7 +14,7 @@ import { useRequete } from '../../../core/hooks/useRequete'
 import { dateCourte, heure, montant } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-type Action = { type: 'publier' | 'cloturer' | 'annuler' | 'fermer_ventes' | 'rouvrir_ventes'; evt: Evenement }
+type Action = { type: 'publier' | 'cloturer' | 'annuler' | 'fermer_ventes' | 'rouvrir_ventes' | 'masquer'; evt: Evenement }
 
 export function AdminEvenementsPage() {
   const [statut, setStatut] = useState<StatutEvenement | ''>('')
@@ -40,6 +40,7 @@ export function AdminEvenementsPage() {
       if (action.type === 'annuler') await adminEvenementService.annuler(action.evt.id, motif.trim())
       if (action.type === 'fermer_ventes') await adminEvenementService.fermerVentes(action.evt.id)
       if (action.type === 'rouvrir_ventes') await adminEvenementService.rouvrirVentes(action.evt.id)
+      if (action.type === 'masquer') await adminEvenementService.masquer(action.evt.id)
       toast.succes(
         action.type === 'publier'
           ? 'Événement publié'
@@ -49,6 +50,8 @@ export function AdminEvenementsPage() {
           ? 'Ventes suspendues'
           : action.type === 'rouvrir_ventes'
           ? 'Ventes rouvertes'
+          : action.type === 'masquer'
+          ? 'Événement masqué définitivement'
           : 'Événement annulé, participants informés par e-mail',
       )
       setAction(null)
@@ -143,6 +146,11 @@ export function AdminEvenementsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <Badge ton={s.ton}>{s.libelle}</Badge>
+                      {e.passe && e.statut === 'PUBLIE' && (
+                        <span className="ml-1 inline-block align-middle">
+                          <Badge ton="gris">Passé</Badge>
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap justify-end gap-1">
@@ -182,6 +190,11 @@ export function AdminEvenementsPage() {
                             Clôturer
                           </Bouton>
                         )}
+                        {(e.passe || e.statut === 'TERMINE' || e.statut === 'ANNULE') && (
+                          <Bouton taille="petit" variante="fantome" icone="visibility_off" onClick={() => setAction({ type: 'masquer', evt: e })}>
+                            Masquer
+                          </Bouton>
+                        )}
                         {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
                           <Bouton taille="petit" variante="fantome" icone="cancel" className="!text-rouge" onClick={() => setAction({ type: 'annuler', evt: e })}>
                             Annuler
@@ -209,6 +222,8 @@ export function AdminEvenementsPage() {
             ? 'Suspendre les ventes'
             : action?.type === 'rouvrir_ventes'
             ? 'Rouvrir les ventes'
+            : action?.type === 'masquer'
+            ? 'Masquer définitivement'
             : "Annuler l'événement"
         }
         surFermeture={() => {
@@ -221,7 +236,7 @@ export function AdminEvenementsPage() {
               Retour
             </Bouton>
             <Bouton
-              variante={action?.type === 'annuler' ? 'danger' : 'primaire'}
+              variante={action?.type === 'annuler' || action?.type === 'masquer' ? 'danger' : 'primaire'}
               enCours={enCours}
               disabled={action?.type === 'annuler' && !motif.trim()}
               onClick={executer}
@@ -245,6 +260,11 @@ export function AdminEvenementsPage() {
           <p>
             Suspendre temporairement les ventes pour <strong>{action.evt.titre}</strong>. Les participants ne pourront plus réserver tant que vous ne les rouvrirez pas.
           </p>
+        )}
+        {action?.type === 'masquer' && (
+          <Alerte ton="attention" titre="Action définitive">
+            <strong>{action.evt.titre}</strong> disparaîtra de toutes les listes, côté client comme côté administration. Les réservations et les billets déjà émis sont conservés.
+          </Alerte>
         )}
         {action?.type === 'rouvrir_ventes' && (
           <p>

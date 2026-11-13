@@ -49,6 +49,9 @@ export interface Evenement {
   accesLibre?: boolean
   passPortee?: 'GLOBAL' | 'JOURNEE' | null
   passJour?: string | null
+  /** Terminé : la fin (ou le début) est derrière nous. */
+  passe?: boolean
+  masque?: boolean
 }
 
 export interface ProfilResponse {

@@ -61,6 +61,10 @@ export const adminEvenementService = {
   async modifier(id: number, d: DonneesEvenement) {
     return (await http.put<Evenement>(`/admin/evenements/${id}`, d)).data
   },
+  /** Masque définitivement un événement passé (il quitte toutes les listes). */
+  async masquer(id: number) {
+    await http.post(`/admin/evenements/${id}/masquage`)
+  },
   async activites(id: number) {
     return (await http.get<Evenement[]>(`/admin/evenements/${id}/activites`)).data
   },

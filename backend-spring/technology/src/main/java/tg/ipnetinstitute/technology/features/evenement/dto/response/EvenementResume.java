@@ -29,7 +29,9 @@ public record EvenementResume(
         String categorie,
         boolean accesLibre,
         String passPortee,
-        java.time.LocalDate passJour
+        java.time.LocalDate passJour,
+        boolean passe,
+        boolean masque
 ) {
     @com.fasterxml.jackson.annotation.JsonProperty("placesRestantes")
     public int placesRestantes() {
