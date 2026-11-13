@@ -53,29 +53,32 @@ export function ListeEvenementsPage() {
 
   return (
     <div>
-      {/* HERO plein écran (gabarit Dewi) */}
-      <section id="hero" className="relative flex min-h-[88vh] items-center justify-center overflow-hidden bg-nuit px-4 pb-16 pt-28 text-center text-white">
-        <img src="/logo_ipnet.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-nuit/85 via-nuit/70 to-nuit/95" aria-hidden />
-        <div className="relative z-10 mx-auto max-w-3xl">
-          <h1 className="apparition text-[2rem] font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Réservez. Payez. <span className="text-rouge-vif">Entrez.</span>
+      {/* HERO deux colonnes (gabarit ScrewFast) */}
+      <section id="hero" className="mx-auto grid max-w-[85rem] gap-4 py-14 md:grid-cols-2 md:items-center md:gap-8">
+        <div>
+          <h1 className="apparition block text-balance text-3xl font-bold tracking-tight text-neutral-800 sm:text-4xl lg:text-6xl lg:leading-tight">
+            Réservez. Payez. <span className="text-yellow-500">Entrez.</span>
           </h1>
-          <p className="apparition apparition-2 mx-auto mt-5 max-w-xl text-base text-white/85 sm:text-xl">
-            La billetterie officielle des événements d'IPNET Institute of Technology.
+          <p className="apparition apparition-2 mt-3 text-pretty text-lg leading-relaxed text-neutral-700 lg:w-4/5">
+            La billetterie officielle des événements d'IPNET Institute of Technology : places en quelques clics, paiement Mobile Money, billet QR code.
           </p>
-          <div className="apparition apparition-3 mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="apparition apparition-3 mt-7 grid w-full gap-3 sm:inline-flex">
             <a href="#evenements" className="btn-cta">
               Voir les événements
+              <Icone nom="arrow_forward" taille={18} />
             </a>
             {prochain && (
               <Link to={`/evenements/${prochain.id}`} className="btn-contour max-w-full">
-                <Icone nom="play_circle" taille={20} className="text-rouge" />
-                <span className="truncate normal-case tracking-normal">Prochain : {prochain.titre}</span>
+                <span className="truncate">Prochain : {prochain.titre}</span>
               </Link>
             )}
           </div>
-          {prochain && <p className="mt-4 text-sm text-white/70">{dateLongue(prochain.dateDebut)}</p>}
+          {prochain && <p className="mt-4 text-sm text-neutral-600">{dateLongue(prochain.dateDebut)}</p>}
+        </div>
+        <div className="flex w-full">
+          <div className="w-full overflow-hidden rounded-xl">
+            <img src="/logo_ipnet.jpg" alt="IPNET Institute of Technology" className="h-full w-full scale-110 object-cover object-center" draggable={false} />
+          </div>
         </div>
       </section>
 
@@ -83,8 +86,8 @@ export function ListeEvenementsPage() {
       <section className="bg-fond-clair py-12">
         <div className="mx-auto grid max-w-6xl gap-5 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           {chiffres.map((c) => (
-            <div key={c.libelle} className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0_0_30px_rgba(10,35,66,0.10)]">
-              <Icone nom={c.icone} taille={42} className="text-rouge" />
+            <div key={c.libelle} className="flex items-center gap-4 rounded-xl bg-neutral-100 p-6 shadow-xs ring-1 ring-neutral-300/60">
+              <Icone nom={c.icone} taille={42} className="text-orange-400" />
               <div className="min-w-0">
                 <p className="font-titre text-xl font-bold leading-tight text-encre">{c.valeur}</p>
                 <p className="text-sm text-attenue">{c.libelle}</p>
@@ -96,7 +99,7 @@ export function ListeEvenementsPage() {
 
       {/* COMMENT ÇA MARCHE */}
       <section className="py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-[85rem]">
           <div className="titre-bloc">
             <span>Simple et rapide</span>
             <h2>Comment ça marche</h2>
@@ -116,8 +119,8 @@ export function ListeEvenementsPage() {
       </section>
 
       {/* ÉVÉNEMENTS */}
-      <section id="evenements" className="scroll-mt-20 bg-fond-clair py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section id="evenements" className="scroll-mt-20 py-16">
+        <div className="mx-auto max-w-[85rem]">
           <div className="titre-bloc">
             <span>Agenda</span>
             <h2>Les événements</h2>
@@ -125,7 +128,7 @@ export function ListeEvenementsPage() {
 
           <form
             onSubmit={appliquer}
-            className="mb-8 grid gap-3 rounded-lg bg-white p-4 shadow-[0_0_30px_rgba(10,35,66,0.10)] sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]"
+            className="mb-8 grid gap-3 rounded-lg bg-white p-4 shadow-xs ring-1 ring-neutral-300/60 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]"
             aria-label="Filtrer les événements"
           >
             <Champ libelle="Rechercher" placeholder="Titre de l'événement" value={saisie.titre} onChange={(e) => setSaisie((s) => ({ ...s, titre: e.target.value }))} />

@@ -6,24 +6,24 @@
  */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-titre: "Raleway", "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
+  --font-titre: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-primaire: #0d9488;
-  --color-primaire-fonce: #0f5f59;
-  --color-primaire-clair: #e6f6f4;
-  --color-primaire-moyen: #9fd8d1;
-  --color-rouge: #0d9488;
-  --color-rouge-fonce: #0b6f66;
-  --color-rouge-vif: #5eead4;
-  --color-rouge-clair: #e6f6f4;
-  --color-surface: #f1f5f4;
-  --color-encre: #1f2a37;
-  --color-nuit: #17302d;
-  --color-fond-clair: #f6f8f7;
-  --color-ciel: #e4f1ee;
-  --color-ciel-fonce: #cfe4de;
-  --color-attenue: #5f6f6b;
-  --color-bordure: #dde5e2;
+  --color-primaire: #ff6a3d;
+  --color-primaire-fonce: #f0532b;
+  --color-primaire-clair: #fef9c2;
+  --color-primaire-moyen: #fdd9a0;
+  --color-rouge: #ff6a3d;
+  --color-rouge-fonce: #f0532b;
+  --color-rouge-vif: #eab308;
+  --color-rouge-clair: #ffedd5;
+  --color-surface: #f5f5f5;
+  --color-encre: #262626;
+  --color-nuit: #262626;
+  --color-fond-clair: #e5e5e5;
+  --color-ciel: #fefce8;
+  --color-ciel-fonce: #fef08a66;
+  --color-attenue: #525252;
+  --color-bordure: #d4d4d4;
 
   /* États de scan (maquette : sémantique opérationnelle) */
   --color-succes: #16a34a;
@@ -50,7 +50,7 @@
     scroll-behavior: smooth;
   }
   ::selection {
-    background: rgb(13 148 136 / 0.2);
+    background: #facc15;
   }
   h1,
   h2,
@@ -97,7 +97,7 @@
     font-variant-numeric: tabular-nums;
   }
   .carte {
-    @apply rounded-lg border border-bordure/60 bg-white shadow-[0_0_30px_rgba(23,48,45,0.08)];
+    @apply rounded-lg border border-bordure/60 bg-white shadow-[0_0_30px_rgba(0,0,0,0.06)];
   }
   /* Apparition douce des blocs (inspirée du gabarit ScrewFast) */
   .apparition {
@@ -178,25 +178,25 @@
   .titre-bloc > span::before,
   .titre-bloc > span::after {
     content: "";
-    @apply h-px w-10 bg-rouge sm:w-16;
+    @apply h-px w-10 bg-yellow-500 sm:w-16;
   }
   .titre-bloc > h2 {
     @apply mt-2 text-[26px] font-bold leading-tight tracking-tight text-encre sm:text-4xl;
   }
   .btn-cta {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-rouge px-7 py-3 text-[15px] font-semibold text-white shadow-md shadow-rouge/25 transition duration-200 hover:bg-rouge-fonce hover:shadow-lg active:translate-y-px;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-rouge px-5 py-3 text-[15px] font-bold text-neutral-50 transition duration-300 hover:bg-rouge-fonce active:translate-y-px;
   }
   .btn-contour {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-white/70 px-6 py-2.5 text-[15px] font-semibold text-white transition duration-200 hover:border-white hover:bg-white/20 active:translate-y-px;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-neutral-300 px-5 py-3 text-[15px] font-medium text-neutral-600 shadow-xs transition duration-300 hover:bg-neutral-400/50 active:translate-y-px;
   }
   .carte-service {
-    @apply relative flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-[0_0_30px_rgba(23,48,45,0.10)];
+    @apply relative flex h-full flex-col overflow-hidden rounded-xl bg-neutral-100 shadow-xs ring-1 ring-neutral-300/60;
   }
   .icone-carre {
-    @apply flex h-14 w-14 items-center justify-center rounded-lg border-2 border-rouge bg-rouge text-white transition-colors duration-300;
+    @apply flex h-14 w-14 items-center justify-center rounded-full bg-yellow-400 text-neutral-800 transition-colors duration-300;
   }
   .carte-service:hover .icone-carre,
   .groupe-carte:hover .icone-carre {
-    @apply bg-white text-rouge;
+    @apply bg-rouge text-white;
   }
 }

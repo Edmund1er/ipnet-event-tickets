@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Icone } from '../ui/Icone'
-import { Logo } from './Logo'
 
 /**
  * Gabarit public inspiré du gabarit Dewi : en-tête fixe, transparent sur le hero de l'accueil puis bleu nuit
@@ -21,85 +20,82 @@ export function PublicLayout() {
     return () => window.removeEventListener('scroll', surDefilement)
   }, [])
 
-  const opaque = defile || !accueil
-
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header
-        className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${opaque ? 'bg-nuit/90 py-2.5 shadow-lg shadow-black/10 backdrop-blur-md' : 'bg-transparent py-4'}`}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Logo compact />
-            <span className="hidden font-titre text-xl font-extrabold tracking-tight text-white sm:block">
-              IPNET<span className="text-rouge-vif">·</span>Events
+    <div className="flex min-h-screen flex-col bg-neutral-200 selection:bg-yellow-400 selection:text-neutral-700">
+      <header className="sticky inset-x-0 top-4 z-50 flex w-full text-sm">
+        <nav
+          className="relative mx-2 flex w-full max-w-[85rem] items-center justify-between rounded-[36px] border border-yellow-100/40 bg-yellow-50/60 px-4 py-3 backdrop-blur-md md:px-6 lg:px-8 xl:mx-auto"
+          aria-label="Navigation"
+        >
+          <Link to="/" className="flex items-center gap-3 rounded-lg text-xl font-bold text-neutral-800" aria-label="IP Events — accueil">
+            <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-neutral-300">
+              <img src="/logo_ipnet.jpg" alt="" className="h-full w-full origin-[58%_42%] scale-[1.6] object-cover object-[58%_42%]" />
             </span>
-          </div>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navigation">
+            <span className="text-lg font-bold tracking-tight">
+              IPNET<span className="text-yellow-500">·</span>Events
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-7">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `hidden px-3 py-2 text-sm font-medium transition-colors md:inline-block ${isActive ? 'text-rouge-vif' : 'text-white/85 hover:text-white'}`
+                `hidden rounded-lg text-base font-medium transition-colors md:inline-block md:text-sm 2xl:text-base ${isActive ? 'text-orange-400' : 'text-neutral-600 hover:text-neutral-500'}`
               }
             >
               Événements
             </NavLink>
-            <Link to="/connexion" className="px-3 py-2 text-sm font-medium text-white/85 transition-colors hover:text-white">
+            <Link to="/connexion" className="rounded-lg text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-500 2xl:text-base">
               Connexion
             </Link>
             <Link
               to="/inscription"
-              className="rounded-lg border-2 border-white/70 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors duration-300 hover:border-rouge hover:bg-rouge sm:px-5 sm:text-[13px]"
+              className="inline-flex items-center justify-center gap-x-2 rounded-lg bg-orange-400 px-4 py-2.5 text-sm font-bold text-neutral-50 transition duration-300 hover:bg-orange-500"
             >
               S'inscrire
             </Link>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </header>
 
       {auth ? (
-        <main id="contenu" className="relative flex-1 overflow-hidden bg-nuit px-3 pb-14 pt-28 sm:px-6 sm:pt-32">
-          <img src="/logo_ipnet.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25" />
-          <div className="absolute inset-0 bg-gradient-to-b from-nuit/85 via-nuit/75 to-nuit/95" aria-hidden />
-          <div className="relative z-10">
-            <Outlet />
-          </div>
+        <main id="contenu" className="flex-1 px-3 pb-14 pt-12 sm:px-6 sm:pt-16">
+          <Outlet />
         </main>
       ) : (
-        <main id="contenu" className={`flex-1 ${accueil ? '' : 'mx-auto w-full max-w-6xl px-3 pb-12 pt-28 sm:px-6 sm:pt-32'}`}>
+        <main id="contenu" className={`mx-auto w-full max-w-[85rem] flex-1 px-4 sm:px-6 lg:px-8 ${accueil ? '' : 'pb-12 pt-10'}`}>
           <Outlet />
         </main>
       )}
 
-      <footer className="bg-nuit text-white/75">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
+      <footer className="bg-neutral-300 text-neutral-600">
+        <div className="mx-auto grid w-full max-w-[85rem] gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.6fr_1fr_1fr_1.2fr] lg:px-16 lg:pt-20">
           <div>
-            <p className="font-titre text-2xl font-extrabold tracking-tight text-white">
-              IPNET<span className="text-rouge-vif">·</span>Events
+            <p className="font-titre text-2xl font-extrabold tracking-tight text-neutral-800">
+              IPNET<span className="text-yellow-500">·</span>Events
             </p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed">
               La billetterie officielle d'IPNET Institute of Technology : réservez, payez par Mobile Money et entrez avec votre QR code.
             </p>
           </div>
           <nav aria-label="Plateforme" className="flex flex-col gap-3 text-sm">
-            <p className="font-titre text-base font-bold text-white">Plateforme</p>
-            <Link to="/" className="transition-colors hover:text-rouge">Événements</Link>
-            <Link to="/connexion" className="transition-colors hover:text-rouge">Connexion</Link>
-            <Link to="/inscription" className="transition-colors hover:text-rouge">Créer un compte</Link>
+            <p className="font-titre text-base font-bold text-neutral-800">Plateforme</p>
+            <Link to="/" className="transition-colors hover:text-neutral-500">Événements</Link>
+            <Link to="/connexion" className="transition-colors hover:text-neutral-500">Connexion</Link>
+            <Link to="/inscription" className="transition-colors hover:text-neutral-500">Créer un compte</Link>
           </nav>
           <div className="flex flex-col gap-3 text-sm">
-            <p className="font-titre text-base font-bold text-white">Services</p>
+            <p className="font-titre text-base font-bold text-neutral-800">Services</p>
             <p>Réservation en ligne</p>
             <p>Paiement Mobile Money</p>
             <p>Contrôle d'accès QR</p>
           </div>
           <div className="flex flex-col gap-3 text-sm">
-            <p className="font-titre text-base font-bold text-white">Contact</p>
+            <p className="font-titre text-base font-bold text-neutral-800">Contact</p>
             <p className="flex items-center gap-2"><Icone nom="location_on" taille={18} className="text-rouge" /> IPNET Institute of Technology, Lomé, Togo</p>
           </div>
         </div>
-        <div className="border-t border-white/10 py-5 text-center text-xs text-white/55">
+        <div className="py-5 text-center text-xs text-neutral-600">
           © {new Date().getFullYear()} IPNET Institute of Technology. Tous droits réservés.
         </div>
       </footer>
@@ -111,7 +107,7 @@ export function PublicLayout() {
           e.preventDefault()
           window.scrollTo({ top: 0, behavior: 'smooth' })
         }}
-        className={`fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-lg bg-rouge text-white shadow-lg transition-all duration-300 hover:bg-rouge-fonce ${defile ? 'visible opacity-100' : 'invisible opacity-0'}`}
+        className={`fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-400 text-neutral-50 shadow-lg transition-all duration-300 hover:bg-rouge-fonce ${defile ? 'visible opacity-100' : 'invisible opacity-0'}`}
       >
         <Icone nom="keyboard_arrow_up" taille={24} />
       </a>
