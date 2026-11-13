@@ -2,9 +2,11 @@ package tg.ipnetinstitute.technology.features.evenement.wrapper;
 
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import tg.ipnetinstitute.technology.common.stockage.StockageSupabase;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -17,6 +19,7 @@ import java.util.UUID;
 /**
  * Stockage des images d'événement (EF-10) hors du répertoire web, sous un nom aléatoire (UUID).
  * Le type est vérifié par inspection du contenu (JPEG, PNG, WebP) ; taille maximale 5 Mo.
+ * Stockage : Supabase Storage quand il est configuré (les fichiers survivent aux redéploiements), sinon disque local.
  */
 @Component
 public class StockageImageWrapper {
@@ -26,10 +29,14 @@ public class StockageImageWrapper {
             "image/jpeg", ".jpg", "image/png", ".png", "image/webp", ".webp");
 
     private final Path dossier;
+    private static final String PREFIXE = "images/";
     private final Tika tika = new Tika();
+    private final StockageSupabase distant;
 
-    public StockageImageWrapper(@Value("${app.stockage.images.chemin:./uploads/images}") String chemin) {
+    public StockageImageWrapper(@Value("${app.stockage.images.chemin:./uploads/images}") String chemin, StockageSupabase distant) {
+        this.distant = distant;
         this.dossier = Paths.get(chemin).toAbsolutePath().normalize();
+        if (distant.actif()) return;
         try {
             Files.createDirectories(dossier);
         } catch (IOException e) {
@@ -51,6 +58,10 @@ public class StockageImageWrapper {
             throw new IllegalArgumentException("Format d'image non supporté (JPG, PNG ou WebP attendu)");
         }
         String nom = UUID.randomUUID() + extension;
+        if (distant.actif()) {
+            distant.enregistrer(PREFIXE + nom, contenu, type);
+            return nom;
+        }
         try {
             Files.write(dossier.resolve(nom), contenu);
         } catch (IOException e) {
@@ -60,6 +71,9 @@ public class StockageImageWrapper {
     }
 
     public Resource lire(String nom) {
+        if (distant.actif()) {
+            return new ByteArrayResource(distant.lire(PREFIXE + verifierNom(nom)));
+        }
         Path fichier = resoudre(nom);
         if (!Files.isRegularFile(fichier)) {
             throw new IllegalStateException("Image introuvable sur le disque");
@@ -73,11 +87,23 @@ public class StockageImageWrapper {
 
     public void supprimer(String nom) {
         if (nom == null) return;
+        if (distant.actif()) {
+            distant.supprimer(PREFIXE + verifierNom(nom));
+            return;
+        }
         try {
             Files.deleteIfExists(resoudre(nom));
         } catch (IOException ignored) {
             // un fichier orphelin n'empêche pas l'opération métier
         }
+    }
+
+    /** Nom généré par la plateforme (UUID + extension) : tout autre format est refusé. */
+    private static String verifierNom(String nom) {
+        if (nom == null || !nom.matches("[0-9a-fA-F-]{36}\\.(jpg|png|webp)")) {
+            throw new IllegalArgumentException("Chemin d'image invalide");
+        }
+        return nom;
     }
 
     private Path resoudre(String nom) {

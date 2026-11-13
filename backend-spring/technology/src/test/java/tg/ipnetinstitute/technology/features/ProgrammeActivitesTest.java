@@ -106,12 +106,12 @@ class ProgrammeActivitesTest {
         return utilisateurs.save(u).getId();
     }
 
-    /** Programme publié : de maintenant + 1 h à maintenant + 3 jours. */
+    /** Programme : de maintenant + 1 min à maintenant + 3 jours (début proche, pour rester sur le même jour que « maintenant »). */
     private EvenementResume cadrePublie() {
         Long a = admin();
         agir(a, "ROLE_ADMIN");
         var cadre = serviceEvenement.creer(new DemandeEvenement("Semaine " + SEQ.incrementAndGet(), "d",
-                LocalDateTime.now().plusHours(1), "Campus", BigDecimal.ZERO, "XOF", 1, null,
+                LocalDateTime.now().plusMinutes(1), "Campus", BigDecimal.ZERO, "XOF", 1, null,
                 LocalDateTime.now().plusDays(3), "CADRE"), a);
         return cadre;
     }
