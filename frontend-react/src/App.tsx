@@ -13,6 +13,7 @@ import { RequireAnonyme, RequireRole } from './core/routing/Gardes'
 import { navigation as navAdminEvenements } from './features/admin-evenements/navigation'
 import { AdminEvenementsPage } from './features/admin-evenements/pages/AdminEvenementsPage'
 import { FormulaireEvenementPage } from './features/admin-evenements/pages/FormulaireEvenementPage'
+import { ConstructeurPage } from './features/admin-evenements/pages/ConstructeurPage'
 import { ParticipantsPage } from './features/admin-evenements/pages/ParticipantsPage'
 import { ProgrammeAdminPage } from './features/admin-evenements/pages/ProgrammeAdminPage'
 import { navigation as navAdminPaiements } from './features/admin-paiements/navigation'
@@ -34,6 +35,7 @@ import { MesBilletsPage } from './features/billets/pages/MesBilletsPage'
 import { navigation as navControle } from './features/controle/navigation'
 import { navigation as navEvenements } from './features/evenements/navigation'
 import { DetailEvenementPage } from './features/evenements/pages/DetailEvenementPage'
+import { ApercuModelePage } from './features/evenements/pages/ApercuModelePage'
 import { ListeEvenementsPage } from './features/evenements/pages/ListeEvenementsPage'
 import { navigation as navParametres } from './features/parametres/navigation'
 import { ParametresPage } from './features/parametres/pages/ParametresPage'
@@ -86,6 +88,7 @@ export default function App() {
             <Route element={<GabaritAdaptatif />}>
               <Route index element={<ListeEvenementsPage />} />
               <Route path="evenements/:id" element={<DetailEvenementPage />} />
+              <Route path="apercu-modele/:cle" element={<ApercuModelePage />} />
             </Route>
 
             {/* Authentification */}
@@ -110,6 +113,7 @@ export default function App() {
               <Route path="admin/evenements" element={admin(<AdminEvenementsPage />)} />
               <Route path="admin/evenements/nouveau" element={admin(<FormulaireEvenementPage />)} />
               <Route path="admin/evenements/:id" element={admin(<FormulaireEvenementPage />)} />
+              <Route path="admin/evenements/:id/page" element={admin(<ConstructeurPage />)} />
               <Route path="admin/evenements/:id/programme" element={admin(<ProgrammeAdminPage />)} />
               <Route path="admin/evenements/:id/participants" element={admin(<ParticipantsPage />)} />
               <Route path="admin/paiements" element={admin(<PaiementsPage />)} />

@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { messageErreur } from '../../../core/api/httpClient'
 import type { Evenement } from '../../../core/api/types'
 import { Badge } from '../../../core/components/ui/Badge'
-import { Bouton } from '../../../core/components/ui/Bouton'
+import { Bouton, classeBouton } from '../../../core/components/ui/Bouton'
 import { Champ, ChampSelection, ChampTexte } from '../../../core/components/ui/Champ'
 import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte, EnteteSection, Modale } from '../../../core/components/ui/Divers'
@@ -11,7 +11,7 @@ import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
 import { STATUTS_EVENEMENT } from '../../../core/constants/statuts'
 import { heure, montant } from '../../../core/utils/format'
-import { libelleTarif } from '../../evenements/components/ProgrammeEvenement'
+import { libelleTarif } from '../../evenements/utils/tarif'
 import { AMBIANCES, CLES_AMBIANCE } from '../../evenements/theme/ambiances'
 import { CATEGORIES, CLES_CATEGORIE, categorieDe } from '../../evenements/theme/categories'
 import { adminEvenementService, type DonneesActivite } from '../services/adminEvenementService'
@@ -252,8 +252,11 @@ export function ProgrammeAdminPage() {
         actions={
           !verrouille && (
             <>
-              <Link to={`/admin/evenements/${cadre.id}`} className="inline-flex h-11 items-center gap-2 rounded-lg border-[1.5px] border-primaire px-4 font-semibold text-primaire hover:bg-primaire-clair">
-                <Icone nom="edit" taille={18} /> Infos et apparence
+              <Link to={`/admin/evenements/${cadre.id}`} className={classeBouton('secondaire')}>
+                <Icone nom="edit" taille={18} /> Informations
+              </Link>
+              <Link to={`/admin/evenements/${cadre.id}/page`} className={classeBouton('sombre')}>
+                <Icone nom="web" taille={18} /> Page de l'événement
               </Link>
               <Bouton icone="add" onClick={() => ouvrirActivite(null)}>
                 Ajouter une activité

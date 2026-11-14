@@ -1,5 +1,6 @@
 import { http } from '../../../core/api/httpClient'
 import type { Evenement, PageResponse } from '../../../core/api/types'
+import type { PageConfig } from '../site/types'
 
 export interface FiltresEvenements {
   titre?: string
@@ -14,8 +15,8 @@ export interface FiltresEvenements {
 
 export const evenementService = {
   /** Programme d'un événement-cadre : activités et pass publiés. */
-  async activites(id: number) {
-    return (await http.get<Evenement[]>(`/evenements/${id}/activites`)).data
+  async activites(id: number, admin = false) {
+    return (await http.get<Evenement[]>(admin ? `/admin/evenements/${id}/activites` : `/evenements/${id}/activites`)).data
   },
   async lister(f: FiltresEvenements) {
     const params: Record<string, string | number> = { page: f.page ?? 0, size: 12, sort: 'dateDebut,asc' }
@@ -26,8 +27,13 @@ export const evenementService = {
     }
     return (await http.get<PageResponse<Evenement>>('/evenements', { params })).data
   },
-  async detail(id: number) {
-    return (await http.get<Evenement>(`/evenements/${id}`)).data
+  /** admin : l'administrateur voit aussi les brouillons (aperçu avant publication). */
+  async detail(id: number, admin = false) {
+    return (await http.get<Evenement>(admin ? `/admin/evenements/${id}` : `/evenements/${id}`)).data
+  },
+  /** Sections de la page d'un événement (vide : la page de base se construit seule). */
+  async page(id: number, admin = false) {
+    return (await http.get<PageConfig>(admin ? `/admin/evenements/${id}/page` : `/evenements/${id}/page`)).data
   },
   /** Réservation existante du participant pour cet événement (RG-06 : une seule par événement). */
   async maReservation(evenementId: number) {

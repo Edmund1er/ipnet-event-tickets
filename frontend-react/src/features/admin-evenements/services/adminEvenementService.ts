@@ -1,6 +1,7 @@
 import { http, telecharger } from '../../../core/api/httpClient'
 import type { Evenement, PageResponse, TypeProfil } from '../../../core/api/types'
 import type { StatutEvenement, StatutInscription } from '../../../core/constants/statuts'
+import type { PageConfig } from '../../evenements/site/types'
 
 export interface DonneesEvenement {
   titre: string
@@ -64,6 +65,14 @@ export const adminEvenementService = {
   /** Masque définitivement un événement passé (il quitte toutes les listes). */
   async masquer(id: number) {
     await http.post(`/admin/evenements/${id}/masquage`)
+  },
+  async enregistrerPage(id: number, page: PageConfig) {
+    return (await http.put<PageConfig>(`/admin/evenements/${id}/page`, page)).data
+  },
+  async envoyerImagePage(id: number, fichier: File) {
+    const fd = new FormData()
+    fd.append('fichier', fichier)
+    return (await http.post<{ nom: string }>(`/admin/evenements/${id}/page/images`, fd)).data.nom
   },
   async activites(id: number) {
     return (await http.get<Evenement[]>(`/admin/evenements/${id}/activites`)).data

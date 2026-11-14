@@ -101,6 +101,8 @@ public class SecurityConfiguration {
                     "/api/evenements",
                     "/api/evenements/*",
                     "/api/evenements/*/image",
+                    "/api/evenements/*/page",
+                    "/api/evenements/*/page/images/*",
                     "/api/referentiels/**",
                     "/api/installation"
                 ).permitAll()

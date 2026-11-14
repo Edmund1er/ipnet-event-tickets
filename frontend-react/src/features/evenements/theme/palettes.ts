@@ -24,12 +24,3 @@ export const PALETTES: Palette[] = [
 export function couleurParDefaut(id: number): string {
   return PALETTES[Math.abs(id) % PALETTES.length].couleur
 }
-
-export type CleModele = 'CLASSIQUE' | 'AFFICHE' | 'MAGAZINE' | 'EPURE'
-
-export const MODELES: { cle: CleModele; nom: string; description: string }[] = [
-  { cle: 'CLASSIQUE', nom: 'Classique', description: 'Grande bannière, texte à gauche, réservation à droite.' },
-  { cle: 'AFFICHE', nom: 'Affiche', description: 'Visuel d’un côté, informations et réservation de l’autre.' },
-  { cle: 'MAGAZINE', nom: 'Magazine', description: 'Titre centré, image large, lecture en colonne.' },
-  { cle: 'EPURE', nom: 'Épuré', description: 'Sobre et rapide, idéal quand il y a peu de contenu.' },
-]

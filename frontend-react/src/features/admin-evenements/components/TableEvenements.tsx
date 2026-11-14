@@ -161,8 +161,13 @@ export function TableEvenements({ elements, surAction }: Props) {
                           <Icone nom="edit" taille={18} /> Modifier
                         </Link>
                       )}
+                      {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
+                        <Link to={`/admin/evenements/${e.id}/page`} className={classeBouton('primaire', 'petit')}>
+                          <Icone nom="web" taille={18} /> Page
+                        </Link>
+                      )}
                       {e.type === 'CADRE' && (
-                        <Link to={`/admin/evenements/${e.id}/programme`} className={classeBouton('primaire', 'petit')}>
+                        <Link to={`/admin/evenements/${e.id}/programme`} className={classeBouton('sombre', 'petit')}>
                           <Icone nom="calendar_view_week" taille={18} /> Programme
                         </Link>
                       )}

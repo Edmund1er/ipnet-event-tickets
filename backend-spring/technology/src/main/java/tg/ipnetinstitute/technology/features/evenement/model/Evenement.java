@@ -94,6 +94,9 @@ public class Evenement {
     @Column(length = 20)
     private String modele;
 
+    @Column(columnDefinition = "TEXT")
+    private String page;
+
     @Column(name = "couleur_principale", length = 7)
     private String couleurPrincipale;
 
@@ -318,6 +321,12 @@ public class Evenement {
         this.modele = modele;
     }
 
+    /** Contenu de la page publique (JSON déjà validé par ServicePageEvenement). */
+    public void definirPage(String json) {
+        this.page = json;
+    }
+
+    public String getPage() { return page; }
     public String getModele() { return modele; }
     public String getAmbiance() { return ambiance; }
     public String getCouleurPrincipale() { return couleurPrincipale; }

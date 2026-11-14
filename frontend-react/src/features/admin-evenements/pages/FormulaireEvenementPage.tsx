@@ -8,8 +8,6 @@ import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte, EnteteSection } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
-import type { CleAmbiance } from '../../evenements/theme/ambiances'
-import { PanneauApparence, type Apparence } from '../components/PanneauApparence'
 import { useImageProtegee } from '../../../core/hooks/useRequete'
 import { depuisChampDateHeure, versChampDateHeure } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
@@ -29,7 +27,6 @@ export function FormulaireEvenementPage() {
   const [enCours, setEnCours] = useState(false)
   // Programme multi-jours (semaine culturelle…) ou événement simple : choisi à la création, figé ensuite
   const [programme, setProgramme] = useState(false)
-  const [apparence, setApparence] = useState<Apparence>({ modele: 'CLASSIQUE', couleur: null, ambiance: 'SOBRE' })
   const [imageEnCours, setImageEnCours] = useState(false)
   const [versionImage, setVersionImage] = useState(0)
   // Création : l'image est choisie tout de suite, envoyée juste après la création du brouillon
@@ -46,7 +43,6 @@ export function FormulaireEvenementPage() {
       .then((e) => {
         setEvt(e)
         setProgramme(e.type === 'CADRE')
-        setApparence({ modele: e.modele ?? 'CLASSIQUE', couleur: e.couleurPrincipale ?? null, ambiance: (e.ambiance as CleAmbiance) ?? 'SOBRE' })
         setF({
           titre: e.titre,
           description: e.description ?? '',
@@ -109,17 +105,11 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Image non enregistrée : ${messageErreur(errImage)}`)
           }
         }
-        await adminEvenementService.definirApparence(evt.id, apparence.ambiance, apparence.couleur, apparence.modele)
         await adminEvenementService.modifier(evt.id, donnees)
         toast.succes('Événement modifié avec succès')
         navigate('/admin/evenements')
       } else {
         const cree = await adminEvenementService.creer(donnees)
-        try {
-          await adminEvenementService.definirApparence(cree.id, apparence.ambiance, apparence.couleur, apparence.modele)
-        } catch (errApp) {
-          toast.erreur(`Brouillon créé, mais l'apparence n'a pas été enregistrée : ${messageErreur(errApp)}`)
-        }
         if (imageChoisie) {
           try {
             await adminEvenementService.envoyerImage(cree.id, imageChoisie)
@@ -127,8 +117,8 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Brouillon créé, mais l'image n'a pas été envoyée : ${messageErreur(errImage)}`)
           }
         }
-        toast.succes(programme ? 'Programme créé : ajoutez maintenant ses activités' : 'Événement créé avec succès')
-        navigate(programme ? `/admin/evenements/${cree.id}/programme` : '/admin/evenements')
+        toast.succes(programme ? 'Programme créé : ajoutez maintenant ses activités' : 'Événement créé : choisissez maintenant le type et le contenu de sa page')
+        navigate(programme ? `/admin/evenements/${cree.id}/programme` : `/admin/evenements/${cree.id}/page`)
       }
     } catch (err) {
       const api = versErreurApi(err)
@@ -248,6 +238,11 @@ export function FormulaireEvenementPage() {
             </div>
             )}
           </fieldset>
+          {evt && (
+            <Link to={`/admin/evenements/${evt.id}/page`} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[1.5px] border-primaire font-semibold text-primaire hover:bg-primaire-clair">
+              <Icone nom="web" taille={20} /> Page de l'événement : type, sections, images
+            </Link>
+          )}
           {evt && programme && (
             <Link to={`/admin/evenements/${evt.id}/programme`} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[1.5px] border-primaire font-semibold text-primaire hover:bg-primaire-clair">
               <Icone nom="calendar_view_week" taille={20} /> Gérer les activités et les pass
@@ -318,9 +313,6 @@ export function FormulaireEvenementPage() {
         </aside>
 
         </div>
-      </div>
-      <div className="mt-5">
-        <PanneauApparence valeur={apparence} surChangement={setApparence} desactive={!!verrouille} />
       </div>
     </div>
   )
