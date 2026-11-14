@@ -8,6 +8,14 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
 
   /* En-tête */
   logoTexte(doc, un(doc, '#header .logo'), c.nomSite, 'color:#fff')
+  // Sur écran moyen, le template place le bouton avant le logo : l'ordre est imposé
+  const logoEntete = un(doc, '#header .logo')
+  if (logoEntete) {
+    logoEntete.style.order = '-1'
+    logoEntete.style.marginRight = 'auto'
+  }
+  const boutonEntete = un(doc, '#header .cta-btn')
+  if (boutonEntete) boutonEntete.style.whiteSpace = 'nowrap'
   menu(un(doc, '#navmenu > ul'), c.menu)
   action(un(doc, '#header .cta-btn'), 'reserver', null, c.boutonReserver)
 

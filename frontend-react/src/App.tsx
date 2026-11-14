@@ -5,6 +5,7 @@ import { AppLayout } from './core/components/layout/AppLayout'
 import { PublicLayout } from './core/components/layout/PublicLayout'
 import { ChargementPage } from './core/components/ui/Chargement'
 import { EtatVide } from './core/components/ui/Divers'
+import { ImmersionProvider } from './core/components/layout/Immersion'
 import { ToastsProvider } from './core/components/ui/Toasts'
 import type { EntreeNavigation } from './core/navigation/types'
 import { GardeInstallation } from './core/routing/GardeInstallation'
@@ -82,6 +83,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastsProvider>
+          <ImmersionProvider>
           <GardeInstallation>
           <Routes>
             {/* Pages publiques (et accessibles une fois connecté) */}
@@ -133,6 +135,7 @@ export default function App() {
             </Route>
           </Routes>
           </GardeInstallation>
+          </ImmersionProvider>
         </ToastsProvider>
       </AuthProvider>
     </BrowserRouter>

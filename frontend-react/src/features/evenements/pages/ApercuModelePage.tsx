@@ -1,4 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
+import { useImmersion } from '../../../core/components/layout/Immersion'
+import { COULEURS_MODELE } from '../site/immersion'
 import { PageSite } from '../site/PageSite'
 import { evenementExemple, pageExemple } from '../site/exemple'
 import { MODELES, PAGE_VIDE, modeleDe } from '../site/types'
@@ -11,8 +13,9 @@ export function ApercuModelePage() {
   const { cle } = useParams()
   const modele = modeleDe(cle?.toUpperCase()) ?? MODELES[0]
   const vide = new URLSearchParams(window.location.search).has('vide')
+  useImmersion({ ...COULEURS_MODELE[modele.cle], retour: { libelle: 'Événements', vers: '/' } })
   return (
-    <div className="-mx-3 -my-6 flex h-[calc(100dvh-6.5rem)] min-h-[480px] flex-col sm:-mx-8 sm:-my-9">
+    <div className="flex h-[calc(100dvh-4rem)] min-h-[420px] flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-white px-4 py-2 text-sm">
         <span className="font-semibold">Aperçu du modèle :</span>
         {MODELES.map((m) => (

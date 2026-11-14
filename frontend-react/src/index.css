@@ -36,6 +36,36 @@
   --color-annule: #374151;
 }
 
+/*
+ * Mode immersion : l'en-tête et le menu latéral prennent les couleurs de la page affichée (template d'un événement).
+ * Les variables --lay-* sont posées sur la racine du gabarit.
+ */
+[data-immersif] .lay-aside,
+[data-immersif] .lay-header {
+  background: var(--lay-fond) !important;
+  color: var(--lay-texte) !important;
+  border-color: var(--lay-bordure) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+[data-immersif] .lay-aside :where(span, p, a, button, svg, h1, h2),
+[data-immersif] .lay-header :where(span, p, a, button, svg, h1, h2) {
+  color: inherit !important;
+}
+[data-immersif] .lay-lien:hover,
+[data-immersif] .lay-header button:hover {
+  background: color-mix(in srgb, var(--lay-texte) 16%, transparent) !important;
+}
+[data-immersif] .lay-aside a.lay-actif,
+[data-immersif] .lay-header .lay-bouton {
+  background: var(--lay-accent) !important;
+  color: var(--lay-sur-accent) !important;
+}
+[data-immersif] .lay-aside a.lay-actif :where(span, svg),
+[data-immersif] .lay-header .lay-bouton :where(span, svg) {
+  color: var(--lay-sur-accent) !important;
+}
+
 @layer base {
   html,
   body,

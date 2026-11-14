@@ -1,15 +1,15 @@
 import { useCallback, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../../core/auth/AuthContext'
 import { messageErreur, versErreurApi } from '../../../core/api/httpClient'
-import { Bouton } from '../../../core/components/ui/Bouton'
+import { useImmersion } from '../../../core/components/layout/Immersion'
 import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte } from '../../../core/components/ui/Divers'
-import { Icone } from '../../../core/components/ui/Icone'
 import { useRequete } from '../../../core/hooks/useRequete'
 import { versDate } from '../../../core/utils/format'
 import { BlocReservation } from '../components/BlocReservation'
 import { ModaleReservation } from '../components/ModaleReservation'
+import { COULEURS_MODELE } from '../site/immersion'
 import { PageSite } from '../site/PageSite'
 import { PAGE_VIDE, modeleDe, type CleModele } from '../site/types'
 import { evenementService } from '../services/evenementService'
@@ -46,6 +46,17 @@ export function DetailEvenementPage() {
   const [enCours, setEnCours] = useState(false)
 
   const ouvrirReservation = useCallback(() => setOuverte(true), [])
+  // La page prend toute la place et habille l'en-tête et le menu aux couleurs de son template
+  const modeleCourant = modeleEffectif(evt?.modele, parent?.modele, evt?.type === 'CADRE')
+  useImmersion(
+    evt
+      ? {
+          ...COULEURS_MODELE[modeleCourant],
+          retour: { libelle: parent ? parent.titre : 'Événements', vers: parent ? `/evenements/${parent.id}` : '/' },
+          badge: evt.statut === 'BROUILLON' ? 'Brouillon : visible par vous seul' : undefined,
+        }
+      : null,
+  )
   const ouvrirActivite = useCallback((cible: number) => navigate(`/evenements/${cible}`), [navigate])
 
   if (chargement) return <ChargementPage />
@@ -56,7 +67,7 @@ export function DetailEvenementPage() {
   const passe = (versDate(finVente)?.getTime() ?? 0) < Date.now()
   const reservable = evt.statut === 'PUBLIE' && !passe && evt.placesRestantes > 0
   const passes = (elements ?? []).filter((e) => e.type === 'PASS' && e.statut === 'PUBLIE')
-  const modele = modeleEffectif(evt.modele, parent?.modele, !!estCadre)
+  const modele = modeleCourant
 
   async function reserver() {
     setErreurResa(null)
@@ -89,24 +100,8 @@ export function DetailEvenementPage() {
   )
 
   return (
-    <div className="-mx-3 -my-6 flex h-[calc(100dvh-6.5rem)] min-h-[480px] flex-col sm:-mx-8 sm:-my-9" style={themeDe(evt)}>
-      {/* Barre de l'application : retour, brouillon éventuel, réservation toujours accessible */}
-      <div className="flex items-center justify-between gap-3 border-b border-black/10 bg-white px-4 py-2">
-        <Link to={parent ? `/evenements/${parent.id}` : '/'} className="inline-flex items-center gap-1 text-sm font-semibold text-encre hover:text-rouge">
-          <Icone nom="arrow_back" taille={18} /> {parent ? parent.titre : 'Tous les événements'}
-        </Link>
-        <div className="flex items-center gap-3">
-          {evt.statut === 'BROUILLON' && <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Brouillon : visible par vous seul</span>}
-          {!evt.accesLibre && (
-            <Bouton variante="rouge" taille="petit" icone="confirmation_number" onClick={ouvrirReservation}>
-              {estCadre ? 'Choisir un pass' : evt.prix === 0 ? 'M’inscrire' : 'Réserver'}
-            </Bouton>
-          )}
-        </div>
-      </div>
-      <div className="min-h-0 flex-1">
-        <PageSite evenement={evt} elements={elements ?? []} config={config ?? PAGE_VIDE} modele={modele} surReserver={ouvrirReservation} surOuvrir={ouvrirActivite} />
-      </div>
+    <div className="h-[calc(100dvh-4rem)] min-h-[420px]" style={themeDe(evt)}>
+      <PageSite evenement={evt} elements={elements ?? []} config={config ?? PAGE_VIDE} modele={modele} surReserver={ouvrirReservation} surOuvrir={ouvrirActivite} />
       <ModaleReservation evenement={evt} passes={passes} ouverte={ouverte} surFermeture={() => setOuverte(false)} reservation={reservation} />
     </div>
   )
