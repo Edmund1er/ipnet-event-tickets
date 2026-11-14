@@ -17,7 +17,7 @@ export function appliquerSoiree(doc: Document, c: ContenuPage) {
   ecrire(doc, '.slider_text p', c.lieu ?? '')
   const titre = un(doc, '.slider_text h3')
   if (titre) titre.style.fontSize = c.titre.length > 28 ? '40px' : c.titre.length > 16 ? '64px' : ''
-  if (c.imageHero) fond(un(doc, '.single_slider'), c.imageHero)
+  if (c.imageHero) fond(un(doc, '.single_slider'), c.imageHero, c)
 
   /* Intervenants */
   const interv = un(doc, '.performar_area')

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException;
 import tg.ipnetinstitute.technology.config.Auditable;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement;
+import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Apparence;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Creneau;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Intervenant;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Section;
@@ -36,6 +37,7 @@ public class ServicePageEvenement {
     private static final Pattern ID_SECTION = Pattern.compile("[A-Za-z0-9_-]{1,40}");
     private static final Pattern JOUR = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
     private static final Pattern HEURE = Pattern.compile("([01]\\d|2[0-3]):[0-5]\\d");
+    private static final Pattern COULEUR = Pattern.compile("#[0-9a-fA-F]{6}");
 
     private final EvenementRepository evenements;
     private final AccesEvenement acces;
@@ -103,7 +105,9 @@ public class ServicePageEvenement {
     }
 
     private PageEvenement valider(PageEvenement p) {
-        if (p == null || p.sections() == null) return PageEvenement.vide();
+        if (p == null) return PageEvenement.vide();
+        Apparence apparence = apparence(p.apparence());
+        if (p.sections() == null) return new PageEvenement(1, apparence, List.of());
         if (p.sections().size() > MAX_SECTIONS) {
             throw new IllegalArgumentException("Une page ne peut pas dépasser " + MAX_SECTIONS + " sections");
         }
@@ -119,7 +123,27 @@ public class ServicePageEvenement {
                     texte(s.bouton(), 40), texte(s.adresse(), 300), texte(s.telephone(), 40), texte(s.email(), 120),
                     intervenants(s.intervenants()), creneaux(s.creneaux())));
         }
-        return new PageEvenement(1, propres);
+        return new PageEvenement(1, apparence, propres);
+    }
+
+    private Apparence apparence(Apparence valeur) {
+        if (valeur == null) return null;
+        String principale = couleur(valeur.couleurPrincipale());
+        String secondaire = couleur(valeur.couleurSecondaire());
+        String bloc = couleur(valeur.couleurBloc());
+        Integer opacite = valeur.opaciteBloc();
+        if (opacite != null && (opacite < 20 || opacite > 90)) {
+            throw new IllegalArgumentException("L’intensité du voile doit être comprise entre 20 et 90");
+        }
+        if (principale == null && secondaire == null && bloc == null && opacite == null) return null;
+        return new Apparence(principale, secondaire, bloc, opacite);
+    }
+
+    private String couleur(String valeur) {
+        if (valeur == null || valeur.isBlank()) return null;
+        String resultat = valeur.strip();
+        if (!COULEUR.matcher(resultat).matches()) throw new IllegalArgumentException("Couleur invalide (format hexadécimal #RRGGBB attendu)");
+        return resultat.toLowerCase();
     }
 
     private List<Intervenant> intervenants(List<Intervenant> liste) {

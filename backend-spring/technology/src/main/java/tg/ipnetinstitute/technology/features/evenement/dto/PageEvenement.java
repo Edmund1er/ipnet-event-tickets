@@ -6,13 +6,21 @@ import java.util.List;
  * Contenu de la page publique d'un événement : une liste de sections facultatives, dans l'ordre voulu par l'administrateur.
  * Aucune section n'est obligatoire : sans section, la page de base du modèle choisi se construit à partir de l'événement.
  */
-public record PageEvenement(int version, List<Section> sections) {
+public record PageEvenement(int version, Apparence apparence, List<Section> sections) {
 
     public static final List<String> TYPES = List.of("HERO", "A_PROPOS", "INTERVENANTS", "PROGRAMME", "LIEU", "TEXTE");
 
-    public static PageEvenement vide() {
-        return new PageEvenement(1, List.of());
+    /** Compatibilité avec les pages enregistrées avant l'ajout des réglages d'apparence. */
+    public PageEvenement(int version, List<Section> sections) {
+        this(version, null, sections);
     }
+
+    public static PageEvenement vide() {
+        return new PageEvenement(1, null, List.of());
+    }
+
+    /** Couleurs contrôlées côté serveur avant insertion dans les styles de la page. */
+    public record Apparence(String couleurPrincipale, String couleurSecondaire, String couleurBloc, Integer opaciteBloc) {}
 
     /** Une section. Les champs inutiles pour son type restent vides. */
     public record Section(

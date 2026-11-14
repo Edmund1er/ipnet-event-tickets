@@ -57,12 +57,52 @@ document.addEventListener('click', function (e) {
 }, true);
 `;
 
+function appliquerPalette(doc: Document, contenu: ContenuPage) {
+  const primaire = contenu.couleurPrincipale
+  if (!primaire) return
+  const secondaire = contenu.couleurSecondaire ?? primaire
+  const style = doc.createElement('style')
+  style.textContent = `
+    :root {
+      --ipnet-primary: ${primaire};
+      --ipnet-secondary: ${secondaire};
+      --accent-color: var(--ipnet-primary);
+      --heading-color: var(--ipnet-secondary);
+    }
+    .cta-btn, .buy_ticket a, .buy_tkt a, .boxed-btn3, .boxed-btn-white,
+    .ticket, .btn-main-md, .buy-btn, a[data-ipnet="reserver"] {
+      background-color: var(--ipnet-primary) !important;
+      border-color: var(--ipnet-primary) !important;
+      color: #fff !important;
+    }
+    .alternate, .section-title h2, .section-title h3, .section_title h3,
+    .nav-tabs .nav-link.active, .nav-pills .nav-link.active {
+      color: var(--ipnet-secondary) !important;
+    }
+    .nav-tabs .nav-link.active, .nav-pills .nav-link.active {
+      background-color: var(--ipnet-primary) !important;
+    }
+  `
+  doc.head.append(style)
+}
+
 function finaliser(doc: Document, dossier: string, contenu: ContenuPage, origine: string) {
+  appliquerPalette(doc, contenu)
   // Scripts de cartes et de suivi : retirés (la carte est remplacée par un plan intégré sans clé d'API)
   doc.querySelectorAll('script').forEach((s) => {
     const src = s.getAttribute('src') ?? '';
     if (/googleapis\.com\/maps|google-map|gmap\.js|analytics|googletagmanager/i.test(src) || /initMap|google\.maps/.test(s.textContent ?? '')) s.remove();
   });
+  // Retire les animations et préchargeurs des sites démo : le contenu reste visible sans JS tiers.
+  doc.querySelectorAll('[data-aos]').forEach((el) => {
+    el.removeAttribute('data-aos')
+    el.removeAttribute('data-aos-delay')
+    el.removeAttribute('data-aos-duration')
+    el.removeAttribute('data-aos-offset')
+    el.classList.remove('aos-init', 'aos-animate')
+  })
+  doc.querySelector('#preloader')?.remove()
+
   // Formulaires de démonstration : retirés
   doc.querySelectorAll('form').forEach((f) => f.remove());
   // Liens vers les autres pages de démonstration : neutralisés (les liens externes sont conservés)

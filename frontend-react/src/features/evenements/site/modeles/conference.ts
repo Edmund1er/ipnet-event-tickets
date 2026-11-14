@@ -1,6 +1,6 @@
 import { avatar } from '../contenu'
 import type { ContenuPage } from '../types'
-import { action, ancre, ecrire, image, logoTexte, menu, miniature, plan, repeter, retirer, tous, un } from './outils'
+import { action, ancre, ecrire, image, imageHero, logoTexte, menu, miniature, plan, repeter, retirer, tous, un } from './outils'
 
 /** Template « TheEvent » : conférence, séminaire. Orateurs en grille, programme par onglets de jours, billets en lignes. */
 export function appliquerConference(doc: Document, c: ContenuPage) {
@@ -23,7 +23,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   const hero = un(doc, '#hero')
   ecrire(hero ?? doc, 'h2', c.titre)
   ecrire(hero ?? doc, '.container.text-center p', [c.dateTexte, c.lieu].filter(Boolean).join(' · '))
-  if (c.imageHero) image(un(doc, '#hero > img'), c.imageHero)
+  if (c.imageHero) imageHero(hero, un(doc, '#hero > img') as HTMLImageElement | null, c.imageHero, c)
   retirer(doc, '.pulsating-play-btn')
   const colonnes = tous(doc, '.about-info .row > [class*="col-"]')
   const [colApropos, colLieu, colDate] = colonnes

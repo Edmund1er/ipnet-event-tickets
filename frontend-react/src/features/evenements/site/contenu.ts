@@ -1,5 +1,6 @@
 import type { Evenement } from '../../../core/api/types'
 import { montant } from '../../../core/utils/format'
+import { estHex } from '../theme/ambiances'
 import type { ContenuPage, CreneauConfig, Jour, Ligne, Offre, PageConfig, SectionConfig } from './types'
 
 const NOM_SITE = 'IPNET Events'
@@ -80,6 +81,7 @@ export function construireContenu(
   const estCadre = evt.type === 'CADRE'
 
   const hero = premiere('HERO')
+  const apparence = config.apparence
   const apropos = premiere('A_PROPOS')
   const interv = premiere('INTERVENANTS')
   const prog = premiere('PROGRAMME')
@@ -126,6 +128,10 @@ export function construireContenu(
   const intervenants = interv?.intervenants?.filter((i) => i.nom.trim())
   const contenu: ContenuPage = {
     titre: hero?.titre?.trim() || evt.titre,
+    couleurPrincipale: estHex(apparence?.couleurPrincipale) ? apparence.couleurPrincipale : undefined,
+    couleurSecondaire: estHex(apparence?.couleurSecondaire) ? apparence.couleurSecondaire : undefined,
+    couleurBloc: estHex(apparence?.couleurBloc) ? apparence.couleurBloc : undefined,
+    opaciteBloc: Math.min(90, Math.max(20, apparence?.opaciteBloc ?? 62)),
     accroche: hero?.sousTitre ?? undefined,
     dateTexte: dateTexte(evt),
     debutMs: new Date(evt.dateDebut).getTime(),

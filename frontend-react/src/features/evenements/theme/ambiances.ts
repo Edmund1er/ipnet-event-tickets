@@ -32,7 +32,7 @@ export const AMBIANCES: Record<CleAmbiance, Ambiance> = {
 export const CLES_AMBIANCE = Object.keys(AMBIANCES) as CleAmbiance[]
 export const COULEUR_DEFAUT = '#2563eb'
 
-const estHex = (c?: string | null): c is string => !!c && /^#[0-9a-fA-F]{6}$/.test(c)
+export const estHex = (c?: string | null): c is string => !!c && /^#[0-9a-fA-F]{6}$/.test(c)
 
 function luminance(hex: string) {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { messageErreur } from '../../../core/api/httpClient'
 import type { Evenement } from '../../../core/api/types'
@@ -8,9 +8,11 @@ import { Alerte, EnteteSection } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
 import { PageSite } from '../../evenements/site/PageSite'
+import { COULEURS_MODELE } from '../../evenements/site/immersion'
 import { MODELES, PAGE_VIDE, modeleDe, type CleModele, type PageConfig, type SectionConfig, type TypeSection } from '../../evenements/site/types'
 import { evenementService } from '../../evenements/services/evenementService'
 import { EditeurSection, TYPES_SECTION } from '../components/EditeurSection'
+import { PALETTES_PAGE } from '../../evenements/theme/palettes'
 import { adminEvenementService } from '../services/adminEvenementService'
 
 const ORDRE: TypeSection[] = ['HERO', 'A_PROPOS', 'INTERVENANTS', 'PROGRAMME', 'LIEU', 'TEXTE']
@@ -33,6 +35,7 @@ export function ConstructeurPage() {
   const [modele, setModele] = useState<CleModele | null>(null)
   const [ouverte, setOuverte] = useState<string | null>(null)
   const [apercus, setApercus] = useState<Record<string, string>>({})
+  const apercusTemporaires = useRef(new Set<string>())
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
@@ -55,8 +58,12 @@ export function ConstructeurPage() {
   useEffect(() => {
     void charger()
   }, [charger])
+  useEffect(() => () => apercusTemporaires.current.forEach((url) => URL.revokeObjectURL(url)), [])
 
-  const surApercu = useCallback((nom: string, url: string) => setApercus((a) => ({ ...a, [nom]: url })), [])
+  const surApercu = useCallback((nom: string, url: string) => {
+    apercusTemporaires.current.add(url)
+    setApercus((a) => ({ ...a, [nom]: url }))
+  }, [])
   const modelePropose: CleModele = modele ?? (evt?.type === 'CADRE' ? 'RENCONTRE' : 'CEREMONIE')
   const urlImage = useMemo(() => (nom: string) => apercus[nom] ?? `${window.location.origin}/api/evenements/${evtId}/page/images/${nom}`, [apercus, evtId])
 
@@ -76,11 +83,19 @@ export function ConstructeurPage() {
     changer({ sections: [...sections, s] })
     setOuverte(s.id)
   }
+  const apparence = config.apparence ?? {}
+  const majApparence = (p: NonNullable<PageConfig['apparence']>) => changer({ apparence: { ...apparence, ...p } })
+  const paletteChoisie = PALETTES_PAGE.find((p) =>
+    p.couleurPrincipale === (apparence.couleurPrincipale ?? null) &&
+    p.couleurSecondaire === (apparence.couleurSecondaire ?? null) &&
+    p.couleurBloc === (apparence.couleurBloc ?? null) &&
+    p.opaciteBloc === (apparence.opaciteBloc ?? 62),
+  )?.cle
 
   async function enregistrer() {
     setEnCours(true)
     try {
-      await adminEvenementService.definirApparence(evtId, evt!.ambiance ?? null, evt!.couleurPrincipale ?? null, modelePropose)
+      await adminEvenementService.definirApparence(evtId, evt!.ambiance ?? null, config.apparence?.couleurPrincipale ?? null, modelePropose)
       const propre = await adminEvenementService.enregistrerPage(evtId, config)
       setConfig(propre)
       setModifie(false)
@@ -150,9 +165,59 @@ export function ConstructeurPage() {
             </div>
           </section>
 
-          {/* 2. Sections */}
+          {/* 2. Apparence */}
           <section className="carte p-5">
-            <h2 className="mb-1 text-lg font-bold">2. Sections de la page</h2>
+            <h2 className="mb-1 text-lg font-bold">2. Couleurs et image de fond</h2>
+            <p className="mb-4 text-sm text-attenue">Choisissez une combinaison prête à l’emploi ou ajustez les couleurs. L’image de la section « Bannière » sert de fond au grand visuel et reçoit le voile choisi ici.</p>
+            <fieldset disabled={verrouille} className="flex flex-col gap-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {PALETTES_PAGE.map((p) => {
+                  const active = paletteChoisie === p.cle
+                  return (
+                    <button
+                      key={p.cle}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => majApparence({ couleurPrincipale: p.couleurPrincipale, couleurSecondaire: p.couleurSecondaire, couleurBloc: p.couleurBloc, opaciteBloc: p.opaciteBloc })}
+                      className={`rounded-xl border-2 p-3 text-left transition ${active ? 'border-indigo-600 bg-indigo-50' : 'border-neutral-200 hover:border-neutral-400'}`}
+                    >
+                      <span className="mb-2 flex items-center gap-2">
+                        <span className="flex -space-x-1">
+                          <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurPrincipale ?? '#334155' }} />
+                          <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurSecondaire ?? '#cbd5e1' }} />
+                          <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurBloc ?? '#0f172a' }} />
+                        </span>
+                        <strong className="text-sm">{p.nom}</strong>
+                      </span>
+                      <span className="block text-xs text-attenue">{p.detail}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="grid gap-3 rounded-xl bg-neutral-50 p-4 sm:grid-cols-2">
+                <label className="flex items-center justify-between gap-3 text-sm font-semibold">
+                  <span>Couleur principale <small className="block font-normal text-attenue">Boutons et accents</small></span>
+                  <input aria-label="Couleur principale" type="color" value={apparence.couleurPrincipale ?? COULEURS_MODELE[modelePropose].accent} onChange={(e) => majApparence({ couleurPrincipale: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
+                </label>
+                <label className="flex items-center justify-between gap-3 text-sm font-semibold">
+                  <span>Couleur secondaire <small className="block font-normal text-attenue">Titres et détails</small></span>
+                  <input aria-label="Couleur secondaire" type="color" value={apparence.couleurSecondaire ?? COULEURS_MODELE[modelePropose].accent} onChange={(e) => majApparence({ couleurSecondaire: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
+                </label>
+                <label className="flex items-center justify-between gap-3 text-sm font-semibold sm:col-span-2">
+                  <span>Couleur du voile sur l’image <small className="block font-normal text-attenue">Le texte reste visible sur la bannière</small></span>
+                  <input aria-label="Couleur du voile sur l’image" type="color" value={apparence.couleurBloc ?? '#21133b'} onChange={(e) => majApparence({ couleurBloc: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
+                </label>
+                <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">
+                  <span className="flex justify-between">Intensité du voile <span>{apparence.opaciteBloc ?? 62}%</span></span>
+                  <input aria-label="Intensité du voile sur l’image" type="range" min={20} max={90} value={apparence.opaciteBloc ?? 62} onChange={(e) => majApparence({ opaciteBloc: Number(e.target.value) })} className="w-full accent-indigo-600" />
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          {/* 3. Sections */}
+          <section className="carte p-5">
+            <h2 className="mb-1 text-lg font-bold">3. Sections de la page</h2>
             <p className="mb-4 text-sm text-attenue">
               {sections.length === 0
                 ? 'Aucune section : la page de base s’affiche toute seule (titre, date, lieu, description, programme). Ajoutez des sections pour la personnaliser.'

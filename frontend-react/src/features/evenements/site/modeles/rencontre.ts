@@ -13,7 +13,7 @@ export function appliquerRencontre(doc: Document, c: ContenuPage) {
 
   /* Hero */
   const hero = un(doc, '.slider_area')
-  if (c.imageHero) fond(hero, c.imageHero)
+  if (c.imageHero) fond(hero, c.imageHero, c)
   ecrire(doc, '.opcity_text', c.titre.split(/\s+/)[0].slice(0, 14).toUpperCase())
   const titre = un(doc, '.title_text h3')
   if (titre) {

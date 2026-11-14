@@ -29,23 +29,25 @@ export function PageSite({ evenement, elements, config, modele, surReserver, sur
   const [html, setHtml] = useState<string | null>(null)
   const [erreur, setErreur] = useState<string | null>(null)
 
-  const cleContenu = JSON.stringify([evenement, elements, config, modele])
   const resoudre = useMemo(() => urlImage ?? ((nom: string) => `${window.location.origin}/api/evenements/${evenement.id}/page/images/${nom}`), [urlImage, evenement.id])
 
   useEffect(() => {
     let annule = false
-    setErreur(null)
-    const contenu = construireContenu(evenement, elements, config, resoudre)
-    // Les chemins d'image relatifs à l'API deviennent absolus : le cadre n'a pas la même base d'adresse
-    if (contenu.imageHero?.startsWith('/')) contenu.imageHero = window.location.origin + contenu.imageHero
-    genererPage(modele, contenu)
-      .then((h) => !annule && setHtml(h))
-      .catch((e) => !annule && setErreur(e instanceof Error ? e.message : 'Page indisponible'))
+    // Coalesce quick successive edits before parsing and rebuilding the full template document.
+    const timer = window.setTimeout(() => {
+      setErreur(null)
+      const contenu = construireContenu(evenement, elements, config, resoudre)
+      // Les chemins d'image relatifs à l'API deviennent absolus : le cadre n'a pas la même base d'adresse
+      if (contenu.imageHero?.startsWith('/')) contenu.imageHero = window.location.origin + contenu.imageHero
+      genererPage(modele, contenu)
+        .then((h) => !annule && setHtml(h))
+        .catch((e) => !annule && setErreur(e instanceof Error ? e.message : 'Page indisponible'))
+    }, 140)
     return () => {
       annule = true
+      window.clearTimeout(timer)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cleContenu])
+  }, [evenement, elements, config, modele, resoudre])
 
   useEffect(() => {
     function recu(e: MessageEvent) {

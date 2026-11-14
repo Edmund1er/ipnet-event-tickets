@@ -1,3 +1,5 @@
+import type { ContenuPage } from '../types'
+
 /** Petites fonctions de manipulation du DOM partagées par les adaptateurs de templates. */
 
 export const un = (racine: ParentNode, sel: string): HTMLElement | null => racine.querySelector<HTMLElement>(sel)
@@ -27,12 +29,30 @@ export function miniature(el: Element | null, url: string, alt: string, px: numb
   el.style.cssText = `width:${px}px;height:${px}px;max-width:${px}px;object-fit:cover;border-radius:50%`
 }
 
-/** Image de fond imposée par-dessus celle du template. */
-export function fond(el: HTMLElement | null, url: string) {
-  el?.style.setProperty('background-image', `url("${url.replace(/"/g, '%22')}")`, 'important')
-  el?.style.setProperty('background-size', 'cover', 'important')
-  el?.style.setProperty('background-position', 'center', 'important')
+function rgba(hex: string, opacite: number): string {
+  const valeurs = [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16))
+  return `rgba(${valeurs[0]},${valeurs[1]},${valeurs[2]},${opacite})`
 }
+
+/** Image de fond du bandeau, avec le voile de couleur choisi par l'administrateur. */
+export function fond(el: HTMLElement | null, url: string, c: ContenuPage) {
+  if (!el) return
+  const couleur = c.couleurBloc ?? '#21133b'
+  const opacite = c.opaciteBloc / 100
+  const image = `url("${url.replace(/"/g, '%22')}")`
+  el.style.setProperty('background-image', `linear-gradient(135deg, ${rgba(couleur, opacite)}, ${rgba(couleur, opacite * 0.72)}), ${image}`, 'important')
+  el.style.setProperty('background-size', 'cover', 'important')
+  el.style.setProperty('background-position', 'center', 'important')
+  el.style.setProperty('background-repeat', 'no-repeat', 'important')
+}
+
+/** Certains modèles utilisent une balise img plein écran au lieu d'un background CSS. */
+export function imageHero(hero: HTMLElement | null, cible: HTMLImageElement | null, url: string, c: ContenuPage) {
+  if (!hero) return
+  cible?.remove()
+  fond(hero, url, c)
+}
+
 
 /**
  * Duplique un élément « modèle » une fois par donnée, puis retire le modèle.

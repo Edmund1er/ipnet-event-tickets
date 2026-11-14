@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
 import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement;
+import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Apparence;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Creneau;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Intervenant;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Section;
@@ -67,6 +68,24 @@ class ServicePageEvenementTest {
         assertThat(relue.sections().get(0).titre()).isEqualTo("Présentation");
         assertThat(relue.sections().get(1).intervenants()).extracting(Intervenant::nom).containsExactly("Ama");
         assertThat(relue.sections().get(2).creneaux().get(0).fin()).isNull();
+    }
+
+    @Test
+    void apparenceEstEnregistreeEtLesCouleursNonHexadecimalesSontRefusees() {
+        var page = new PageEvenement(1, new Apparence("#7C3AED", "#c4b5fd", "#21133b", 66), List.of());
+        service.enregistrer(1L, page, 1L);
+
+        assertThat(service.lire(1L, true).apparence())
+                .isEqualTo(new Apparence("#7c3aed", "#c4b5fd", "#21133b", 66));
+        assertThatThrownBy(() -> service.enregistrer(1L,
+                new PageEvenement(1, new Apparence("red;display:none", null, null, 50), List.of()), 1L))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.enregistrer(1L,
+                new PageEvenement(1, new Apparence(null, null, null, 19), List.of()), 1L))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.enregistrer(1L,
+                new PageEvenement(1, new Apparence(null, null, null, 91), List.of()), 1L))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

@@ -3,6 +3,7 @@ export type CleModele = 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE'
 
 export interface DescriptionModele {
   cle: CleModele
+  /** Description du type d'événement, pas un nom de modèle technique. */
   nom: string
   pourQui: string
   /** Dossier des fichiers du template (public/modeles/<dossier>). */
@@ -10,10 +11,10 @@ export interface DescriptionModele {
 }
 
 export const MODELES: DescriptionModele[] = [
-  { cle: 'SOIREE', nom: 'Soirée / Concert', pourQui: 'Fêtes, soirées dansantes, concerts, événements nocturnes du campus. Fond noir, titre géant, ambiance de scène.', dossier: 'soiree' },
-  { cle: 'CONFERENCE', nom: 'Conférence', pourQui: 'Conférences, séminaires, journées scientifiques. Page sombre et sobre avec orateurs et programme par jour.', dossier: 'conference' },
-  { cle: 'RENCONTRE', nom: 'Rencontre / Forum', pourQui: 'Forums, hackathons, rencontres étudiantes, semaines thématiques. Dégradé coloré, compte à rebours, programme par jour.', dossier: 'rencontre' },
-  { cle: 'CEREMONIE', nom: 'Cérémonie / Gala', pourQui: 'Cérémonies, remises de diplômes, galas, portes ouvertes. Page claire et formelle avec onglets de jours et pass.', dossier: 'ceremonie' },
+  { cle: 'SOIREE', nom: 'Soirée, concert et événement nocturne', pourQui: 'Mise en scène immersive, grand titre et visuels expressifs.', dossier: 'soiree' },
+  { cle: 'CONFERENCE', nom: 'Conférence, séminaire et journée scientifique', pourQui: 'Présentation structurée des orateurs et du programme par jour.', dossier: 'conference' },
+  { cle: 'RENCONTRE', nom: 'Forum, hackathon et rencontre étudiante', pourQui: 'Présentation dynamique avec compte à rebours et programme quotidien.', dossier: 'rencontre' },
+  { cle: 'CEREMONIE', nom: 'Cérémonie, gala et portes ouvertes', pourQui: 'Présentation élégante avec programme par jour et offres de billets.', dossier: 'ceremonie' },
 ]
 
 export const modeleDe = (cle?: string | null) => MODELES.find((m) => m.cle === cle) ?? null
@@ -54,12 +55,20 @@ export interface SectionConfig {
   creneaux?: CreneauConfig[] | null
 }
 
+export interface ApparencePage {
+  couleurPrincipale?: string | null
+  couleurSecondaire?: string | null
+  couleurBloc?: string | null
+  opaciteBloc?: number | null
+}
+
 export interface PageConfig {
   version: number
+  apparence?: ApparencePage | null
   sections: SectionConfig[]
 }
 
-export const PAGE_VIDE: PageConfig = { version: 1, sections: [] }
+export const PAGE_VIDE: PageConfig = { version: 1, apparence: null, sections: [] }
 
 /* ---- Contenu résolu : ce que les templates affichent, qu'il vienne de la page ou de l'événement ---- */
 
@@ -94,6 +103,10 @@ export interface Offre {
 
 export interface ContenuPage {
   titre: string
+  couleurPrincipale?: string
+  couleurSecondaire?: string
+  couleurBloc?: string
+  opaciteBloc: number
   accroche?: string
   dateTexte: string
   /** Date de début en millisecondes, pour les comptes à rebours. */

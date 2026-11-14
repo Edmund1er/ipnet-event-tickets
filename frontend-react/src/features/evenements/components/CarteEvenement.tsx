@@ -5,10 +5,13 @@ import { dateLongue, montant } from '../../../core/utils/format'
 import { urlImageEvenement } from '../services/evenementService'
 import { themeDe } from '../theme/ambiances'
 
+// Photo Unsplash (photo-1492684223066-81342ee5ff30), locale pour éviter un appel réseau tiers à l'affichage.
+const IMAGE_EVENEMENT_DEFAUT = '/event-card-default.jpg'
+
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
-  // Les images sont ajoutées par l'administrateur : sans image, on n'affiche rien.
-  if (!evenement.aImage) return null
-  return <img src={urlImageEvenement(evenement.id)} alt="" loading="lazy" className={`object-cover ${className}`} />
+  // Photo locale par défaut, remplacée dès que l'organisateur fournit son propre visuel.
+  const src = evenement.aImage ? urlImageEvenement(evenement.id) : IMAGE_EVENEMENT_DEFAUT
+  return <img src={src} alt="" loading="lazy" className={`object-cover ${className}`} />
 }
 
 export function JaugePlaces({ evenement }: { evenement: Evenement }) {
@@ -38,18 +41,12 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
       className="carte-service group transition duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={themeDe(evenement)}
     >
-      {/* Sans photo : fond généré dans la couleur de l'événement (variée d'un événement à l'autre) */}
-      <div
-        className="relative aspect-[16/10] overflow-hidden"
-        style={{ backgroundImage: 'var(--ev-motif), linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))' }}
-      >
-        {evenement.aImage ? (
-          <VisuelEvenement evenement={evenement} className="h-full w-full transition-transform duration-500 group-hover:scale-110" />
-        ) : (
-          <div className="flex h-full items-center justify-center" style={{ color: 'var(--ev-sur-primaire)' }}>
-            <Icone nom={evenement.type === 'CADRE' ? 'calendar_view_week' : 'confirmation_number'} taille={64} className="opacity-30" />
-          </div>
-        )}
+      <div className="relative aspect-[16/10] overflow-hidden bg-neutral-900">
+        <VisuelEvenement evenement={evenement} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+        <span className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+          {evenement.type === 'CADRE' ? 'Programme' : 'Événement'}
+        </span>
         <span className="absolute right-0 top-4 rounded-l bg-white px-4 py-1.5 text-sm font-bold text-encre shadow-md">
           {evenement.type === 'CADRE' ? 'Programme' : evenement.prix === 0 ? 'Gratuit' : montant(evenement.prix, evenement.devise)}
         </span>

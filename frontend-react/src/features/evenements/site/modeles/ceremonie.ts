@@ -38,7 +38,7 @@ export function appliquerCeremonie(doc: Document, c: ContenuPage) {
 
   /* Bannière */
   const banniere = un(doc, 'section.banner')
-  if (c.imageHero) fond(banniere, c.imageHero)
+  if (c.imageHero) fond(banniere, c.imageHero, c)
   const mots = c.titre.trim().split(/\s+/)
   ecrire(doc, '.banner .block h1', mots[0])
   ecrire(doc, '.banner .block h2', mots.slice(1).join(' ') || c.accroche || '')

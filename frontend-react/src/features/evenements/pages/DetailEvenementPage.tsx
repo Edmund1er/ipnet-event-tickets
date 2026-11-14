@@ -13,7 +13,7 @@ import { COULEURS_MODELE } from '../site/immersion'
 import { PageSite } from '../site/PageSite'
 import { PAGE_VIDE, modeleDe, type CleModele } from '../site/types'
 import { evenementService } from '../services/evenementService'
-import { themeDe } from '../theme/ambiances'
+import { estHex, texteSur, themeDe } from '../theme/ambiances'
 
 /** Modèle choisi par l'admin ; une activité ou un pass reprend celui de son programme ; à défaut, un modèle par type d'événement. */
 function modeleEffectif(modele: string | null | undefined, modeleParent: string | null | undefined, programme: boolean): CleModele {
@@ -48,10 +48,13 @@ export function DetailEvenementPage() {
   const ouvrirReservation = useCallback(() => setOuverte(true), [])
   // La page prend toute la place et habille l'en-tête et le menu aux couleurs de son template
   const modeleCourant = modeleEffectif(evt?.modele, parent?.modele, evt?.type === 'CADRE')
+  const accentPage = config?.apparence?.couleurPrincipale
+  const accentValide = estHex(accentPage) ? accentPage : null
   useImmersion(
     evt
       ? {
           ...COULEURS_MODELE[modeleCourant],
+          ...(accentValide ? { accent: accentValide, surAccent: texteSur(accentValide) } : {}),
           retour: { libelle: parent ? parent.titre : 'Événements', vers: parent ? `/evenements/${parent.id}` : '/' },
           badge: evt.statut === 'BROUILLON' ? 'Brouillon : visible par vous seul' : undefined,
         }
