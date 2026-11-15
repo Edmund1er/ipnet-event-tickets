@@ -124,8 +124,8 @@ export function AppLayout({ entrees }: { entrees: EntreeNavigation[] }) {
               <Icone nom="menu" />
             </button>
             {immersion?.retour ? (
-              <Link to={immersion.retour.vers} className="lay-lien inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold">
-                <Icone nom="arrow_back" taille={18} /> {immersion.retour.libelle}
+              <Link to={immersion.retour.vers} className="lay-lien inline-flex items-center gap-1 rounded-lg px-1 py-1 text-sm font-semibold sm:px-2">
+                <span aria-hidden="true" className="text-base leading-none">←</span> {immersion.retour.libelle}
               </Link>
             ) : (
               <FilAriane chemin={location.pathname} entrees={visibles} />

@@ -32,25 +32,25 @@ export function PublicLayout() {
         <nav
           className={`lay-header relative flex w-full items-center justify-between border ${
             immersion
-              ? 'h-16 rounded-none px-4 sm:px-6'
+              ? 'h-16 rounded-none px-2 sm:px-6'
               : 'mx-2 max-w-[85rem] rounded-[36px] border-yellow-100/40 bg-yellow-50/60 px-4 py-3 backdrop-blur-md md:px-6 lg:px-8 xl:mx-auto'
           }`}
           aria-label="Navigation"
         >
           {immersion?.retour ? (
-            <Link to={immersion.retour.vers} className="lay-lien inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold">
-              <Icone nom="arrow_back" taille={18} /> {immersion.retour.libelle}
+            <Link to={immersion.retour.vers} className="lay-lien inline-flex items-center gap-1 rounded-lg px-1 py-1 text-sm font-semibold sm:px-2">
+              <span aria-hidden="true" className="text-base leading-none">←</span> {immersion.retour.libelle}
             </Link>
           ) : null}
           <Link to="/" className="flex items-center gap-3 rounded-lg text-xl font-bold text-neutral-800" aria-label="IP Events — accueil">
             <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-neutral-300">
               <img src="/logo_ipnet.jpg" alt="" className="h-full w-full origin-[58%_42%] scale-[1.6] object-cover object-[58%_42%]" />
             </span>
-            <span className="text-lg font-bold tracking-tight">
+            <span className="hidden text-lg font-bold tracking-tight sm:block">
               IPNET<span className="text-yellow-500">·</span>Events
             </span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-4 lg:gap-7">
+          <div className="flex items-center gap-1 sm:gap-4 lg:gap-7">
             <NavLink
               to="/"
               end
@@ -65,7 +65,7 @@ export function PublicLayout() {
             </Link>
             <Link
               to="/inscription"
-              className="lay-bouton inline-flex items-center justify-center gap-x-2 rounded-lg bg-orange-400 px-4 py-2.5 text-sm font-bold text-neutral-50 transition duration-300 hover:bg-orange-500"
+              className="lay-bouton inline-flex items-center justify-center gap-x-2 rounded-lg bg-orange-400 px-2 py-2.5 text-sm font-bold text-neutral-50 transition duration-300 hover:bg-orange-500 sm:px-4"
             >
               S'inscrire
             </Link>

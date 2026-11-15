@@ -12,39 +12,42 @@ import { GardeInstallation } from './core/routing/GardeInstallation'
 import { RequireAnonyme, RequireRole } from './core/routing/Gardes'
 
 import { navigation as navAdminEvenements } from './features/admin-evenements/navigation'
-import { AdminEvenementsPage } from './features/admin-evenements/pages/AdminEvenementsPage'
-import { FormulaireEvenementPage } from './features/admin-evenements/pages/FormulaireEvenementPage'
-import { ConstructeurPage } from './features/admin-evenements/pages/ConstructeurPage'
-import { ParticipantsPage } from './features/admin-evenements/pages/ParticipantsPage'
-import { ProgrammeAdminPage } from './features/admin-evenements/pages/ProgrammeAdminPage'
 import { navigation as navAdminPaiements } from './features/admin-paiements/navigation'
-import { ImportRelevePage } from './features/admin-paiements/pages/ImportRelevePage'
-import { PaiementsPage } from './features/admin-paiements/pages/PaiementsPage'
 import { navigation as navAdministration } from './features/administration/navigation'
-import { AgentsScanPage } from './features/administration/pages/AgentsScanPage'
-import { AuditPage } from './features/administration/pages/AuditPage'
-import { NotificationsPage } from './features/administration/pages/NotificationsPage'
-import { TableauDeBordPage } from './features/administration/pages/TableauDeBordPage'
-import { ConnexionPage } from './features/auth/pages/ConnexionPage'
-import { InscriptionPage } from './features/auth/pages/InscriptionPage'
-import { InstallationPage } from './features/auth/pages/InstallationPage'
-import { MotDePasseOubliePage, ReinitialisationPage } from './features/auth/pages/MotDePassePages'
-import { VerificationInscriptionPage } from './features/auth/pages/VerificationInscriptionPage'
-import { VerificationPage } from './features/auth/pages/VerificationPage'
 import { navigation as navBillets } from './features/billets/navigation'
-import { MesBilletsPage } from './features/billets/pages/MesBilletsPage'
 import { navigation as navControle } from './features/controle/navigation'
 import { navigation as navEvenements } from './features/evenements/navigation'
-import { DetailEvenementPage } from './features/evenements/pages/DetailEvenementPage'
-import { ApercuModelePage } from './features/evenements/pages/ApercuModelePage'
-import { ListeEvenementsPage } from './features/evenements/pages/ListeEvenementsPage'
 import { navigation as navParametres } from './features/parametres/navigation'
-import { ParametresPage } from './features/parametres/pages/ParametresPage'
 import { navigation as navProfil } from './features/profil/navigation'
-import { ProfilPage } from './features/profil/pages/ProfilPage'
 import { navigation as navReservations } from './features/reservations/navigation'
-import { MesReservationsPage } from './features/reservations/pages/MesReservationsPage'
-import { PaiementPage } from './features/reservations/pages/PaiementPage'
+
+// Charger chaque écran avec sa route pour garder le premier écran léger.
+const AdminEvenementsPage = lazy(() => import('./features/admin-evenements/pages/AdminEvenementsPage').then((m) => ({ default: m.AdminEvenementsPage })))
+const FormulaireEvenementPage = lazy(() => import('./features/admin-evenements/pages/FormulaireEvenementPage').then((m) => ({ default: m.FormulaireEvenementPage })))
+const ConstructeurPage = lazy(() => import('./features/admin-evenements/pages/ConstructeurPage').then((m) => ({ default: m.ConstructeurPage })))
+const ParticipantsPage = lazy(() => import('./features/admin-evenements/pages/ParticipantsPage').then((m) => ({ default: m.ParticipantsPage })))
+const ProgrammeAdminPage = lazy(() => import('./features/admin-evenements/pages/ProgrammeAdminPage').then((m) => ({ default: m.ProgrammeAdminPage })))
+const ImportRelevePage = lazy(() => import('./features/admin-paiements/pages/ImportRelevePage').then((m) => ({ default: m.ImportRelevePage })))
+const PaiementsPage = lazy(() => import('./features/admin-paiements/pages/PaiementsPage').then((m) => ({ default: m.PaiementsPage })))
+const AgentsScanPage = lazy(() => import('./features/administration/pages/AgentsScanPage').then((m) => ({ default: m.AgentsScanPage })))
+const AuditPage = lazy(() => import('./features/administration/pages/AuditPage').then((m) => ({ default: m.AuditPage })))
+const NotificationsPage = lazy(() => import('./features/administration/pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })))
+const TableauDeBordPage = lazy(() => import('./features/administration/pages/TableauDeBordPage').then((m) => ({ default: m.TableauDeBordPage })))
+const ConnexionPage = lazy(() => import('./features/auth/pages/ConnexionPage').then((m) => ({ default: m.ConnexionPage })))
+const InscriptionPage = lazy(() => import('./features/auth/pages/InscriptionPage').then((m) => ({ default: m.InscriptionPage })))
+const InstallationPage = lazy(() => import('./features/auth/pages/InstallationPage').then((m) => ({ default: m.InstallationPage })))
+const MotDePasseOubliePage = lazy(() => import('./features/auth/pages/MotDePassePages').then((m) => ({ default: m.MotDePasseOubliePage })))
+const ReinitialisationPage = lazy(() => import('./features/auth/pages/MotDePassePages').then((m) => ({ default: m.ReinitialisationPage })))
+const VerificationInscriptionPage = lazy(() => import('./features/auth/pages/VerificationInscriptionPage').then((m) => ({ default: m.VerificationInscriptionPage })))
+const VerificationPage = lazy(() => import('./features/auth/pages/VerificationPage').then((m) => ({ default: m.VerificationPage })))
+const MesBilletsPage = lazy(() => import('./features/billets/pages/MesBilletsPage').then((m) => ({ default: m.MesBilletsPage })))
+const DetailEvenementPage = lazy(() => import('./features/evenements/pages/DetailEvenementPage').then((m) => ({ default: m.DetailEvenementPage })))
+const ApercuModelePage = lazy(() => import('./features/evenements/pages/ApercuModelePage').then((m) => ({ default: m.ApercuModelePage })))
+const ListeEvenementsPage = lazy(() => import('./features/evenements/pages/ListeEvenementsPage').then((m) => ({ default: m.ListeEvenementsPage })))
+const ParametresPage = lazy(() => import('./features/parametres/pages/ParametresPage').then((m) => ({ default: m.ParametresPage })))
+const ProfilPage = lazy(() => import('./features/profil/pages/ProfilPage').then((m) => ({ default: m.ProfilPage })))
+const MesReservationsPage = lazy(() => import('./features/reservations/pages/MesReservationsPage').then((m) => ({ default: m.MesReservationsPage })))
+const PaiementPage = lazy(() => import('./features/reservations/pages/PaiementPage').then((m) => ({ default: m.PaiementPage })))
 
 // Contrôle d'accès chargé à la demande (bibliothèque caméra volumineuse)
 const ScannerPage = lazy(() => import('./features/controle/pages/ScannerPage').then((m) => ({ default: m.ScannerPage })))
@@ -85,6 +88,7 @@ export default function App() {
         <ToastsProvider>
           <ImmersionProvider>
           <GardeInstallation>
+          <Suspense fallback={<ChargementPage />}>
           <Routes>
             {/* Pages publiques (et accessibles une fois connecté) */}
             <Route element={<GabaritAdaptatif />}>
@@ -134,6 +138,7 @@ export default function App() {
               <Route path="*" element={<EtatVide icone="explore_off" titre="Page introuvable" texte="Cette adresse n'existe pas." />} />
             </Route>
           </Routes>
+          </Suspense>
           </GardeInstallation>
           </ImmersionProvider>
         </ToastsProvider>
