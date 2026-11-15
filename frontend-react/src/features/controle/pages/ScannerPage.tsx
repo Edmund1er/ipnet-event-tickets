@@ -9,6 +9,7 @@ import { heure, heureSecondes } from '../../../core/utils/format'
 import { SelecteurEvenement } from '../components/SelecteurEvenement'
 import { useEvenementControle } from '../hooks/useEvenementControle'
 import { controleService, type ReponseScan, type Statistiques } from '../services/controleService'
+import { dansAntiRebond } from '../utils/antiRebond'
 import { PRESENTATION_RESULTAT, jouerSon } from '../utils/retourScan'
 import { creerScannerQr, type ScannerQr } from '../wrappers/scannerQrWrapper'
 
@@ -28,7 +29,7 @@ export function ScannerPage() {
   const [stats, setStats] = useState<Statistiques | null>(null)
   const [historique, setHistorique] = useState<(ReponseScan & { a: string })[]>([])
   const scanner = useRef<ScannerQr | null>(null)
-  const dernier = useRef<{ jeton: string; t: number } | null>(null)
+  const dernier = useRef<{ evenementId: number; jeton: string; instant: number } | null>(null)
   const occupe = useRef(false)
   const minuterie = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -52,8 +53,8 @@ export function ScannerPage() {
       const jeton = jetonBrut.trim()
       if (!evenement || !jeton || occupe.current) return
       const maintenant = Date.now()
-      if (dernier.current && dernier.current.jeton === jeton && maintenant - dernier.current.t < ANTI_REBOND) return
-      dernier.current = { jeton, t: maintenant }
+      if (dansAntiRebond(dernier.current, evenement.id, jeton, maintenant, ANTI_REBOND)) return
+      dernier.current = { evenementId: evenement.id, jeton, instant: maintenant }
       occupe.current = true
       setEnCours(true)
       setErreurScan(null)

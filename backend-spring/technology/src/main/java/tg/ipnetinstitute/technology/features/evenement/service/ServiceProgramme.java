@@ -61,6 +61,7 @@ public class ServiceProgramme {
                 champs.prix(), cadre.getDevise(), champs.capacite(), champs.limite(), adminId);
         e.definirStructure(TypeEvenement.valueOf(d.type()), cadreId, champs.fin(), d.categorie(),
                 champs.accesLibre(), champs.portee(), champs.jour());
+        if (d.qrPourGratuit() != null) e.definirQrPourGratuit(d.qrPourGratuit());
         e.definirApparence(d.ambiance() != null ? d.ambiance() : cadre.getAmbiance(),
                 d.couleurPrincipale() != null ? d.couleurPrincipale() : cadre.getCouleurPrincipale());
         if (cadre.getStatut() == StatutEvenement.PUBLIE && !e.finDeVente().isBefore(LocalDateTime.now())) {
@@ -86,6 +87,7 @@ public class ServiceProgramme {
                 champs.prix(), cadre.getDevise(), Math.max(champs.capacite(), e.getPlacesReservees() == 0 ? 1 : e.getPlacesReservees()));
         e.definirStructure(e.getType(), e.getParentId(), champs.fin(), d.categorie(), champs.accesLibre(), champs.portee(), champs.jour());
         e.definirDateLimite(champs.limite());
+        if (d.qrPourGratuit() != null) e.definirQrPourGratuit(d.qrPourGratuit());
         if (d.ambiance() != null || d.couleurPrincipale() != null) {
             e.definirApparence(d.ambiance(), d.couleurPrincipale());
         }
@@ -135,6 +137,7 @@ public class ServiceProgramme {
                 Evenement copie = Evenement.creer(m.getTitre(), m.getDescription(), debut, m.getLieu(), m.getPrix(),
                         m.getDevise(), m.getCapacite(), null, adminId);
                 copie.definirStructure(TypeEvenement.ACTIVITE, cadreId, fin, m.getCategorie(), m.isAccesLibre(), null, null);
+                copie.definirQrPourGratuit(m.isQrPourGratuit());
                 copie.definirApparence(m.getAmbiance(), m.getCouleurPrincipale());
                 if (cadre.getStatut() == StatutEvenement.PUBLIE && !copie.finDeVente().isBefore(LocalDateTime.now())) {
                     copie.publier(Clock.systemDefaultZone());

@@ -1,7 +1,7 @@
 import type { ContenuPage } from '../types'
 import { action, ancre, ecrire, image, imageHero, logoTexte, menu, plage, repeter, retirer, un } from './outils'
 
-/** Page d'atelier, formation ou masterclass : apprentissage pratique et programme lisible. */
+/** Page de festival de la jeunesse : animations, expériences et programmation en plusieurs temps. */
 export function appliquerAtelier(doc: Document, c: ContenuPage) {
   logoTexte(doc, un(doc, '.atelier-brand'), c.nomSite, 'color:inherit;font-size:20px')
   menu(un(doc, '#atelier-nav'), c.menu)
@@ -9,7 +9,7 @@ export function appliquerAtelier(doc: Document, c: ContenuPage) {
 
   const hero = un(doc, '#atelier-hero')
   ancre(hero, 'hero')
-  ecrire(hero ?? doc, '.atelier-hero__eyebrow', 'Atelier pratique')
+  ecrire(hero ?? doc, '.atelier-hero__eyebrow', 'Festival de la jeunesse')
   if (c.accroche) ecrire(hero ?? doc, '.atelier-hero__summary', c.accroche)
   else retirer(hero ?? doc, '.atelier-hero__summary')
   ecrire(hero ?? doc, 'h1', c.titre)
@@ -36,7 +36,7 @@ export function appliquerAtelier(doc: Document, c: ContenuPage) {
   const intervenants = un(doc, '#intervenants')
   if (intervenants && c.intervenants?.liste.length) {
     ancre(intervenants, 'intervenants')
-    ecrire(intervenants, 'h2', c.intervenants.titre)
+    ecrire(intervenants, 'h2', c.intervenants.titre === 'Intervenants' ? 'Line-up & invités' : c.intervenants.titre)
     if (c.intervenants.sousTitre) ecrire(intervenants, '.atelier-section__intro', c.intervenants.sousTitre)
     else retirer(intervenants, '.atelier-section__intro')
     repeter(un(intervenants, '.atelier-speaker'), c.intervenants.liste, (el, personne) => {
@@ -94,7 +94,7 @@ export function appliquerAtelier(doc: Document, c: ContenuPage) {
   const billets = un(doc, '#billets')
   if (billets && c.offres.length) {
     ancre(billets, 'billets')
-    ecrire(billets, 'h2', c.offres.some((offre) => offre.lienId) ? 'Choisir une offre' : 'Participer à l’atelier')
+    ecrire(billets, 'h2', c.offres.some((offre) => offre.lienId) ? 'Choisir un pass' : 'Réserver mon accès')
     repeter(un(billets, '.atelier-offer'), c.offres, (offreEl, offre, index) => {
       offreEl.classList.toggle('atelier-offer--featured', index === 1)
       ecrire(offreEl, '.atelier-offer__name', offre.nom)

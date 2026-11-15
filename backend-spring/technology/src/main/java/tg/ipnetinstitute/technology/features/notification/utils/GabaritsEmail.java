@@ -70,9 +70,16 @@ public final class GabaritsEmail {
     }
 
     public static String billet(String titre, LocalDateTime dateDebut, String lieu, String nom, String prenom, String urlFront) {
+        return billet(titre, dateDebut, lieu, nom, prenom, urlFront, false);
+    }
+
+    public static String billet(String titre, LocalDateTime dateDebut, String lieu, String nom, String prenom, String urlFront, boolean gratuite) {
+        String confirmation = gratuite
+                ? "Votre inscription gratuite est confirmée. Voici votre billet pour <strong>" + e(titre) + "</strong>."
+                : "Votre paiement a été confirmé. Voici votre billet pour <strong>" + e(titre) + "</strong>.";
         return cadre("Votre billet est prêt",
                 p("Bonjour " + e(prenom) + " " + e(nom) + ",")
-                        + p("Votre paiement a été confirmé. Voici votre billet pour <strong>" + e(titre) + "</strong>.")
+                        + p(confirmation)
                         + "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:16px 0;border:1px dashed " + BLEU
                         + ";border-radius:8px;width:100%;\"><tr><td style=\"padding:16px;\">"
                         + "<p style=\"margin:0 0 6px;font-size:13px;color:#64748B;\">ÉVÉNEMENT</p>"
@@ -84,6 +91,16 @@ public final class GabaritsEmail {
                         + "</td></tr></table>"
                         + p("Présentez ce QR code à l'entrée (écran ou impression). Il est aussi joint à cet e-mail et reste disponible dans votre espace.")
                         + bouton(urlFront + "/billets", "Voir mes billets"));
+    }
+
+    /** Confirmation d'une inscription gratuite quand l'organisateur a choisi de ne pas émettre de QR. */
+    public static String inscriptionGratuite(String titre, LocalDateTime dateDebut, String lieu, String urlFront) {
+        return cadre("Inscription confirmée",
+                p("Votre inscription à <strong>" + e(titre) + "</strong> est confirmée. Aucun paiement n'était nécessaire.")
+                        + p("L'organisateur n'a pas demandé de billet QR pour cet événement. Votre inscription reste consultable dans votre espace.")
+                        + p("📅 " + e(date(dateDebut)))
+                        + (lieu == null || lieu.isBlank() ? "" : p("📍 " + e(lieu)))
+                        + bouton(urlFront + "/reservations", "Voir mes inscriptions"));
     }
 
     public static String preuveRejetee(String titreEvenement, String motif, String urlFront) {

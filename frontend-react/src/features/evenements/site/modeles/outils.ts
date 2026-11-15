@@ -90,6 +90,18 @@ export function action(el: Element | null, type: 'reserver' | 'ouvrir' = 'reserv
   if (libelle !== undefined) el.textContent = libelle
 }
 
+/** CTA de hero visible et utilisable sur mobile. L'accès libre mène aux infos sans ouvrir une réservation payante. */
+export function actionHero(doc: Document, zone: HTMLElement | null, c: ContenuPage) {
+  if (!zone) return
+  const lien = doc.createElement('a')
+  lien.className = 'ipnet-hero-cta'
+  lien.textContent = c.boutonHero
+  const libre = c.offres.some((offre) => offre.points.includes('Accès libre'))
+  if (libre) lien.href = doc.getElementById('programme') ? '#programme' : '#billets'
+  else action(lien, 'reserver', null, c.boutonHero)
+  zone.append(lien)
+}
+
 /** Plan intégré sans clé d'API : recherche de l'adresse. */
 export function plan(doc: Document, adresse: string): HTMLIFrameElement {
   const f = doc.createElement('iframe')

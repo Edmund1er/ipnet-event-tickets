@@ -56,7 +56,7 @@ export function ChampMotDePasse({
               <span key={n} className={`h-1.5 flex-1 rounded-lg ${r.score >= n ? couleurs[r.score] : 'bg-bordure'}`} />
             ))}
           </div>
-          <p className="mt-1 text-xs text-attenue">Robustesse : {r.libelle} (6 caractères minimum)</p>
+          <p className="mt-1 text-xs text-attenue">Robustesse : {r.libelle} (12 caractères minimum)</p>
         </div>
       )}
       {erreur && (

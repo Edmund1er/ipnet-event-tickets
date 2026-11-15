@@ -1,5 +1,5 @@
 import type { ContenuPage } from '../types'
-import { action, ancre, ecrire, fond, image, logoTexte, menu, plage, plan, repeter, retirer, tous, un } from './outils'
+import { action, actionHero, ancre, ecrire, fond, image, logoTexte, menu, plage, plan, repeter, retirer, tous, un } from './outils'
 
 /** Template « EventCon » : concert, soirée, fête. Fond noir, titre géant, timeline du programme. */
 export function appliquerSoiree(doc: Document, c: ContenuPage) {
@@ -21,6 +21,7 @@ export function appliquerSoiree(doc: Document, c: ContenuPage) {
     titre.style.fontSize = c.titre.length > 28 ? 'clamp(2rem, 5.5vw, 3rem)' : c.titre.length > 16 ? 'clamp(2rem, 7vw, 4rem)' : ''
   }
   if (c.imageHero) fond(un(doc, '.single_slider'), c.imageHero, c)
+  actionHero(doc, un(doc, '.slider_text'), c)
 
   /* Intervenants */
   const interv = un(doc, '.performar_area')

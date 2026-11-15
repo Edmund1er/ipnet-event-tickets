@@ -24,7 +24,17 @@ public record DemandeActivite(
         boolean accesLibre,
         @Pattern(regexp = "^(GLOBAL|JOURNEE)$", message = "Portée : GLOBAL ou JOURNEE") String passPortee,
         LocalDate passJour,
-        @Pattern(regexp = "^(SOBRE|ACADEMIQUE|CEREMONIE|SOIREE|SPORT|CULTURE|FESTIF)$", message = "Ambiance inconnue") String ambiance,
+        @Pattern(regexp = "^(SOBRE|ACADEMIQUE|CEREMONIE|SOIREE|SPORT|CULTURE|FESTIF|PLAGE|URBAIN|GOSPEL|ELECTRO|FESTIVAL)$", message = "Ambiance inconnue") String ambiance,
         @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Couleur au format #RRGGBB") String couleurPrincipale,
-        LocalDateTime dateLimiteReservation
-) {}
+        LocalDateTime dateLimiteReservation,
+        Boolean qrPourGratuit
+) {
+    public DemandeActivite(String type, String titre, String description, String categorie,
+                           LocalDateTime dateDebut, LocalDateTime dateFin, String lieu,
+                           BigDecimal prix, Integer capacite, boolean accesLibre, String passPortee,
+                           LocalDate passJour, String ambiance, String couleurPrincipale,
+                           LocalDateTime dateLimiteReservation) {
+        this(type, titre, description, categorie, dateDebut, dateFin, lieu, prix, capacite, accesLibre,
+                passPortee, passJour, ambiance, couleurPrincipale, dateLimiteReservation, null);
+    }
+}

@@ -11,8 +11,9 @@ import { useToast } from '../../../core/components/ui/Toasts'
 import { useImageProtegee } from '../../../core/hooks/useRequete'
 import { depuisChampDateHeure, versChampDateHeure } from '../../../core/utils/format'
 import { adminEvenementService } from '../services/adminEvenementService'
+import { EtapesEvenement } from '../components/EtapesEvenement'
 
-const VIDE = { titre: '', description: '', dateDebut: '', dateFin: '', lieu: '', prix: '', devise: 'XOF', capacite: '', dateLimiteReservation: '' }
+const VIDE = { titre: '', description: '', dateDebut: '', dateFin: '', lieu: '', prix: '', devise: 'XOF', capacite: '', dateLimiteReservation: '', qrPourGratuit: true }
 
 export function FormulaireEvenementPage() {
   const { id } = useParams()
@@ -25,7 +26,7 @@ export function FormulaireEvenementPage() {
   const [erreur, setErreur] = useState<string | null>(null)
   const [chargement, setChargement] = useState(edition)
   const [enCours, setEnCours] = useState(false)
-  // Programme multi-jours (semaine culturelle…) ou événement simple : choisi à la création, figé ensuite
+  // Sortie simple ou programme festif d'une journée / plusieurs jours : choisi à la création, figé ensuite
   const [programme, setProgramme] = useState(false)
   const [imageEnCours, setImageEnCours] = useState(false)
   const [versionImage, setVersionImage] = useState(0)
@@ -53,6 +54,7 @@ export function FormulaireEvenementPage() {
           devise: e.devise,
           capacite: String(e.capacite),
           dateLimiteReservation: e.dateLimiteReservation ? versChampDateHeure(e.dateLimiteReservation) : '',
+          qrPourGratuit: e.qrPourGratuit ?? true,
         })
       })
       .catch((e) => setErreur(messageErreur(e)))
@@ -92,6 +94,7 @@ export function FormulaireEvenementPage() {
       capacite: programme ? 1 : Number(f.capacite),
       dateFin: programme && f.dateFin ? depuisChampDateHeure(f.dateFin) : null,
       type: programme ? ('CADRE' as const) : ('EVENEMENT' as const),
+      qrPourGratuit: f.qrPourGratuit,
       dateLimiteReservation: f.dateLimiteReservation ? depuisChampDateHeure(f.dateLimiteReservation) : null,
     }
     setErreur(null)
@@ -178,7 +181,8 @@ export function FormulaireEvenementPage() {
       <Link to="/admin/evenements" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primaire hover:underline">
         <Icone nom="arrow_back" taille={18} /> Événements
       </Link>
-      <EnteteSection icone={edition ? 'edit_calendar' : 'add_circle'} titre={edition ? "Modifier l'événement" : 'Nouvel événement'} />
+      <EnteteSection icone={edition ? 'edit_calendar' : 'add_circle'} titre={edition ? "Modifier l'événement" : 'Nouvelle sortie'} />
+      {!edition && <EtapesEvenement etape={1} programme={programme} />}
 
       {erreur && (
         <div className="mb-4">
@@ -197,8 +201,8 @@ export function FormulaireEvenementPage() {
             {!edition && (
               <div role="radiogroup" aria-label="Type d'événement" className="grid gap-2 sm:grid-cols-2">
                 {[
-                  { v: false, titre: 'Événement simple', texte: 'Une soirée, une conférence : une date, un billet.', icone: 'confirmation_number' },
-                  { v: true, titre: 'Programme sur plusieurs jours', texte: 'Semaine culturelle, festival : plusieurs activités, des pass.', icone: 'calendar_view_week' },
+                  { v: false, titre: 'Fête ou soirée', texte: 'Concert, gala, rap ou club : une date et un accès.', icone: 'nightlife' },
+                  { v: true, titre: 'Programme de sorties', texte: 'Journée d’intégration ou semaine festive : activités, horaires et pass par jour.', icone: 'calendar_view_week' },
                 ].map((o) => (
                   <button
                     key={o.titre}
@@ -236,6 +240,20 @@ export function FormulaireEvenementPage() {
               <Champ libelle="Devise" value={f.devise} onChange={maj('devise')} erreur={erreurs.devise} maxLength={3} aide="XOF = FCFA" />
               <Champ libelle="Capacité" type="number" min={1} step="1" value={f.capacite} onChange={maj('capacite')} erreur={erreurs.capacite} />
             </div>
+            )}
+            {!programme && f.prix !== '' && Number(f.prix) === 0 && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#ff653d]/25 bg-[#fff5f1] p-4">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 accent-[#ff653d]"
+                  checked={f.qrPourGratuit}
+                  onChange={(e) => setF((x) => ({ ...x, qrPourGratuit: e.target.checked }))}
+                />
+                <span>
+                  <span className="block text-sm font-bold text-[#17171d]">Envoyer un billet QR pour les inscriptions gratuites</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-neutral-600">Désactive cette option si l’inscription confirmée suffit et qu’aucun QR n’est requis à l’entrée.</span>
+                </span>
+              </label>
             )}
           </fieldset>
           {evt && (

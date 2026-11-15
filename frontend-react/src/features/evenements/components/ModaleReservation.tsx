@@ -5,6 +5,10 @@ import { Modale } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { montant } from '../../../core/utils/format'
 
+const datePass = (jour?: string | null) => jour
+  ? new Date(`${jour.slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  : 'la journée choisie'
+
 interface Props {
   evenement: Evenement
   /** Pass d'un programme multi-jours. */
@@ -31,7 +35,7 @@ export function ModaleReservation({ evenement, passes, ouverte, surFermeture, re
               <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <div>
                   <p className="font-bold">{p.titre}</p>
-                  <p className="text-sm text-attenue">{p.passPortee === 'JOURNEE' ? 'Valable un jour' : 'Valable pendant tout le programme'}</p>
+                  <p className="text-sm text-attenue">{p.passPortee === 'JOURNEE' ? `Pass du ${datePass(p.passJour)}` : 'Pass valable pendant tout le programme'}</p>
                 </div>
                 <Link to={`/evenements/${p.id}`} className={classeBouton('rouge', 'normal')} onClick={surFermeture}>
                   {montant(p.prix, p.devise)} <Icone nom="arrow_forward" taille={18} />

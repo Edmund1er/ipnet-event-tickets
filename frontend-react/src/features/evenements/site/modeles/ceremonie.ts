@@ -22,7 +22,7 @@ function titreDouble(doc: Document, el: HTMLElement | null, texte: string) {
   el.append(s)
 }
 
-/** Template « Eventre » : cérémonie, gala, séminaire. Clair et formel, onglets de jours, pass en colonnes. */
+/** Template « Eventre » : cérémonie, gala, bal. Clair et formel, onglets de jours, pass en colonnes. */
 export function appliquerCeremonie(doc: Document, c: ContenuPage) {
   const modeleTexte = un(doc, 'section.about')?.cloneNode(true) as HTMLElement | undefined
 

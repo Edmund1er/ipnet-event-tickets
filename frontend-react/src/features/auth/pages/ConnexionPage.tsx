@@ -44,7 +44,7 @@ export function ConnexionPage() {
   }
 
   return (
-    <CadreAuth icone="login" titre="Connexion" sousTitre="Accédez à vos réservations et billets">
+    <CadreAuth icone="login" titre="Bon retour" sousTitre="Connecte-toi pour retrouver tes billets et préparer ta prochaine sortie.">
       <form onSubmit={soumettre} className="flex flex-col gap-4" noValidate>
         {erreur && <Alerte ton="erreur">{erreur}</Alerte>}
         <Champ libelle="E-mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -60,9 +60,12 @@ export function ConnexionPage() {
         <p className="text-center text-sm text-attenue">
           Pas encore de compte ?{' '}
           <Link to="/inscription" className="font-semibold text-rouge hover:underline">
-            Créer un compte
+            Créer mon compte
           </Link>
         </p>
+        <Link to="/" className="text-center text-sm font-semibold text-[#e44e2d] underline-offset-4 hover:underline">
+          Explorer les événements sans compte
+        </Link>
       </form>
     </CadreAuth>
   )

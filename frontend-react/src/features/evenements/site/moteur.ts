@@ -257,6 +257,21 @@ function finaliser(doc: Document, dossier: string, contenu: ContenuPage, origine
   doc.title = contenu.titre;
   doc.documentElement.lang = 'fr';
 
+  const stylesActions = doc.createElement('style');
+  stylesActions.textContent = `.ipnet-hero-cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;margin-top:22px;padding:0 22px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:var(--ipnet-button,var(--accent-color,#ff653d));box-shadow:0 12px 30px rgba(0,0,0,.25);color:#fff!important;font-weight:800;text-decoration:none!important;transition:transform .2s ease,filter .2s ease}.ipnet-hero-cta:hover{transform:translateY(-2px);filter:brightness(1.08)}.ipnet-hero-cta:focus-visible,.ipnet-mobile-ticket-cta:focus-visible{outline:3px solid #bef264;outline-offset:3px}.ipnet-mobile-ticket-cta{display:none}@media(max-width:767px){body{padding-bottom:92px!important}.ipnet-mobile-ticket-cta{position:fixed;z-index:9999;right:14px;bottom:max(12px,env(safe-area-inset-bottom));left:14px;display:flex;min-height:54px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.2);border-radius:15px;background:var(--ipnet-button,var(--accent-color,#ff653d));box-shadow:0 12px 32px rgba(0,0,0,.4);color:#fff!important;font-weight:800;text-decoration:none!important}}@media(prefers-reduced-motion:reduce){.ipnet-hero-cta{transition:none}.ipnet-hero-cta:hover{transform:none}}`;
+  doc.head.append(stylesActions);
+
+  const libre = contenu.offres.some((offre) => offre.points.includes('Accès libre'));
+  const sticky = doc.createElement('a');
+  sticky.className = 'ipnet-mobile-ticket-cta';
+  sticky.textContent = libre ? 'Voir le programme' : contenu.boutonReserver;
+  if (libre) sticky.href = doc.getElementById('programme') ? '#programme' : '#billets';
+  else {
+    sticky.href = '#';
+    sticky.setAttribute('data-ipnet', 'reserver');
+  }
+  doc.body.append(sticky);
+
   const pont = doc.createElement('script');
   pont.textContent = SCRIPT_PONT;
   doc.body.append(pont);

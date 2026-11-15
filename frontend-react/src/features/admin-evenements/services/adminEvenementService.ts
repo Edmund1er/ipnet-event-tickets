@@ -15,6 +15,7 @@ export interface DonneesEvenement {
   /** Programme multi-jours : fin du programme. */
   dateFin?: string | null
   type?: 'EVENEMENT' | 'CADRE'
+  qrPourGratuit?: boolean
 }
 
 export interface DonneesActivite {
@@ -32,6 +33,7 @@ export interface DonneesActivite {
   passJour: string | null
   ambiance: string | null
   couleurPrincipale: string | null
+  qrPourGratuit?: boolean
 }
 
 export interface Participant {

@@ -97,6 +97,7 @@ public class ServiceEvenement {
             e.definirStructure(TypeEvenement.CADRE, null, modif.dateFin(), null, false, null, null);
         }
         e.definirDateLimite(modif.dateLimiteReservation());
+        if (modif.qrPourGratuit() != null) e.definirQrPourGratuit(modif.qrPourGratuit());
         return mapper.resume(evenements.save(e));
     }
 
@@ -342,9 +343,12 @@ public class ServiceEvenement {
             Evenement cadre = Evenement.creer(d.titre(), d.description(), d.dateDebut(), d.lieu(), java.math.BigDecimal.ZERO,
                     d.devise().trim().toUpperCase(), 1, null, adminId);
             cadre.definirStructure(TypeEvenement.CADRE, null, d.dateFin(), null, false, null, null);
+            if (d.qrPourGratuit() != null) cadre.definirQrPourGratuit(d.qrPourGratuit());
             return cadre;
         }
-        return Evenement.creer(d.titre(), d.description(), d.dateDebut(), d.lieu(), d.prix(),
+        Evenement evenement = Evenement.creer(d.titre(), d.description(), d.dateDebut(), d.lieu(), d.prix(),
                 d.devise().trim().toUpperCase(), d.capacite(), d.dateLimiteReservation(), adminId);
+        if (d.qrPourGratuit() != null) evenement.definirQrPourGratuit(d.qrPourGratuit());
+        return evenement;
     }
 }

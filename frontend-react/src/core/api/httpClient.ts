@@ -125,7 +125,11 @@ export function messageErreur(e: unknown): string {
 
 /** Récupère une ressource binaire protégée (QR, capture…) sous forme d'URL locale. */
 export async function urlBlob(chemin: string): Promise<string> {
-  const r = await http.get<Blob>(chemin, { responseType: 'blob' })
+  const r = await http.get<Blob>(chemin, {
+    responseType: 'blob',
+    // Le client partagé demande application/json par défaut; les routes d'image doivent négocier un format binaire.
+    headers: { Accept: 'image/*, application/octet-stream;q=0.9, */*;q=0.8' },
+  })
   return URL.createObjectURL(r.data)
 }
 

@@ -11,5 +11,6 @@ RUN useradd --system --uid 10001 ipnet && mkdir -p /app/uploads && chown ipnet /
 COPY --from=build /src/target/*.jar app.jar
 USER ipnet
 EXPOSE 8081
+ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseSerialGC"
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

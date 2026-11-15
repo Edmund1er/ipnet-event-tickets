@@ -189,13 +189,35 @@
 .laser {
   animation: balayage 2.4s ease-in-out infinite;
 }
+.auth-orb {
+  animation: auth-flottement 12s ease-in-out infinite;
+}
+.auth-orb-delayed {
+  animation-delay: -5s;
+}
+.auth-story-ring,
+.event-vibe-orb {
+  animation: halo-respire 8s ease-in-out infinite;
+}
+
+@keyframes auth-flottement {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(24px, -18px, 0) scale(1.08); }
+}
+@keyframes halo-respire {
+  0%, 100% { transform: scale(.96); opacity: .65; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .apparition,
-  .laser {
+  .laser,
+  .auth-orb,
+  .auth-story-ring,
+  .event-vibe-orb {
     animation: none;
   }
 }

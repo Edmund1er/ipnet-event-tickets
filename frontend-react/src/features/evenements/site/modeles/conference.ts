@@ -1,8 +1,8 @@
 import { avatar } from '../contenu'
 import type { ContenuPage } from '../types'
-import { action, ancre, ecrire, image, imageHero, logoTexte, menu, miniature, plage, plan, repeter, retirer, tous, un } from './outils'
+import { action, actionHero, ancre, ecrire, image, imageHero, logoTexte, menu, miniature, plage, plan, repeter, retirer, tous, un } from './outils'
 
-/** Template « TheEvent » : conférence, séminaire. Orateurs en grille, programme par onglets de jours, billets en lignes. */
+/** Template « TheEvent » : concerts, showcases et scènes live; line-up, jours et billets en évidence. */
 export function appliquerConference(doc: Document, c: ContenuPage) {
   const modeleTexte = un(doc, '#hero .about-info .col-lg-6')?.cloneNode(true) as HTMLElement | undefined
 
@@ -16,7 +16,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   }
   const boutonEntete = un(doc, '#header .cta-btn')
   if (boutonEntete) boutonEntete.style.whiteSpace = 'nowrap'
-  menu(un(doc, '#navmenu > ul'), c.menu)
+  menu(un(doc, '#navmenu > ul'), c.menu.map((item) => item.ancre === 'intervenants' && item.libelle === 'Intervenants' ? { ...item, libelle: 'Line-up' } : item))
   action(un(doc, '#header .cta-btn'), 'reserver', null, c.boutonReserver)
 
   /* Hero + bandeau « à propos » */
@@ -26,6 +26,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   ecrire(hero ?? doc, '.container.text-center p', [c.dateTexte, c.lieu].filter(Boolean).join(' · '))
   if (c.imageHero) imageHero(hero, un(doc, '#hero > img') as HTMLImageElement | null, c.imageHero, c)
   retirer(doc, '.pulsating-play-btn')
+  actionHero(doc, un(doc, '#hero .container.text-center'), c)
   const colonnes = tous(doc, '.about-info .row > [class*="col-"]')
   const [colApropos, colLieu, colDate] = colonnes
   if (colApropos) {
@@ -63,7 +64,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   const sp = un(doc, '#speakers')
   if (sp && c.intervenants) {
     ancre(sp, 'intervenants')
-    ecrire(sp, '.section-title h2', c.intervenants.titre)
+    ecrire(sp, '.section-title h2', c.intervenants.titre === 'Intervenants' ? 'Line-up' : c.intervenants.titre)
     if (c.intervenants.sousTitre) ecrire(sp, '.section-title p', c.intervenants.sousTitre)
     else retirer(sp, '.section-title p')
     repeter(un(sp, '.row.gy-4 > [class*="col-"]'), c.intervenants.liste, (el, p) => {

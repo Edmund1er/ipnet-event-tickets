@@ -96,9 +96,12 @@ public class DispatcheurOutbox {
                 var b = donnees.billet();
                 yield new MessageSortant(n.getDestinataire(), "Votre billet – " + b.evenementTitre(),
                         GabaritsEmail.billet(b.evenementTitre(), b.evenementDate(), b.evenementLieu(),
-                                b.porteurNom(), b.porteurPrenom(), urlFront),
+                                b.porteurNom(), b.porteurPrenom(), urlFront, donnees.gratuite()),
                         List.of(new PieceJointe("billet-ipnet.png", donnees.qrPng(), "image/png", "qrcode")));
             }
+            case INSCRIPTION_GRATUITE_CONFIRMEE -> new MessageSortant(n.getDestinataire(), "Inscription confirmée – " + c.path("evenementTitre").asText(),
+                    GabaritsEmail.inscriptionGratuite(c.path("evenementTitre").asText(),
+                            LocalDateTime.parse(c.path("dateDebut").asText()), c.path("lieu").asText(), urlFront), List.of());
             case PREUVE_REJETEE -> new MessageSortant(n.getDestinataire(), "Paiement non validé – " + c.path("evenementTitre").asText(),
                     GabaritsEmail.preuveRejetee(c.path("evenementTitre").asText(), c.path("motif").asText(), urlFront), List.of());
             case EVENEMENT_ANNULE -> new MessageSortant(n.getDestinataire(), "Annulation – " + c.path("evenementTitre").asText(),

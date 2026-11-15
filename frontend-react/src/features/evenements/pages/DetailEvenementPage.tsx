@@ -17,7 +17,7 @@ import { estHex, texteSur, themeDe } from '../theme/ambiances'
 
 /** Modèle choisi par l'admin ; une activité ou un pass reprend celui de son programme ; à défaut, un modèle par type d'événement. */
 function modeleEffectif(modele: string | null | undefined, modeleParent: string | null | undefined, programme: boolean): CleModele {
-  return (modeleDe(modele)?.cle ?? modeleDe(modeleParent)?.cle ?? (programme ? 'RENCONTRE' : 'CEREMONIE')) as CleModele
+  return (modeleDe(modele)?.cle ?? modeleDe(modeleParent)?.cle ?? (programme ? 'RENCONTRE' : 'SOIREE')) as CleModele
 }
 
 /**
@@ -83,7 +83,9 @@ export function DetailEvenementPage() {
     try {
       const r = await evenementService.reserver(evt!.id)
       // Inscription gratuite : déjà confirmée, le billet est disponible sans paiement
-      navigate(r.statut === 'CONFIRMEE' ? '/billets' : `/reservations/${r.id}/paiement`)
+      navigate(r.statut === 'CONFIRMEE'
+        ? (evt!.prix === 0 && evt!.qrPourGratuit === false ? '/reservations' : '/billets')
+        : `/reservations/${r.id}/paiement`)
     } catch (e) {
       const api = versErreurApi(e)
       if (api.code === 'RG-06') setDejaReserve(true)

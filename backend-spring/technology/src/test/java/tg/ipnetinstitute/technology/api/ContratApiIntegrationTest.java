@@ -339,7 +339,8 @@ class ContratApiIntegrationTest {
                 .andExpect(jsonPath("$[0].nonce").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         String billetId = JsonPath.read(billets, "$[0].id");
-        mvc.perform(get("/api/billets/" + billetId + "/qr").header("Authorization", participant))
+        // Le QR est une ressource binaire : le client doit négocier le type image, pas le JSON par défaut.
+        mvc.perform(get("/api/billets/" + billetId + "/qr").header("Authorization", participant).accept(MediaType.IMAGE_PNG))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG));
 

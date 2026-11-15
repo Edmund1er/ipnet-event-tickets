@@ -34,6 +34,7 @@ public class EvenementResumeMapper {
                 e.getDateFin(),
                 e.getCategorie(),
                 e.isAccesLibre(),
+                e.isQrPourGratuit(),
                 e.getPassPortee(),
                 e.getPassJour(),
                 e.estPasse(maintenant),

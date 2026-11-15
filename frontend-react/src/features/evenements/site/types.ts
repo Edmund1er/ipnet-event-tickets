@@ -11,14 +11,14 @@ export interface DescriptionModele {
 }
 
 export const MODELES: DescriptionModele[] = [
-  { cle: 'SOIREE', nom: 'Soirée, concert et événement nocturne', pourQui: 'Mise en scène immersive, grand titre et visuels expressifs.', dossier: 'soiree' },
-  { cle: 'CONFERENCE', nom: 'Conférence, séminaire et journée scientifique', pourQui: 'Présentation structurée des orateurs et du programme par jour.', dossier: 'conference' },
-  { cle: 'RENCONTRE', nom: 'Forum, hackathon et rencontre étudiante', pourQui: 'Présentation dynamique avec compte à rebours et programme quotidien.', dossier: 'rencontre' },
-  { cle: 'CEREMONIE', nom: 'Cérémonie, gala et portes ouvertes', pourQui: 'Présentation élégante avec programme par jour et offres de billets.', dossier: 'ceremonie' },
-  { cle: 'ATELIER', nom: 'Atelier, formation et masterclass', pourQui: 'Mise en avant des apprentissages, intervenants et ateliers pratiques.', dossier: 'atelier' },
-  { cle: 'TOURNOI', nom: 'Tournoi, compétition et e-sport', pourQui: 'Affichage dynamique des journées, matchs et informations de compétition.', dossier: 'tournoi' },
-  { cle: 'SALON', nom: 'Salon, exposition et foire', pourQui: 'Présentation visuelle des exposants, stands et temps forts.', dossier: 'salon' },
-  { cle: 'RESEAUTAGE', nom: 'Lancement, networking et rencontre professionnelle', pourQui: 'Page orientée rencontres, invités et échanges professionnels.', dossier: 'reseautage' },
+  { cle: 'SOIREE', nom: 'Soirée étudiante, club et nuit dansante', pourQui: 'Ambiance nocturne, DJ, danse et réservation rapide.', dossier: 'soiree' },
+  { cle: 'CONFERENCE', nom: 'Concert rap, showcase et scène live', pourQui: 'Line-up d’artistes, horaires de scène et billets de concert.', dossier: 'conference' },
+  { cle: 'RENCONTRE', nom: 'Journée d’intégration, plage et chill', pourQui: 'Sortie étudiante en plein air, activités et programme de la journée.', dossier: 'rencontre' },
+  { cle: 'CEREMONIE', nom: 'Bal de promo, gala et remise des diplômes', pourQui: 'Grande soirée habillée, dîner, distinctions et danse.', dossier: 'ceremonie' },
+  { cle: 'ATELIER', nom: 'Festival de la jeunesse & animations', pourQui: 'Journée festive avec plusieurs espaces, stands et expériences à partager.', dossier: 'atelier' },
+  { cle: 'TOURNOI', nom: 'Tournoi sportif et e-sport', pourQui: 'Matchs, équipes, journées de compétition et accès.', dossier: 'tournoi' },
+  { cle: 'SALON', nom: 'Gospel, louange et concert', pourQui: 'Concert live, invités, programme et billetterie.', dossier: 'salon' },
+  { cle: 'RESEAUTAGE', nom: 'Soirée DJ, club et nuit électro', pourQui: 'Line-up de DJs, ambiance nocturne et accès à la soirée.', dossier: 'reseautage' },
 ]
 
 export const modeleDe = (cle?: string | null) => MODELES.find((m) => m.cle === cle) ?? null

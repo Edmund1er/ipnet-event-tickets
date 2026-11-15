@@ -12,11 +12,11 @@ export function evenementExemple(): Evenement {
   fin.setHours(23, 0, 0, 0)
   return {
     id: 0,
-    titre: 'Nuit de la rentrée IPNET',
-    description: "Une soirée pour célébrer la rentrée : concerts d'artistes de l'institut, DJ sets, concours de danse et animations tout au long de la nuit. Venez avec vos amis, la scène est à vous.",
+    titre: 'Nuit des Vibes — Lomé',
+    description: 'Une nuit de musique, de danse et de rencontres avec concerts live, DJ sets, rap, gospel et animations jusqu’au bout de la nuit. Rassemble ta team et viens vivre la scène.',
     dateDebut: iso(debut),
     dateFin: iso(fin),
-    lieu: 'Campus IPNET, Lomé',
+    lieu: 'Lomé, Togo',
     prix: 2000,
     devise: 'XOF',
     capacite: 400,
@@ -37,14 +37,14 @@ export function pageExemple(): PageConfig {
   return {
     version: 1,
     sections: [
-      { id: 'hero', type: 'HERO', actif: true, titre: 'Nuit de la rentrée IPNET', sousTitre: 'Deux jours de musique, de danse et de rencontres', bouton: 'Réserver ma place' },
+      { id: 'hero', type: 'HERO', actif: true, titre: 'Nuit des Vibes — Lomé', sousTitre: 'Deux jours de musique live, de danse et de good vibes', bouton: 'Réserver ma place' },
       {
         id: 'apropos',
         type: 'A_PROPOS',
         actif: true,
-        titre: 'Une rentrée qui a de la voix',
+        titre: 'Deux nuits. Toutes les vibes.',
         texte:
-          "Pour la rentrée, l'institut ouvre ses portes à toutes les filières : concerts d'artistes de l'institut, DJ sets, concours de danse et animations jusqu'au bout de la nuit. Une occasion de retrouver les anciens, d'accueillir les nouveaux et de passer un moment ensemble sur le campus.",
+          'Une scène ouverte à la musique, à la danse et aux rencontres : rap, gospel live, DJ sets et animations. Viens avec tes amis, découvre les artistes et profite de deux nuits pensées pour la fête.',
         bouton: 'Je réserve',
       },
       {
@@ -72,7 +72,7 @@ export function pageExemple(): PageConfig {
           { jour: jour(1), debut: '20:00', fin: '22:30', titre: 'Grand concert de clôture', intervenant: 'Ama Dossou', lieu: 'Scène principale' },
         ],
       },
-      { id: 'lieu', type: 'LIEU', actif: true, titre: 'Où nous trouver', adresse: 'Campus IPNET, Lomé, Togo', telephone: '+228 90 00 00 00', email: 'evenements@ipnet.tg' },
+      { id: 'lieu', type: 'LIEU', actif: true, titre: 'Où nous trouver', adresse: 'Lomé, Togo', telephone: '+228 90 00 00 00', email: 'evenements@ipnet.tg' },
     ],
   }
 }

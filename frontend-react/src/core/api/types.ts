@@ -47,6 +47,8 @@ export interface Evenement {
   dateFin?: string | null
   categorie?: string | null
   accesLibre?: boolean
+  /** Pour les inscriptions gratuites, l'organisateur peut désactiver le billet QR. */
+  qrPourGratuit?: boolean
   passPortee?: 'GLOBAL' | 'JOURNEE' | null
   passJour?: string | null
   /** Terminé : la fin (ou le début) est derrière nous. */

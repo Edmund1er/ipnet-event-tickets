@@ -1,21 +1,27 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { evenementExemple } from '../site/exemple'
 import { CarteEvenement } from './CarteEvenement'
 
 describe('CarteEvenement', () => {
-  it('utilise le visuel local de secours quand aucun visuel n’a été fourni', () => {
+  it('affiche une composition festive locale quand aucune affiche n’a été fournie', () => {
     const evenement = evenementExemple()
     const { container } = render(<MemoryRouter><CarteEvenement evenement={evenement} /></MemoryRouter>)
 
-    expect(container.querySelector('img')?.getAttribute('src')).toBe('/event-card-default.jpg')
+    expect(container.querySelector('[data-vibe-art]')).toBeInTheDocument()
+    expect(container.querySelector('img')).toBeNull()
+    expect(container.querySelector('a')?.getAttribute('href')).toBe('/evenements/0')
   })
 
-  it('préfère le visuel téléversé de l’événement au visuel de secours', () => {
+  it('préfère l’affiche téléversée et conserve le visuel de secours si elle ne charge pas', () => {
     const evenement = { ...evenementExemple(), aImage: true }
     const { container } = render(<MemoryRouter><CarteEvenement evenement={evenement} /></MemoryRouter>)
+    const affiche = container.querySelector('img')
 
-    expect(container.querySelector('img')?.getAttribute('src')).toBe('/api/evenements/0/image')
+    expect(affiche?.getAttribute('src')).toBe('/api/evenements/0/image')
+    fireEvent.error(affiche!)
+    expect(container.querySelector('[data-vibe-art]')).toBeInTheDocument()
+    expect(container.querySelector('img')).toBeNull()
   })
 })

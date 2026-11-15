@@ -95,7 +95,11 @@ class UtilitairesTest {
                 .contains("Gala").containsIgnoringCase("M&eacute;t&eacute;o");
         assertThat(GabaritsEmail.evenementAnnule("Gala", LocalDateTime.of(2026, 12, 5, 18, 30), null, false, null)).contains("Gala");
         assertThat(GabaritsEmail.billet("Gala", LocalDateTime.of(2026, 12, 5, 18, 30), "Lomé", "Doe", "Jane", "http://localhost"))
-                .contains("Doe").contains("Jane");
+                .contains("Doe").contains("Jane").contains("Votre paiement a été confirmé");
+        String billetGratuit = GabaritsEmail.billet("Beach Day", LocalDateTime.of(2026, 12, 5, 18, 30), "Lomé", "Doe", "Jane", "http://localhost", true);
+        assertThat(billetGratuit).contains("Votre inscription gratuite est confirmée").doesNotContain("paiement a été confirmé");
+        String sansQr = GabaritsEmail.inscriptionGratuite("Beach Day", LocalDateTime.of(2026, 12, 5, 18, 30), "Lomé", "http://localhost");
+        assertThat(sansQr).contains("L'organisateur n'a pas demandé de billet QR").doesNotContain("cid:qrcode");
         assertThat(GabaritsEmail.test()).isNotBlank();
         assertThat(GabaritsEmail.alerteEchec("OTP", "a@b.tg", "boom", "http://localhost")).contains("a@b.tg");
         assertThat(GabaritsEmail.date(null)).isEmpty();

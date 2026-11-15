@@ -107,20 +107,36 @@ public class SmtpWrapper implements CanalNotification {
         log.info("E-mail « {} » envoyé", message.sujet());
     }
 
+    static String retirerImagesCidNonSupportesParApi(String html, java.util.List<PieceJointe> piecesJointes) {
+        String resultat = html;
+        if (piecesJointes == null) return resultat;
+        for (PieceJointe piece : piecesJointes) {
+            if (piece.cid() == null) continue;
+            String cid = java.util.regex.Pattern.quote(piece.cid());
+            var baliseImageCid = java.util.regex.Pattern.compile(
+                    "<img\\b(?=[^>]*\\bsrc\\s*=\\s*['\"]cid:" + cid + "['\"])[^>]*>",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+            resultat = baliseImageCid.matcher(resultat).replaceAll("");
+        }
+        return resultat;
+    }
+
     /** API transactionnelle Brevo : POST /v3/smtp/email (HTTPS, sans port SMTP). */
     private void envoyerParApi(MessageSortant message) throws Exception {
         var corps = json.createObjectNode();
         corps.putObject("sender").put("name", nomExpediteur).put("email", expediteur);
         corps.putArray("to").addObject().put("email", message.destinataire());
         corps.put("subject", message.sujet());
-        corps.put("htmlContent", message.corpsHtml());
+        String html = message.corpsHtml();
         if (message.piecesJointes() != null && !message.piecesJointes().isEmpty()) {
             var pieces = corps.putArray("attachment");
             for (PieceJointe pj : message.piecesJointes()) {
-                pieces.addObject().put("name", pj.nomFichier())
-                        .put("content", java.util.Base64.getEncoder().encodeToString(pj.contenu()));
+                String contenuBase64 = java.util.Base64.getEncoder().encodeToString(pj.contenu());
+                pieces.addObject().put("name", pj.nomFichier()).put("content", contenuBase64);
             }
+            html = retirerImagesCidNonSupportesParApi(html, message.piecesJointes());
         }
+        corps.put("htmlContent", html);
         var requete = java.net.http.HttpRequest.newBuilder(java.net.URI.create(urlApi))
                 .timeout(java.time.Duration.ofSeconds(20))
                 .header("api-key", cleApi)

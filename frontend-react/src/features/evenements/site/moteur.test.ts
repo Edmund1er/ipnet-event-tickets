@@ -20,10 +20,10 @@ describe('moteur de pages événement', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(premiere).toContain('<html lang="fr">')
-    expect(premiere).toContain('Nuit de la rentrée IPNET')
+    expect(premiere).toContain('Nuit des Vibes — Lomé')
     expect(premiere).not.toContain('window.hacked')
     expect(seconde).toContain('Deuxième aperçu')
-    expect(seconde).not.toContain('Nuit de la rentrée IPNET')
+    expect(seconde).not.toContain('Nuit des Vibes — Lomé')
     expect(premiere).not.toContain('id="preloader"')
 
     const blocs: PageConfig = {
@@ -35,5 +35,21 @@ describe('moteur de pages événement', () => {
     expect(pageAvecBlocs).toContain('Atelier pratique')
     expect(pageAvecBlocs).toContain('Création en groupe')
     expect(pageAvecBlocs).toContain('data-ipnet-section')
+  })
+
+  it('affiche un CTA du hero et une réservation fixe au mobile sans afficher l’image de démo', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => '<!doctype html><html lang="en"><head></head><body><main><div class="slider_area"><div class="single_slider"><div class="slider_text"><span>Demo</span><h3>Demo</h3><p>Demo</p></div></div></div></main></body></html>',
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const contenu = construireContenu(evenementExemple(), [], PAGE_VIDE, (nom) => `/images/${nom}`)
+    const page = await genererPage('SOIREE', contenu, 'https://events.test')
+
+    expect(page).toContain('class="ipnet-hero-cta"')
+    expect(page).toContain('data-ipnet="reserver"')
+    expect(page).toContain('class="ipnet-mobile-ticket-cta"')
+    expect(page).toContain('data:image/svg+xml,')
+    expect(page).not.toContain('src="/event-card-default.jpg"')
   })
 })

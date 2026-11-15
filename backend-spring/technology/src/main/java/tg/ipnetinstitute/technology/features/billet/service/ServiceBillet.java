@@ -62,6 +62,11 @@ public class ServiceBillet {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void surPaiementConfirme(PaiementConfirmeEvent evt) {
+        var inscription = inscriptions.findById(evt.inscriptionId()).orElseThrow();
+        var evenement = serviceEvenement.consulter(inscription.getEvenementId());
+        boolean gratuite = inscription.getMontant() == null || inscription.getMontant().signum() == 0;
+        if (gratuite && !evenement.qrPourGratuit()) return;
+
         if (billets.findByInscriptionId(evt.inscriptionId()).isEmpty()) {
             var billet = billets.save(Billet.nouveau(evt.inscriptionId()));
             publieur.publishEvent(new BilletEmisEvent(billet.getId(), evt.inscriptionId()));
@@ -93,14 +98,15 @@ public class ServiceBillet {
     }
 
     /** Données nécessaires à l'e-mail du billet (EF-31) : détail + image du QR code. */
-    public record DonneesEmailBillet(BilletResponse billet, byte[] qrPng) {}
+    public record DonneesEmailBillet(BilletResponse billet, byte[] qrPng, boolean gratuite) {}
 
     @Transactional(readOnly = true)
     public DonneesEmailBillet pourEmail(UUID billetId) {
         Billet b = billets.findById(billetId).orElseThrow(() -> new RessourceIntrouvableException("Billet", billetId));
         Inscription i = inscriptions.findById(b.getInscriptionId()).orElseThrow();
         String jeton = signateur.signer(b.getId(), b.getNonce(), i.getEvenementId());
-        return new DonneesEmailBillet(versResponse(b, i), qr.generer(jeton, 480));
+        boolean gratuite = i.getMontant() == null || i.getMontant().signum() == 0;
+        return new DonneesEmailBillet(versResponse(b, i), qr.generer(jeton, 480), gratuite);
     }
 
     /** EF-31 / §6 Fiabilité : le participant peut se faire renvoyer son billet par e-mail. */

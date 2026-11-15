@@ -5,11 +5,14 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import tg.ipnetinstitute.technology.features.identite.model.Role;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
@@ -33,8 +36,24 @@ public class JwtWrapper {
     private final long refreshValidityMs = 7 * 24 * 60 * 60 * 1000L; // 7 jours
     private final long resetValidityMs = 30 * 60 * 1000; // 30 min
 
-    public JwtWrapper(@Value("${app.security.jwt.secret:ipnet_billetterie_jwt_secret_key_minimum_256_bits_length_for_hmac_sha256!}") String secret) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    public JwtWrapper(@Value("${app.security.jwt.secret:}") String secret, Environment environment) {
+        String valeur = secret == null ? "" : secret.trim();
+        boolean production = Arrays.stream(environment.getActiveProfiles())
+                .anyMatch(profil -> profil.equalsIgnoreCase("prod") || profil.equalsIgnoreCase("production"));
+        if (valeur.isEmpty()) {
+            if (production) {
+                throw new IllegalStateException("JWT_SECRET doit être configuré en production.");
+            }
+            byte[] aleatoire = new byte[32];
+            new SecureRandom().nextBytes(aleatoire);
+            this.key = Keys.hmacShaKeyFor(aleatoire);
+            return;
+        }
+        byte[] cle = valeur.getBytes(StandardCharsets.UTF_8);
+        if (cle.length < 32) {
+            throw new IllegalStateException("JWT_SECRET doit contenir au moins 32 octets.");
+        }
+        this.key = Keys.hmacShaKeyFor(cle);
     }
 
     public long dureeAccessSecondes() {

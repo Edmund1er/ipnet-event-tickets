@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { createContext, useContext, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 
 /**
  * Mode « immersion » : la page affichée prend toute la place et habille l'en-tête et le menu latéral
@@ -38,7 +38,7 @@ export const useImmersionActive = () => useContext(Ctx).immersion
 export function useImmersion(immersion: Immersion | null) {
   const { definir } = useContext(Ctx)
   const cle = JSON.stringify(immersion)
-  useEffect(() => {
+  useLayoutEffect(() => {
     definir(immersion)
     return () => definir(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps

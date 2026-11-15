@@ -1,12 +1,15 @@
 package tg.ipnetinstitute.technology.features.billet.wrapper;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,8 +23,24 @@ public class SignateurHmacImpl implements HmacWrapper {
 
     private final byte[] secretKey;
 
-    public SignateurHmacImpl(@Value("${app.security.qr.hmac-secret:ipnet_billetterie_super_secret_hmac_key_2026_safe_protection}") String secret) {
-        this.secretKey = secret.getBytes(StandardCharsets.UTF_8);
+    public SignateurHmacImpl(@Value("${app.security.qr.hmac-secret:}") String secret, Environment environment) {
+        String valeur = secret == null ? "" : secret.trim();
+        boolean production = Arrays.stream(environment.getActiveProfiles())
+                .anyMatch(profil -> profil.equalsIgnoreCase("prod") || profil.equalsIgnoreCase("production"));
+        if (valeur.isEmpty()) {
+            if (production) {
+                throw new IllegalStateException("QR_HMAC_SECRET doit être configuré en production.");
+            }
+            byte[] aleatoire = new byte[32];
+            new SecureRandom().nextBytes(aleatoire);
+            this.secretKey = aleatoire;
+            return;
+        }
+        byte[] cle = valeur.getBytes(StandardCharsets.UTF_8);
+        if (cle.length < 32) {
+            throw new IllegalStateException("QR_HMAC_SECRET doit contenir au moins 32 octets.");
+        }
+        this.secretKey = cle;
     }
 
     @Override

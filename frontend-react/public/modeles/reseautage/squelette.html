@@ -4,23 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
-  <title>Événement professionnel</title>
+  <title>Soirée DJ étudiante</title>
   <style>
-    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; scroll-behavior: smooth; }
+    :root { color-scheme: dark; --ipnet-primary:#8b5cf6; --ipnet-secondary:#fb7185; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; scroll-behavior: smooth; }
     * { box-sizing: border-box; }
-    body { margin: 0; color: #18302e; background: #f7f9f7; line-height: 1.6; }
+    body { margin: 0; color: #f8f5ff; background: #11091d; line-height: 1.6; }
     a { color: inherit; }
     .rn-shell { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
-    .rn-header { position: relative; z-index: 2; background: #fff; border-bottom: 1px solid #e8eeeb; }
+    .rn-header { position: relative; z-index: 2; background: #160d24; border-bottom: 1px solid rgba(255,255,255,.12); }
     .rn-header-inner { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
     .rn-brand { color: var(--ipnet-primary, #176c60); font-size: 1.05rem; font-weight: 800; letter-spacing: -.03em; text-decoration: none; white-space: nowrap; }
     .rn-nav ul { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; list-style: none; margin: 0; padding: 0; }
-    .rn-nav a { color: #445652; font-size: .9rem; font-weight: 650; text-decoration: none; }
+    .rn-nav a { color: #ddd5ea; font-size: .9rem; font-weight: 650; text-decoration: none; }
     .rn-nav a:hover, .rn-nav a:focus-visible { color: var(--ipnet-primary, #176c60); }
     .rn-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 20px; border: 0; border-radius: 999px; background: var(--ipnet-primary, #176c60); color: #fff; font: inherit; font-size: .92rem; font-weight: 750; text-decoration: none; cursor: pointer; transition: transform .2s ease, background .2s ease; }
     .rn-button:hover { background: var(--ipnet-secondary, #d48d50); color: #172e2b; transform: translateY(-1px); }
     .rn-header-cta { white-space: nowrap; }
-    .rn-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 540px; display: grid; align-items: center; padding: 80px 0 126px; background: linear-gradient(120deg, #103f3a, #176c60 62%, #619b82); color: #fff; }
+    .rn-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 540px; display: grid; align-items: center; padding: 80px 0 126px; background: radial-gradient(ellipse at 78% 20%, rgba(217,70,239,.32), transparent 38%), linear-gradient(120deg, #11091d, #281143 62%, #4c1d60); color: #fff; }
     .rn-hero::before, .rn-hero::after { position: absolute; z-index: -1; content: ""; border-radius: 50%; pointer-events: none; }
     .rn-hero::before { width: 430px; height: 430px; right: -70px; top: -190px; border: 1px solid rgba(255,255,255,.22); box-shadow: 0 0 0 44px rgba(255,255,255,.045), 0 0 0 90px rgba(255,255,255,.035); }
     .rn-hero::after { width: 260px; height: 260px; right: 17%; bottom: -200px; background: rgba(255,255,255,.07); }
@@ -67,7 +67,7 @@
     .rn-venue-card p { margin: 0 0 10px; color: #63736e; }
     .rn-venue-image { width: 100%; height: 230px; border-radius: 14px; object-fit: cover; background: #e3efea; }
     @media(max-width:700px){.rn-venue-card{grid-template-columns:1fr}}
-    .rn-offers { color: #fff; background: #153f39; }
+    .rn-offers { color: #fff; background: #160d24; }
     .rn-offers .rn-section-heading h2 { color: #fff; }
     .rn-offers .rn-eyebrow { color: #c5e3d4; }
     .rn-offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 18px; align-items: stretch; }
@@ -109,7 +109,7 @@
     <section class="rn-hero" id="accueil" aria-labelledby="rn-title">
       <div class="rn-hero-art" aria-hidden="true"></div>
       <div class="rn-shell rn-hero-content">
-        <p class="rn-kicker">Réseautage professionnel</p>
+        <p class="rn-kicker">Soirée DJ · Club · Électro</p>
         <h1 id="rn-title"></h1>
         <div class="rn-hero-meta">
           <p class="rn-hero-date"></p>
@@ -130,7 +130,7 @@
     <section class="rn-section rn-people" aria-labelledby="rn-people-title">
       <div class="rn-shell">
         <header class="rn-section-heading">
-          <p class="rn-eyebrow">Celles et ceux qui font le réseau</p>
+          <p class="rn-eyebrow">Le line-up</p>
           <h2 id="rn-people-title"></h2>
           <p class="rn-people-subtitle"></p>
         </header>

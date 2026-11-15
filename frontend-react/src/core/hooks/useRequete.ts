@@ -30,14 +30,15 @@ export function useRequete<T>(charger: () => Promise<T>, dependances: unknown[] 
 }
 
 /** Image protégée par authentification chargée en Blob (QR, capture, image admin). */
-export function useImageProtegee(chemin: string | null) {
+export function useImageProtegee(chemin: string | null, rechargement = 0) {
   const [url, setUrl] = useState<string | null>(null)
   const [erreur, setErreur] = useState(false)
   useEffect(() => {
-    if (!chemin) return
     let actuelle: string | null = null
     let actif = true
+    setUrl(null)
     setErreur(false)
+    if (!chemin) return () => { actif = false }
     urlBlob(chemin)
       .then((u) => {
         actuelle = u
@@ -50,6 +51,6 @@ export function useImageProtegee(chemin: string | null) {
       if (actuelle) URL.revokeObjectURL(actuelle)
       setUrl(null)
     }
-  }, [chemin])
+  }, [chemin, rechargement])
   return { url, erreur }
 }

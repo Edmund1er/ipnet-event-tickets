@@ -137,11 +137,13 @@ function LigneReservation({ r, surAnnulation }: { r: Reservation; surAnnulation:
               {r.statut === 'REJETEE' ? 'Renvoyer une référence' : 'Payer'}
             </Link>
           )}
-          {r.statut === 'CONFIRMEE' && (
+          {r.statut === 'CONFIRMEE' && r.montant === 0 && r.evenement.qrPourGratuit === false ? (
+            <p className="max-w-60 text-right text-xs leading-relaxed text-attenue">Inscription confirmée · l’organisateur n’a pas prévu de billet QR.</p>
+          ) : r.statut === 'CONFIRMEE' ? (
             <Link to="/billets" className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primaire px-3 text-sm font-semibold text-white">
-              <Icone nom="qr_code_2" taille={18} /> Voir le billet
+              <Icone nom="qr_code_2" taille={18} /> Voir mon billet QR
             </Link>
-          )}
+          ) : null}
           {annulable && (
             <Bouton variante="fantome" taille="petit" icone="cancel" onClick={surAnnulation}>
               Annuler

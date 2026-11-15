@@ -1,6 +1,6 @@
 import type { Evenement } from '../../../core/api/types'
 import { montant } from '../../../core/utils/format'
-import { estHex } from '../theme/ambiances'
+import { ambianceDe, estHex } from '../theme/ambiances'
 import type { ContenuPage, CreneauConfig, Jour, Ligne, Offre, PageConfig, SectionConfig } from './types'
 
 const NOM_SITE = 'IPNET Events'
@@ -10,6 +10,9 @@ const jourDe = (k: string) => new Date(`${k}T12:00:00`)
 const hhmm = (iso: string) => iso.slice(11, 16)
 
 const heureLisible = (hm: string) => hm.replace(':', 'h')
+const datePass = (iso?: string | null) => iso
+  ? new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  : 'la journée choisie'
 
 function tarif(e: Evenement): string {
   if (e.accesLibre) return 'Accès libre'
@@ -24,6 +27,13 @@ export function avatar(nom: string): string {
   let h = 0
   for (const c of nom) h = (h * 31 + c.charCodeAt(0)) % 360
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='hsl(${h},45%,38%)'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-size='150' font-weight='700' fill='white'>${initiales}</text></svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
+/** Affiche un visuel vectoriel premium selon l'ambiance si l'organisateur n'a pas fourni d'affiche. */
+function afficheDeSecours(evt: Evenement): string {
+  const accent = estHex(evt.couleurPrincipale) ? evt.couleurPrincipale : ambianceDe(evt.ambiance).couleur
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs><linearGradient id="fond" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#08090e"/><stop offset=".58" stop-color="#17111e"/><stop offset="1" stop-color="#090a10"/></linearGradient><radialGradient id="lumiere"><stop stop-color="${accent}" stop-opacity=".82"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient><linearGradient id="spot" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="1600" height="900" fill="url(#fond)"/><ellipse cx="1190" cy="280" rx="470" ry="390" fill="url(#lumiere)" opacity=".75"/><path d="M180 0h190l290 720H420zM990 0h130L950 760H820z" fill="url(#spot)" opacity=".5"/><circle cx="1190" cy="280" r="250" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/><circle cx="1190" cy="280" r="340" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/><g fill="none" stroke="#fff" stroke-opacity=".12"><path d="M0 760h1600M0 800h1600M0 840h1600"/><path d="M120 900l520-250M1480 900 960 650"/></g><g fill="${accent}" opacity=".72"><circle cx="300" cy="210" r="5"/><circle cx="440" cy="320" r="4"/><circle cx="1380" cy="500" r="6"/><circle cx="260" cy="570" r="3"/></g></svg>`
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
@@ -90,7 +100,7 @@ export function construireContenu(
   const prog = premiere('PROGRAMME')
   const lieuSec = premiere('LIEU')
 
-  const imageHero = hero?.image ? urlImage(hero.image) : evt.aImage ? `/api/evenements/${evt.id}/image` : undefined
+  const imageHero = hero?.image ? urlImage(hero.image) : evt.aImage ? `/api/evenements/${evt.id}/image` : afficheDeSecours(evt)
   const couleur = (valeur?: string | null) => estHex(valeur) ? valeur : undefined
   const ancreType: Partial<Record<SectionConfig['type'], string>> = {
     HERO: 'hero', A_PROPOS: 'apropos', INTERVENANTS: 'intervenants', PROGRAMME: 'programme', LIEU: 'lieu',
@@ -142,14 +152,14 @@ export function construireContenu(
         .map((p) => ({
           nom: p.titre,
           prix: montant(p.prix, p.devise),
-          points: [p.passPortee === 'JOURNEE' ? 'Valable un jour' : 'Valable pendant tout le programme', 'Accès à toutes les activités incluses', 'Billet QR code'],
+          points: [p.passPortee === 'JOURNEE' ? `Valable le ${datePass(p.passJour)}` : 'Valable pendant tout le programme', 'Accès aux activités incluses', 'Billet QR code'],
           lienId: p.id,
         }))
     : [
         {
           nom: evt.type === 'PASS' ? evt.titre : 'Billet',
           prix: tarif(evt),
-          points: ['Place nominative', 'Billet QR code par e-mail', 'Paiement Mobile Money'],
+          points: evt.accesLibre ? ['Accès libre', 'Aucun billet payant à réserver'] : ['Place nominative', 'Billet QR code par e-mail', 'Paiement Mobile Money'],
         },
       ]
 
@@ -177,7 +187,7 @@ export function construireContenu(
     debutMs: new Date(evt.dateDebut).getTime(),
     lieu: evt.lieu ?? undefined,
     imageHero,
-    boutonHero: hero?.bouton?.trim() || (evt.accesLibre ? 'Entrée libre' : evt.prix === 0 ? 'Je m’inscris' : 'Réserver ma place'),
+    boutonHero: hero?.bouton?.trim() || (evt.accesLibre ? 'Voir le programme' : evt.prix === 0 ? 'Je m’inscris' : 'Réserver ma place'),
     textes: sections
       .filter((s) => s.type === 'TEXTE' && (s.texte || s.titre))
       .map((s) => ({ id: s.id, titre: s.titre ?? '', texte: s.texte ?? '', image: s.image ? urlImage(s.image) : undefined })),

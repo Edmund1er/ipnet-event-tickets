@@ -14,6 +14,7 @@ import { EditeurSection, TYPES_SECTION } from '../components/EditeurSection'
 import { ChampCouleur } from '../components/ChampCouleur'
 import { PALETTES_PAGE } from '../../evenements/theme/palettes'
 import { adminEvenementService } from '../services/adminEvenementService'
+import { EtapesEvenement } from '../components/EtapesEvenement'
 
 const ORDRE: TypeSection[] = ['HERO', 'A_PROPOS', 'INTERVENANTS', 'PROGRAMME', 'LIEU', 'TEXTE', 'CARTES', 'COLONNES']
 
@@ -74,7 +75,7 @@ export function ConstructeurPage() {
     apercusTemporaires.current.add(url)
     setApercus((a) => ({ ...a, [nom]: url }))
   }, [])
-  const modelePropose: CleModele = modele ?? (evt?.type === 'CADRE' ? 'RENCONTRE' : 'CEREMONIE')
+  const modelePropose: CleModele = modele ?? (evt?.type === 'CADRE' ? 'RENCONTRE' : 'SOIREE')
   const urlImage = useMemo(() => (nom: string) => apercus[nom] ?? `${window.location.origin}/api/evenements/${evtId}/page/images/${nom}`, [apercus, evtId])
 
   if (chargement) return <ChargementPage />
@@ -145,6 +146,7 @@ export function ConstructeurPage() {
           </>
         }
       />
+      <EtapesEvenement etape={evt.type === 'CADRE' ? 3 : 2} programme={evt.type === 'CADRE'} />
       {verrouille && <Alerte ton="attention">Cet événement est {evt.statut === 'ANNULE' ? 'annulé' : 'terminé'} : sa page ne peut plus être modifiée.</Alerte>}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">

@@ -1,4 +1,4 @@
-export type CleCategorie = 'SPORT' | 'CULTURE' | 'DANSE' | 'JEUX' | 'CONFERENCE' | 'SOIREE' | 'AUTRE'
+export type CleCategorie = 'SPORT' | 'CULTURE' | 'DANSE' | 'JEUX' | 'CONFERENCE' | 'SOIREE' | 'RAP' | 'GOSPEL' | 'PLAGE' | 'DJ' | 'FESTIVAL' | 'AUTRE'
 
 interface Categorie {
   libelle: string
@@ -9,16 +9,22 @@ interface Categorie {
 
 /** Chaque catégorie donne son visuel par défaut à une activité (couleur, icône) : l'admin n'a rien à régler. */
 export const CATEGORIES: Record<CleCategorie, Categorie> = {
-  SPORT: { libelle: 'Sport', couleur: '#16a34a', icone: 'sports_soccer' },
-  CULTURE: { libelle: 'Culture', couleur: '#ea580c', icone: 'palette' },
-  DANSE: { libelle: 'Danse', couleur: '#d946ef', icone: 'music_note' },
-  JEUX: { libelle: 'Jeux', couleur: '#0891b2', icone: 'sports_esports' },
-  CONFERENCE: { libelle: 'Conférence', couleur: '#1e3a8a', icone: 'co_present' },
-  SOIREE: { libelle: 'Soirée', couleur: '#7c3aed', icone: 'nightlife' },
-  AUTRE: { libelle: 'Autre', couleur: '#475569', icone: 'event' },
+  SPORT: { libelle: 'Tournoi sportif', couleur: '#16a34a', icone: 'sports_soccer' },
+  CULTURE: { libelle: 'Festival culturel', couleur: '#ea580c', icone: 'palette' },
+  DANSE: { libelle: 'Bal & danse', couleur: '#d946ef', icone: 'music_note' },
+  JEUX: { libelle: 'E-sport & gaming', couleur: '#0891b2', icone: 'sports_esports' },
+  CONFERENCE: { libelle: 'Concert / scène live', couleur: '#1e3a8a', icone: 'co_present' },
+  SOIREE: { libelle: 'Soirée / club', couleur: '#7c3aed', icone: 'nightlife' },
+  RAP: { libelle: 'Rap & urbain', couleur: '#db2777', icone: 'mic_external_on' },
+  GOSPEL: { libelle: 'Gospel & louange', couleur: '#b45309', icone: 'church' },
+  PLAGE: { libelle: 'Plage & chill', couleur: '#0891b2', icone: 'beach_access' },
+  DJ: { libelle: 'DJ & électro', couleur: '#7c3aed', icone: 'album' },
+  FESTIVAL: { libelle: 'Festival & live', couleur: '#ea580c', icone: 'festival' },
+  AUTRE: { libelle: 'Autre fête', couleur: '#475569', icone: 'event' },
 }
 
-export const CLES_CATEGORIE = Object.keys(CATEGORIES) as CleCategorie[]
+/** Nouvelles activités proposées : l'ancien code CONFERENCE reste affichable, mais n'est plus choisi. */
+export const CLES_CATEGORIE: CleCategorie[] = ['SOIREE', 'RAP', 'GOSPEL', 'PLAGE', 'DJ', 'FESTIVAL', 'SPORT', 'CULTURE', 'DANSE', 'JEUX', 'AUTRE']
 
 export function categorieDe(cle?: string | null): Categorie {
   return CATEGORIES[(cle as CleCategorie) ?? 'AUTRE'] ?? CATEGORIES.AUTRE

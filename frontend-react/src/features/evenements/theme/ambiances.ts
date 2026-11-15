@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import type { Evenement } from '../../../core/api/types'
 import { couleurParDefaut } from './palettes'
 
-export type CleAmbiance = 'SOBRE' | 'ACADEMIQUE' | 'CEREMONIE' | 'SOIREE' | 'SPORT' | 'CULTURE' | 'FESTIF'
+export type CleAmbiance = 'SOBRE' | 'ACADEMIQUE' | 'CEREMONIE' | 'SOIREE' | 'SPORT' | 'CULTURE' | 'FESTIF' | 'PLAGE' | 'URBAIN' | 'GOSPEL' | 'ELECTRO' | 'FESTIVAL'
 
 interface Ambiance {
   libelle: string
@@ -21,15 +21,20 @@ const svg = (corps: string, t = 48) =>
 
 export const AMBIANCES: Record<CleAmbiance, Ambiance> = {
   SOBRE: { libelle: 'Sobre', couleur: '#2563eb', sombre: true, motif: svg("<circle cx='4' cy='4' r='1.5' fill='white' fill-opacity='.12'/>", 24) },
-  ACADEMIQUE: { libelle: 'Académique', couleur: '#1e3a8a', sombre: true, motif: svg("<path d='M0 24h48M24 0v48' stroke='white' stroke-opacity='.07'/>") },
+  ACADEMIQUE: { libelle: 'Classique', couleur: '#1e3a8a', sombre: true, motif: svg("<path d='M0 24h48M24 0v48' stroke='white' stroke-opacity='.07'/>") },
   CEREMONIE: { libelle: 'Cérémonie', couleur: '#b8860b', sombre: true, motif: svg("<path d='M24 6l6 12-6 12-6-12z' fill='none' stroke='white' stroke-opacity='.14'/>") },
   SOIREE: { libelle: 'Soirée', couleur: '#d946ef', sombre: true, motif: svg("<path d='M0 40L40 0M8 48L48 8' stroke='white' stroke-opacity='.12' stroke-width='2'/>") },
   SPORT: { libelle: 'Sport', couleur: '#16a34a', sombre: true, motif: svg("<path d='M-4 52L52 -4M12 52L52 12M-4 36L36 -4' stroke='white' stroke-opacity='.13' stroke-width='3'/>") },
   CULTURE: { libelle: 'Culture', couleur: '#ea580c', sombre: true, motif: svg("<path d='M0 12l12-12 12 12-12 12zM24 36l12-12 12 12-12 12z' fill='white' fill-opacity='.1'/>") },
-  FESTIF: { libelle: 'Festif', couleur: '#e11d48', sombre: true, motif: svg("<circle cx='10' cy='12' r='3' fill='white' fill-opacity='.18'/><rect x='32' y='30' width='6' height='6' fill='white' fill-opacity='.15' transform='rotate(25 35 33)'/>") },
+  FESTIF: { libelle: 'Fête & rencontres', couleur: '#e11d48', sombre: true, motif: svg("<circle cx='10' cy='12' r='3' fill='white' fill-opacity='.18'/><rect x='32' y='30' width='6' height='6' fill='white' fill-opacity='.15' transform='rotate(25 35 33)'/>") },
+  PLAGE: { libelle: 'Plage & chill', couleur: '#0891b2', sombre: false, motif: svg("<path d='M0 32 Q12 24 24 32 T48 32M0 40 Q12 32 24 40 T48 40' fill='none' stroke='white' stroke-opacity='.12' stroke-width='2'/>") },
+  URBAIN: { libelle: 'Rap & urbain', couleur: '#7c3aed', sombre: true, motif: svg("<path d='M0 40L40 0M12 52L52 12' stroke='white' stroke-opacity='.13' stroke-width='3'/>") },
+  GOSPEL: { libelle: 'Gospel & louange', couleur: '#b45309', sombre: true, motif: svg("<path d='M24 8v32M8 24h32' stroke='white' stroke-opacity='.12' stroke-width='3'/>") },
+  ELECTRO: { libelle: 'DJ & électro', couleur: '#db2777', sombre: true, motif: svg("<circle cx='24' cy='24' r='16' fill='none' stroke='white' stroke-opacity='.15'/><circle cx='24' cy='24' r='5' fill='white' fill-opacity='.18'/>") },
+  FESTIVAL: { libelle: 'Festival & live', couleur: '#ea580c', sombre: true, motif: svg("<path d='M0 12h48M0 24h48M0 36h48' stroke='white' stroke-opacity='.09'/><circle cx='12' cy='12' r='3' fill='white' fill-opacity='.15'/><circle cx='36' cy='36' r='3' fill='white' fill-opacity='.18'/>") },
 }
 
-export const CLES_AMBIANCE = Object.keys(AMBIANCES) as CleAmbiance[]
+export const CLES_AMBIANCE: CleAmbiance[] = ['SOBRE', 'CEREMONIE', 'SOIREE', 'SPORT', 'CULTURE', 'FESTIF', 'PLAGE', 'URBAIN', 'GOSPEL', 'ELECTRO', 'FESTIVAL']
 export const COULEUR_DEFAUT = '#2563eb'
 
 export const estHex = (c?: string | null): c is string => !!c && /^#[0-9a-fA-F]{6}$/.test(c)

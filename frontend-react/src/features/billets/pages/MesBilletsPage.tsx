@@ -26,7 +26,7 @@ export function MesBilletsPage() {
         <EtatVide
           icone="confirmation_number"
           titre="Aucun billet pour le moment"
-          texte="Un billet est émis dès que votre paiement est validé."
+          texte="Les billets avec QR apparaissent ici après confirmation. Les inscriptions gratuites sans QR restent visibles dans Mes réservations."
           action={
             <Link to="/reservations" className="inline-flex h-11 items-center rounded-lg bg-primaire px-4 font-semibold text-white">
               Mes réservations
@@ -46,7 +46,8 @@ export function MesBilletsPage() {
 }
 
 function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran: () => void }) {
-  const { url, erreur } = useImageProtegee(billet.invalide ? null : billetService.cheminQr(billet.id))
+  const [rechargementQr, setRechargementQr] = useState(0)
+  const { url, erreur } = useImageProtegee(billet.invalide ? null : billetService.cheminQr(billet.id), rechargementQr)
   const [renvoi, setRenvoi] = useState(false)
   const toast = useToast()
 
@@ -130,7 +131,11 @@ function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran:
             <img src={url} alt={`QR code du billet ${billet.evenementTitre}`} className="h-40 w-40" />
           </button>
         ) : erreur ? (
-          <p className="text-sm text-rouge">QR code indisponible</p>
+          <div role="alert" className="flex h-40 w-40 flex-col items-center justify-center gap-2 rounded-lg bg-rouge-clair p-3 text-center text-rouge">
+            <Icone nom="qr_code_2" taille={32} />
+            <p className="text-xs">Impossible de charger le QR.</p>
+            <button type="button" onClick={() => setRechargementQr((n) => n + 1)} className="text-xs font-bold underline">Réessayer</button>
+          </div>
         ) : (
           <div className="flex h-40 w-40 items-center justify-center">
             <Chargement />
@@ -147,10 +152,16 @@ function CarteBillet({ billet, surPleinEcran }: { billet: Billet; surPleinEcran:
 }
 
 function QrGrand({ billet }: { billet: Billet }) {
-  const { url } = useImageProtegee(billetService.cheminQr(billet.id))
+  const [rechargement, setRechargement] = useState(0)
+  const { url, erreur } = useImageProtegee(billetService.cheminQr(billet.id), rechargement)
   return (
     <div className="flex flex-col items-center gap-3 py-2 text-center">
-      {url ? <img src={url} alt="QR code du billet" className="w-full max-w-sm" /> : <Chargement taille={40} />}
+      {url ? <img src={url} alt="QR code du billet" className="w-full max-w-sm" /> : erreur ? (
+        <div role="alert" className="flex flex-col items-center gap-3 py-8">
+          <p className="text-sm text-rouge">Impossible de charger ce QR code.</p>
+          <Bouton variante="secondaire" onClick={() => setRechargement((n) => n + 1)}>Réessayer</Bouton>
+        </div>
+      ) : <Chargement taille={40} />}
       <p className="font-semibold">
         {billet.porteurPrenom} {billet.porteurNom}
       </p>

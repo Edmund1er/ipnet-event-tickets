@@ -19,6 +19,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tg.ipnetinstitute.technology.common.exception.EvenementNonReservableException;
 import tg.ipnetinstitute.technology.features.billet.repository.BilletRepository;
+import tg.ipnetinstitute.technology.features.billet.service.ServiceBillet;
 import tg.ipnetinstitute.technology.features.billet.wrapper.HmacWrapper;
 import tg.ipnetinstitute.technology.features.controle.model.ResultatScan;
 import tg.ipnetinstitute.technology.features.controle.service.ServiceControle;
@@ -30,6 +31,8 @@ import tg.ipnetinstitute.technology.features.evenement.model.TypeEvenement;
 import tg.ipnetinstitute.technology.features.evenement.service.ServiceEvenement;
 import tg.ipnetinstitute.technology.features.evenement.service.ServiceProgramme;
 import tg.ipnetinstitute.technology.features.evenement.utils.FiltresEvenementUtils;
+import tg.ipnetinstitute.technology.features.notification.model.ModeleNotification;
+import tg.ipnetinstitute.technology.features.notification.repository.OutboxNotificationRepository;
 import tg.ipnetinstitute.technology.features.identite.model.Role;
 import tg.ipnetinstitute.technology.features.identite.model.TypeProfil;
 import tg.ipnetinstitute.technology.features.identite.model.Utilisateur;
@@ -43,10 +46,18 @@ import tg.ipnetinstitute.technology.features.reservation.repository.InscriptionR
 import tg.ipnetinstitute.technology.features.reservation.service.ServiceReservation;
 import tg.ipnetinstitute.technology.support.PostgresEmbarque;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import javax.imageio.ImageIO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +79,8 @@ class ProgrammeActivitesTest {
     @Autowired ServiceReservation serviceReservation;
     @Autowired ServicePaiement servicePaiement;
     @Autowired ServiceControle serviceControle;
+    @Autowired ServiceBillet serviceBillet;
+    @Autowired OutboxNotificationRepository outbox;
     @Autowired ServiceParametres serviceParametres;
     @Autowired InscriptionRepository inscriptions;
     @Autowired PaiementRepository paiements;
@@ -137,6 +150,27 @@ class ProgrammeActivitesTest {
         return signateur.signer(billet.getId(), billet.getNonce(), insc.getEvenementId());
     }
 
+    private <T> List<Object> enParallele(List<Callable<T>> taches) throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(taches.size());
+        CountDownLatch depart = new CountDownLatch(1);
+        List<Future<Object>> futurs = new ArrayList<>();
+        for (Callable<T> tache : taches) {
+            futurs.add(pool.submit(() -> {
+                depart.await();
+                try {
+                    return tache.call();
+                } catch (Throwable erreur) {
+                    return erreur;
+                }
+            }));
+        }
+        depart.countDown();
+        List<Object> resultats = new ArrayList<>();
+        for (Future<Object> futur : futurs) resultats.add(futur.get());
+        pool.shutdown();
+        return resultats;
+    }
+
     @Test
     void cadreNonReservable_etListesGeneralesSansActivites() {
         var cadre = cadrePublie();
@@ -201,6 +235,33 @@ class ProgrammeActivitesTest {
     }
 
     @Test
+    void inscriptionGratuiteRespecteLeChoixQrEtLeBilletEstLisibleDansLApplication() throws Exception {
+        Long a = admin();
+        agir(a, "ROLE_ADMIN");
+        var avecQr = serviceEvenement.creer(new DemandeEvenement("Entrée gratuite QR " + SEQ.incrementAndGet(), "d",
+                LocalDateTime.now().plusDays(2), "Lomé", BigDecimal.ZERO, "XOF", 20, null, null, "EVENEMENT", true), a);
+        var sansQr = serviceEvenement.creer(new DemandeEvenement("Entrée gratuite sans QR " + SEQ.incrementAndGet(), "d",
+                LocalDateTime.now().plusDays(2), "Lomé", BigDecimal.ZERO, "XOF", 20, null, null, "EVENEMENT", false), a);
+        serviceEvenement.publier(avecQr.id(), a);
+        serviceEvenement.publier(sansQr.id(), a);
+
+        Long participantQr = nouvelUtilisateur(Role.PARTICIPANT, TypeProfil.VISITEUR);
+        agir(participantQr, "ROLE_PARTICIPANT");
+        Long inscriptionQr = serviceReservation.reserver(participantQr, avecQr.id()).id();
+        var billet = billets.findByInscriptionId(inscriptionQr).orElseThrow();
+        assertThat(ImageIO.read(new ByteArrayInputStream(serviceBillet.imageQr(billet.getId(), participantQr)))).isNotNull();
+
+        Long participantSansQr = nouvelUtilisateur(Role.PARTICIPANT, TypeProfil.VISITEUR);
+        agir(participantSansQr, "ROLE_PARTICIPANT");
+        Long inscriptionSansQr = serviceReservation.reserver(participantSansQr, sansQr.id()).id();
+        assertThat(billets.findByInscriptionId(inscriptionSansQr)).isEmpty();
+        assertThat(outbox.findAll()).anySatisfy(notification -> {
+            assertThat(notification.getModele()).isEqualTo(ModeleNotification.INSCRIPTION_GRATUITE_CONFIRMEE);
+            assertThat(notification.getCharge()).contains(sansQr.titre());
+        });
+    }
+
+    @Test
     void passGlobal_ouvreToutesLesActivites_uneEntreeParActivite() {
         var cadre = cadrePublie();
         Long a = admin();
@@ -226,6 +287,27 @@ class ProgrammeActivitesTest {
         assertThat(serviceControle.scanner(jeton, a1.id(), agent)).isInstanceOf(ResultatScan.DejaUtilise.class);
         assertThat(serviceControle.scanner(jeton, a2.id(), agent)).isInstanceOf(ResultatScan.Accepte.class);
         assertThat(serviceControle.scanner(jeton, etranger, agent)).isInstanceOf(ResultatScan.MauvaisEvenement.class);
+    }
+
+    @Test
+    void passScanneDeuxFoisEnParallele_uneSeuleEntreeParActivite() throws Exception {
+        var cadre = cadrePublie();
+        Long a = admin();
+        agir(a, "ROLE_ADMIN");
+        var activite = serviceProgramme.creerActivite(cadre.id(), activite("Concert", LocalDateTime.now().plusHours(3), new BigDecimal("2000"), 50, false), a);
+        var pass = serviceProgramme.creerActivite(cadre.id(), new DemandeActivite("PASS", "Pass complet", null, null,
+                cadre.dateDebut(), cadre.dateFin(), null, new BigDecimal("5000"), 30, false, "GLOBAL", null, null, null, null), a);
+        serviceEvenement.publier(cadre.id(), a);
+
+        Long participant = nouvelUtilisateur(Role.PARTICIPANT, TypeProfil.VISITEUR);
+        String jeton = jeton(reserverEtConfirmer(participant, pass.id()));
+        Long agent = nouvelUtilisateur(Role.SCANNER, TypeProfil.AUCUN);
+        List<Object> resultats = enParallele(List.of(
+                () -> { agir(agent, "ROLE_SCANNER"); return serviceControle.scanner(jeton, activite.id(), agent); },
+                () -> { agir(agent, "ROLE_SCANNER"); return serviceControle.scanner(jeton, activite.id(), agent); }));
+
+        assertThat(resultats.stream().filter(r -> r instanceof ResultatScan.Accepte)).hasSize(1);
+        assertThat(resultats.stream().filter(r -> r instanceof ResultatScan.DejaUtilise)).hasSize(1);
     }
 
     @Test

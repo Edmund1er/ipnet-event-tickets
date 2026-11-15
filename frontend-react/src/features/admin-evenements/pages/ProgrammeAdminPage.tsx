@@ -15,6 +15,7 @@ import { libelleTarif } from '../../evenements/utils/tarif'
 import { AMBIANCES, CLES_AMBIANCE } from '../../evenements/theme/ambiances'
 import { CATEGORIES, CLES_CATEGORIE, categorieDe } from '../../evenements/theme/categories'
 import { adminEvenementService, type DonneesActivite } from '../services/adminEvenementService'
+import { EtapesEvenement } from '../components/EtapesEvenement'
 
 type Mode = 'PAYANT' | 'GRATUIT' | 'LIBRE'
 
@@ -31,9 +32,10 @@ interface Formulaire {
   capacite: string
   ambiance: string
   couleur: string
+  qrPourGratuit: boolean
 }
 
-const VIDE: Formulaire = { titre: '', description: '', categorie: 'CULTURE', jour: '', debut: '08:00', fin: '09:00', lieu: '', mode: 'GRATUIT', prix: '', capacite: '', ambiance: '', couleur: '' }
+const VIDE: Formulaire = { titre: '', description: '', categorie: 'FESTIVAL', jour: '', debut: '08:00', fin: '09:00', lieu: '', mode: 'GRATUIT', prix: '', capacite: '', ambiance: '', couleur: '', qrPourGratuit: true }
 
 const cleJour = (iso: string) => iso.slice(0, 10)
 const libelleJour = (cle: string) => new Date(`${cle}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -65,7 +67,7 @@ export function ProgrammeAdminPage() {
   const [personnaliser, setPersonnaliser] = useState(false)
   // Pass
   const [formPass, setFormPass] = useState<{ edition: Evenement | null } | null>(null)
-  const [pass, setPass] = useState({ titre: '', portee: 'GLOBAL' as 'GLOBAL' | 'JOURNEE', jour: '', prix: '', capacite: '' })
+  const [pass, setPass] = useState({ titre: '', portee: 'GLOBAL' as 'GLOBAL' | 'JOURNEE', jour: '', prix: '', capacite: '', qrPourGratuit: true })
   // Duplication
   const [duplication, setDuplication] = useState<{ source: string; cibles: string[] } | null>(null)
   const [enCours, setEnCours] = useState(false)
@@ -116,6 +118,7 @@ export function ProgrammeAdminPage() {
         capacite: edition.accesLibre ? '' : String(edition.capacite),
         ambiance: edition.ambiance ?? '',
         couleur: edition.couleurPrincipale ?? '',
+        qrPourGratuit: edition.qrPourGratuit ?? true,
       })
       setPersonnaliser(!!(edition.ambiance || edition.couleurPrincipale))
     } else {
@@ -147,6 +150,7 @@ export function ProgrammeAdminPage() {
       passJour: null,
       ambiance: personnaliser && f.ambiance ? f.ambiance : null,
       couleurPrincipale: personnaliser && f.couleur ? f.couleur : null,
+      qrPourGratuit: f.qrPourGratuit,
     }
     setEnCours(true)
     setErreurForm(null)
@@ -167,8 +171,8 @@ export function ProgrammeAdminPage() {
     setErreurForm(null)
     setPass(
       edition
-        ? { titre: edition.titre, portee: edition.passPortee ?? 'GLOBAL', jour: edition.passJour ?? '', prix: String(edition.prix), capacite: String(edition.capacite) }
-        : { titre: '', portee: 'GLOBAL', jour: jours[0] ?? '', prix: '', capacite: '' },
+        ? { titre: edition.titre, portee: edition.passPortee ?? 'GLOBAL', jour: edition.passJour ?? '', prix: String(edition.prix), capacite: String(edition.capacite), qrPourGratuit: edition.qrPourGratuit ?? true }
+        : { titre: '', portee: 'GLOBAL', jour: jours[0] ?? '', prix: '', capacite: '', qrPourGratuit: true },
     )
     setFormPass({ edition })
   }
@@ -194,6 +198,7 @@ export function ProgrammeAdminPage() {
       passJour: pass.portee === 'JOURNEE' ? pass.jour : null,
       ambiance: null,
       couleurPrincipale: null,
+      qrPourGratuit: pass.qrPourGratuit,
     }
     setEnCours(true)
     setErreurForm(null)
@@ -265,6 +270,7 @@ export function ProgrammeAdminPage() {
           )
         }
       />
+      <EtapesEvenement etape={2} programme />
       <div className="mb-4 flex items-center gap-2">
         <Badge ton={STATUTS_EVENEMENT[cadre.statut].ton}>{STATUTS_EVENEMENT[cadre.statut].libelle}</Badge>
         {cadre.statut === 'BROUILLON' && <span className="text-sm text-attenue">Publiez le programme depuis la liste des événements : ses activités et pass seront publiés avec lui.</span>}
@@ -401,7 +407,7 @@ export function ProgrammeAdminPage() {
             <legend className="mb-1 text-sm font-semibold">Accès</legend>
             {(
               [
-                ['GRATUIT', 'Gratuit, sur inscription', 'Les étudiants s’inscrivent et reçoivent un billet.'],
+                ['GRATUIT', 'Gratuit, sur inscription', 'Les participants s’inscrivent; vous choisissez si un billet QR est envoyé.'],
                 ['PAYANT', 'Payant', 'Billet payé par Mobile Money.'],
                 ['LIBRE', 'Accès libre', 'Aucune inscription : l’activité est simplement affichée.'],
               ] as [Mode, string, string][]
@@ -420,6 +426,15 @@ export function ProgrammeAdminPage() {
               {f.mode === 'PAYANT' && <Champ libelle={`Prix (${cadre.devise})`} type="number" min={1} value={f.prix} onChange={maj('prix')} />}
               <Champ libelle="Nombre de places" type="number" min={1} value={f.capacite} onChange={maj('capacite')} />
             </div>
+          )}
+          {f.mode === 'GRATUIT' && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#ff653d]/25 bg-[#fff5f1] p-4">
+              <input type="checkbox" className="mt-1 h-4 w-4 accent-[#ff653d]" checked={f.qrPourGratuit} onChange={(e) => setF((x) => ({ ...x, qrPourGratuit: e.target.checked }))} />
+              <span>
+                <span className="block text-sm font-bold">Envoyer un billet QR</span>
+                <span className="mt-1 block text-xs leading-relaxed text-neutral-600">Désactive pour confirmer l’inscription sans QR ni contrôle par billet.</span>
+              </span>
+            </label>
           )}
           <ChampTexte libelle="Description" facultatif rows={3} value={f.description} onChange={maj('description')} />
           <div>
@@ -482,6 +497,15 @@ export function ProgrammeAdminPage() {
             <Champ libelle={`Prix (${cadre.devise})`} type="number" min={0} value={pass.prix} onChange={(e) => setPass((x) => ({ ...x, prix: e.target.value }))} />
             <Champ libelle="Nombre de pass" type="number" min={1} value={pass.capacite} onChange={(e) => setPass((x) => ({ ...x, capacite: e.target.value }))} />
           </div>
+          {pass.prix !== '' && Number(pass.prix) === 0 && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#ff653d]/25 bg-[#fff5f1] p-4">
+              <input type="checkbox" className="mt-1 h-4 w-4 accent-[#ff653d]" checked={pass.qrPourGratuit} onChange={(e) => setPass((x) => ({ ...x, qrPourGratuit: e.target.checked }))} />
+              <span>
+                <span className="block text-sm font-bold">Envoyer un billet QR pour ce pass gratuit</span>
+                <span className="mt-1 block text-xs leading-relaxed text-neutral-600">Désactive pour confirmer l’inscription sans QR ni contrôle par billet.</span>
+              </span>
+            </label>
+          )}
         </div>
       </Modale>
 

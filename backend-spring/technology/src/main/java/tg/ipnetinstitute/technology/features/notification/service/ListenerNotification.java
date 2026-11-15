@@ -19,6 +19,7 @@ import tg.ipnetinstitute.technology.features.notification.model.OutboxNotificati
 import tg.ipnetinstitute.technology.features.notification.repository.OutboxNotificationRepository;
 import tg.ipnetinstitute.technology.features.paiement.model.StatutPaiement;
 import tg.ipnetinstitute.technology.features.paiement.repository.PaiementRepository;
+import tg.ipnetinstitute.technology.features.paiement.service.PaiementConfirmeEvent;
 import tg.ipnetinstitute.technology.features.paiement.service.PaiementRejeteEvent;
 import tg.ipnetinstitute.technology.features.reservation.model.Inscription;
 import tg.ipnetinstitute.technology.features.reservation.model.StatutInscription;
@@ -69,6 +70,24 @@ public class ListenerNotification {
         inscriptions.findById(e.inscriptionId()).ifPresent(i ->
                 serviceIdentite.emailDe(i.getUtilisateurId()).ifPresent(email ->
                         enregistrer(email, ModeleNotification.BILLET_EMIS, Map.of("billetId", e.billetId().toString()))));
+    }
+
+    /** Inscription gratuite sans QR : envoyer une confirmation, jamais un faux reçu de paiement. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void surInscriptionGratuite(PaiementConfirmeEvent e) {
+        if (e.paiementId() != null) return;
+        inscriptions.findById(e.inscriptionId()).ifPresent(i -> {
+            var evenement = serviceEvenement.consulter(i.getEvenementId());
+            if ((i.getMontant() != null && i.getMontant().signum() != 0) || evenement.qrPourGratuit()) return;
+            serviceIdentite.emailDe(i.getUtilisateurId()).ifPresent(email -> {
+                Map<String, Object> charge = new LinkedHashMap<>();
+                charge.put("evenementTitre", evenement.titre());
+                charge.put("dateDebut", evenement.dateDebut().toString());
+                charge.put("lieu", evenement.lieu() == null ? "" : evenement.lieu());
+                enregistrer(email, ModeleNotification.INSCRIPTION_GRATUITE_CONFIRMEE, charge);
+            });
+        });
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

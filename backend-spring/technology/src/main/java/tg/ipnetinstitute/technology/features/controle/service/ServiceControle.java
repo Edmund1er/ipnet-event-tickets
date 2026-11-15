@@ -105,6 +105,8 @@ public class ServiceControle {
 
         boolean pass = evenement.getType() == TypeEvenement.PASS;
         if (pass) {
+            // Verrou du billet : sérialise les contrôles d'un pass entre plusieurs postes.
+            billet = billets.verrouillerParId(billet.getId()).orElseThrow();
             // Un pass ouvre le programme (cadre) et toutes ses activités
             Evenement scanne = evenements.findById(evenementId).orElse(null);
             boolean dansLeProgramme = scanne != null && evenement.getParentId() != null

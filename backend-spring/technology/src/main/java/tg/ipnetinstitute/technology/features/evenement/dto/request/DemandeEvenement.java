@@ -18,14 +18,20 @@ public record DemandeEvenement(
         @NotNull @Min(1) Integer capacite,
         LocalDateTime dateLimiteReservation,
         LocalDateTime dateFin,
-        @jakarta.validation.constraints.Pattern(regexp = "^(EVENEMENT|CADRE)$", message = "Type : EVENEMENT ou CADRE") String type
+        @jakarta.validation.constraints.Pattern(regexp = "^(EVENEMENT|CADRE)$", message = "Type : EVENEMENT ou CADRE") String type,
+        Boolean qrPourGratuit
 ) {
     public DemandeEvenement(String titre, String description, LocalDateTime dateDebut, String lieu,
+              BigDecimal prix, String devise, Integer capacite, LocalDateTime dateLimiteReservation,
+              LocalDateTime dateFin, String type) {
+        this(titre, description, dateDebut, lieu, prix, devise, capacite, dateLimiteReservation, dateFin, type, null);
+    }
+    public DemandeEvenement(String titre, String description, LocalDateTime dateDebut, String lieu,
               BigDecimal prix, String devise, Integer capacite, LocalDateTime dateLimiteReservation) {
-        this(titre, description, dateDebut, lieu, prix, devise, capacite, dateLimiteReservation, null, null);
+        this(titre, description, dateDebut, lieu, prix, devise, capacite, dateLimiteReservation, null, null, null);
     }
     public DemandeEvenement(String titre, String description, LocalDateTime dateDebut, String lieu,
               BigDecimal prix, String devise, Integer capacite) {
-        this(titre, description, dateDebut, lieu, prix, devise, capacite, null, null, null);
+        this(titre, description, dateDebut, lieu, prix, devise, capacite, null, null, null, null);
     }
 }

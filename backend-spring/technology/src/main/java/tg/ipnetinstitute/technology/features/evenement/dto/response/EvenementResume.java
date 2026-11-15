@@ -28,6 +28,7 @@ public record EvenementResume(
         LocalDateTime dateFin,
         String categorie,
         boolean accesLibre,
+        boolean qrPourGratuit,
         String passPortee,
         java.time.LocalDate passJour,
         boolean passe,

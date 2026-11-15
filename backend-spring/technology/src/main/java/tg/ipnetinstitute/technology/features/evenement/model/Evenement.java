@@ -82,6 +82,10 @@ public class Evenement {
     @Column(name = "acces_libre", nullable = false)
     private boolean accesLibre = false;
 
+    /** Pour une inscription gratuite : émettre et envoyer un billet QR si l'organisateur le souhaite. */
+    @Column(name = "qr_pour_gratuit", nullable = false)
+    private boolean qrPourGratuit = true;
+
     @Column(name = "pass_portee", length = 10)
     private String passPortee;
 
@@ -273,6 +277,10 @@ public class Evenement {
         this.passJour = passJour;
     }
 
+    public void definirQrPourGratuit(boolean qrPourGratuit) {
+        this.qrPourGratuit = qrPourGratuit;
+    }
+
     /** Un pass reste en vente pendant tout le programme ; les autres événements jusqu'à leur début. */
     public LocalDateTime finDeVente() {
         return (type == TypeEvenement.PASS && dateFin != null) ? dateFin : dateDebut;
@@ -307,6 +315,7 @@ public class Evenement {
     public LocalDateTime getDateFin() { return dateFin; }
     public String getCategorie() { return categorie; }
     public boolean isAccesLibre() { return accesLibre; }
+    public boolean isQrPourGratuit() { return qrPourGratuit; }
     public String getPassPortee() { return passPortee; }
     public java.time.LocalDate getPassJour() { return passJour; }
 

@@ -40,8 +40,8 @@ function AgendaEvenements({ connecte }: { connecte: boolean }) {
       <section id="evenements" className={`scroll-mt-20 ${connecte ? 'pb-10' : 'py-16'}`}>
         <div className="mx-auto max-w-[85rem]">
           <div className="titre-bloc">
-            <span>Agenda</span>
-            <h2>Les événements</h2>
+            <span>Cette semaine, on sort</span>
+            <h2>Les prochaines sorties</h2>
           </div>
 
           <form

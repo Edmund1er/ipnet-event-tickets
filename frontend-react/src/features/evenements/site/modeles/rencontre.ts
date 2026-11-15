@@ -2,7 +2,7 @@ import { avatar } from '../contenu'
 import type { ContenuPage } from '../types'
 import { action, ancre, ecrire, fond, image, logoTexte, menu, miniature, plage, repeter, retirer, tous, un } from './outils'
 
-/** Template « Wemeet » : forum, hackathon, rencontre. Dégradé coloré, compte à rebours, programme par jour. */
+/** Template « Wemeet » : journée d’intégration, plage et sorties en plein air, avec programme par jour. */
 export function appliquerRencontre(doc: Document, c: ContenuPage) {
   const modeleTexte = un(doc, '.about_area')?.cloneNode(true) as HTMLElement | undefined
 
