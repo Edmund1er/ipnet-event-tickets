@@ -1,58 +1,54 @@
 import type { ReactNode } from 'react'
-import { CalendarDays, Music2, Sparkles, TicketCheck } from 'lucide-react'
 import { Icone } from '../../../core/components/ui/Icone'
 
 const ATOUTS = [
-  { icone: TicketCheck, texte: 'Réserve en quelques clics' },
-  { icone: CalendarDays, texte: 'Garde le programme à portée de main' },
-  { icone: Sparkles, texte: 'Entre avec ton billet QR' },
+  { icone: 'confirmation_number', texte: 'Réserve ta place en quelques clics' },
+  { icone: 'smartphone', texte: 'Paie par Mobile Money si l’événement est payant' },
+  { icone: 'qr_code_2', texte: 'Retrouve ton billet QR quand il est prévu' },
 ]
 
-/** Cadre d’authentification immersif; conserve les vrais formulaires et actions métier enfants. */
+/** Cadre d’authentification dans le style ScrewFast; garde les formulaires réels et leur largeur. */
 export function CadreAuth({ icone, titre, sousTitre, children, large }: { icone: string; titre: string; sousTitre?: ReactNode; children: ReactNode; large?: boolean }) {
   return (
     <div className={`auth-card apparition mx-auto w-full ${large ? 'max-w-6xl' : 'max-w-5xl'}`}>
-      <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-white shadow-[0_32px_100px_-38px_rgba(0,0,0,.75)] lg:grid lg:grid-cols-[.92fr_1.08fr]">
-        <aside className="auth-story relative hidden min-h-[620px] flex-col justify-between overflow-hidden p-9 text-white lg:flex xl:p-12">
-          <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_20%,rgba(217,70,239,.32),transparent_42%),radial-gradient(ellipse_at_10%_90%,rgba(255,101,61,.28),transparent_44%),linear-gradient(150deg,#12121b,#08090e_68%)]" />
-          <div aria-hidden="true" className="auth-story-ring absolute -right-16 top-24 h-72 w-72 rounded-full border border-white/15" />
-          <div aria-hidden="true" className="absolute -right-3 top-36 h-48 w-48 rounded-full border border-white/10" />
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 lg:grid lg:grid-cols-[.92fr_1.08fr]">
+        <aside className="relative hidden min-h-[620px] flex-col justify-between overflow-hidden bg-neutral-800 p-9 text-white lg:flex xl:p-12">
+          <img src="/logo_ipnet.jpg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-neutral-900/45 via-neutral-900/70 to-neutral-900/90" />
           <div className="relative z-10">
-            <p className="font-titre text-xl font-extrabold tracking-tight">IPNET<span className="text-[#ff653d]">·</span>Events</p>
-            <p className="mt-2 text-sm text-white/60">Les sorties de la jeunesse, en un seul endroit.</p>
+            <p className="font-titre text-2xl font-bold tracking-tight">IPNET<span className="text-yellow-400">·</span>Events</p>
+            <p className="mt-2 text-sm text-white/80">Les sorties, concerts et fêtes de la jeunesse à Lomé.</p>
           </div>
           <div className="relative z-10 py-8">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-lime-200 shadow-lg shadow-black/20 backdrop-blur">
-              <Music2 aria-hidden="true" className="h-8 w-8" />
-            </div>
-            <p className="text-xs font-extrabold uppercase tracking-[.2em] text-lime-200">La nuit est à toi</p>
-            <h2 className="mt-3 max-w-[11ch] font-titre text-4xl font-extrabold leading-[1.05] tracking-tight xl:text-5xl">Les meilleurs souvenirs se vivent ensemble.</h2>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">Soirée rap, gospel, bal ou journée plage : retrouve ta team et profite du moment.</p>
+            <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-orange-400 text-white shadow-sm">
+              <Icone nom="music_note" taille={26} />
+            </span>
+            <h2 className="max-w-[12ch] font-titre text-4xl font-bold leading-tight tracking-tight xl:text-5xl">Les bons moments se vivent ensemble.</h2>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/80">Choisis ta sortie, retrouve ta bande et profite du moment.</p>
           </div>
           <ul className="relative z-10 flex flex-col gap-3">
-            {ATOUTS.map(({ icone: Ic, texte }) => (
-              <li key={texte} className="flex items-center gap-3 text-sm font-medium text-white/80">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-lime-200"><Ic aria-hidden="true" className="h-4 w-4" /></span>
-                {texte}
+            {ATOUTS.map((a) => (
+              <li key={a.texte} className="flex items-center gap-3 text-sm text-white/90">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-yellow-300">
+                  <Icone nom={a.icone} taille={20} />
+                </span>
+                {a.texte}
               </li>
             ))}
           </ul>
-          <p className="relative z-10 mt-8 text-xs text-white/40">© {new Date().getFullYear()} IPNET Events · Lomé</p>
+          <p className="relative z-10 mt-8 text-xs text-white/60">© {new Date().getFullYear()} IPNET Events · Lomé</p>
         </aside>
 
-        <section className="auth-form-panel flex min-w-0 flex-col justify-center p-5 sm:p-9 lg:p-12">
-          <div className="mb-7 flex items-center gap-3 lg:hidden">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#17171d] text-lime-300"><Music2 aria-hidden="true" className="h-5 w-5" /></span>
-            <span className="font-titre text-base font-extrabold text-[#17171d]">IPNET<span className="text-[#ff653d]">·</span>Events</span>
+        <section className="auth-form-panel min-w-0 bg-neutral-100 p-5 dark:bg-neutral-800 sm:p-9 lg:p-12">
+          <div className="relative mb-6 h-24 overflow-hidden rounded-lg lg:hidden">
+            <img src="/logo_ipnet.jpg" alt="IPNET Events" className="h-full w-full object-cover object-center" />
           </div>
-          <div className="mb-7 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#17171d] text-lime-300 shadow-lg shadow-black/10">
-              <Icone nom={icone} taille={24} />
+          <div className="mb-7 text-center">
+            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-orange-400 text-white shadow-sm">
+              <Icone nom={icone} taille={23} />
             </div>
-            <div className="min-w-0 pt-0.5">
-              <h1 className="font-titre text-2xl font-extrabold leading-tight tracking-tight text-[#17171d] sm:text-3xl">{titre}</h1>
-              {sousTitre && <p className="mt-1 text-sm leading-relaxed text-neutral-500">{sousTitre}</p>}
-            </div>
+            <h1 className="font-titre text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 sm:text-3xl">{titre}</h1>
+            {sousTitre && <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{sousTitre}</p>}
           </div>
           {children}
         </section>
