@@ -18,6 +18,17 @@ import { EtapesEvenement } from '../components/EtapesEvenement'
 
 const ORDRE: TypeSection[] = ['HERO', 'A_PROPOS', 'INTERVENANTS', 'PROGRAMME', 'LIEU', 'TEXTE', 'CARTES', 'COLONNES']
 
+const APERCUS_MODELE: Record<CleModele, string> = {
+  SOIREE: 'radial-gradient(ellipse at 82% 18%,#fb923c 0,transparent 34%),linear-gradient(125deg,#171717,#7c2d12)',
+  CONFERENCE: 'radial-gradient(ellipse at 78% 20%,#facc15 0,transparent 34%),linear-gradient(125deg,#1c1917,#9a3412)',
+  RENCONTRE: 'radial-gradient(ellipse at 78% 20%,#38bdf8 0,transparent 35%),linear-gradient(125deg,#0f172a,#0e7490)',
+  CEREMONIE: 'radial-gradient(ellipse at 78% 20%,#fbbf24 0,transparent 35%),linear-gradient(125deg,#292524,#78350f)',
+  ATELIER: 'radial-gradient(ellipse at 78% 20%,#a3e635 0,transparent 35%),linear-gradient(125deg,#1c1917,#365314)',
+  TOURNOI: 'radial-gradient(ellipse at 78% 20%,#22d3ee 0,transparent 35%),linear-gradient(125deg,#0f172a,#155e75)',
+  SALON: 'radial-gradient(ellipse at 78% 20%,#fcd34d 0,transparent 35%),linear-gradient(125deg,#1c1917,#713f12)',
+  RESEAUTAGE: 'radial-gradient(ellipse at 78% 20%,#e879f9 0,transparent 35%),linear-gradient(125deg,#18181b,#581c87)',
+}
+
 function nouvelleSection(type: TypeSection): SectionConfig {
   return { id: `${type.toLowerCase()}-${Math.random().toString(36).slice(2, 8)}`, type, actif: true, intervenants: [], creneaux: [], elements: [], colonnes: 3 }
 }
@@ -89,6 +100,13 @@ export function ConstructeurPage() {
     setModifie(true)
   }
   const majSection = (s: SectionConfig) => changer({ sections: sections.map((x) => (x.id === s.id ? s : x)) })
+  const deplacerSection = (index: number, direction: -1 | 1) => {
+    const cible = index + direction
+    if (cible < 0 || cible >= sections.length) return
+    const ordre = [...sections]
+    ;[ordre[index], ordre[cible]] = [ordre[cible], ordre[index]]
+    changer({ sections: ordre })
+  }
   const ajouter = (type: TypeSection) => {
     const s = nouvelleSection(type)
     changer({ sections: [...sections, s] })
@@ -159,8 +177,13 @@ export function ConstructeurPage() {
               {MODELES.map((m) => {
                 const actif = modelePropose === m.cle
                 return (
-                  <div key={m.cle} className={`flex flex-col rounded-xl border-2 p-3 transition ${actif ? 'border-indigo-600 bg-indigo-50' : 'border-neutral-200 bg-white hover:border-neutral-400'}`}>
-                    <label className="flex flex-1 cursor-pointer flex-col text-left outline-none focus-within:ring-2 focus-within:ring-indigo-500">
+                  <div key={m.cle} className={`flex flex-col rounded-xl border-2 p-3 transition ${actif ? 'border-orange-400 bg-yellow-50' : 'border-neutral-200 bg-white hover:border-orange-200'}`}>
+                    <div aria-hidden="true" className="relative mb-3 flex h-16 items-end overflow-hidden rounded-lg border border-black/5 p-2.5" style={{ background: APERCUS_MODELE[m.cle] }}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+                      <span className="relative text-[10px] font-bold uppercase tracking-[.18em] text-white/90">{m.cle}</span>
+                      <span className="relative ml-auto flex items-end gap-1">{[10, 17, 12, 22, 14].map((h, i) => <i key={i} className="w-1 rounded-t bg-white/80" style={{ height: h }} />)}</span>
+                    </div>
+                    <label className="flex flex-1 cursor-pointer flex-col text-left outline-none focus-within:ring-2 focus-within:ring-orange-400">
                       <input
                         type="radio"
                         name="modelePage"
@@ -171,11 +194,11 @@ export function ConstructeurPage() {
                         className="sr-only"
                       />
                       <span className="flex items-center gap-2 font-bold">
-                        <Icone nom={actif ? 'radio_button_checked' : 'radio_button_unchecked'} className={actif ? 'text-indigo-600' : 'text-neutral-400'} /> {m.nom}
+                        <Icone nom={actif ? 'radio_button_checked' : 'radio_button_unchecked'} className={actif ? 'text-orange-500' : 'text-neutral-400'} /> {m.nom}
                       </span>
                       <span className="mt-1 block text-xs text-attenue">{m.pourQui}</span>
                     </label>
-                    <Link to={`/apercu-modele/${m.cle.toLowerCase()}`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 underline">
+                    <Link to={`/apercu-modele/${m.cle.toLowerCase()}`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 underline">
                       <Icone nom="visibility" taille={16} /> Voir un exemple
                     </Link>
                   </div>
@@ -198,7 +221,7 @@ export function ConstructeurPage() {
                       type="button"
                       aria-pressed={active}
                       onClick={() => majApparence({ couleurPrincipale: p.couleurPrincipale, couleurSecondaire: p.couleurSecondaire, couleurBloc: p.couleurBloc, opaciteBloc: p.opaciteBloc, couleurEntete: p.couleurEntete, couleurTexteEntete: p.couleurTexteEntete, couleurFondPage: p.couleurFondPage, couleurPied: p.couleurPied, couleurTextePied: p.couleurTextePied, couleurTexte: p.couleurTexte, couleurCarte: p.couleurCarte, couleurBouton: p.couleurBouton })}
-                      className={`rounded-xl border-2 p-3 text-left transition ${active ? 'border-indigo-600 bg-indigo-50' : 'border-neutral-200 hover:border-neutral-400'}`}
+                      className={`rounded-xl border-2 p-3 text-left transition ${active ? 'border-orange-400 bg-yellow-50' : 'border-neutral-200 hover:border-neutral-400'}`}
                     >
                       <span className="mb-2 flex items-center gap-2">
                         <span className="flex -space-x-1">
@@ -238,7 +261,7 @@ export function ConstructeurPage() {
                     <ChampCouleur libelle="Voile de l’image hero" valeur={apparence.couleurBloc} defaut="#21133b" surChangement={(v) => majApparence({ couleurBloc: v })} />
                     <label className="flex flex-col justify-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-semibold">
                       <span className="flex justify-between">Intensité du voile <span>{apparence.opaciteBloc ?? 62}%</span></span>
-                      <input aria-label="Intensité du voile sur l’image" type="range" min={20} max={90} value={apparence.opaciteBloc ?? 62} onChange={(e) => majApparence({ opaciteBloc: Number(e.target.value) })} className="w-full accent-indigo-600" />
+                      <input aria-label="Intensité du voile sur l’image" type="range" min={20} max={90} value={apparence.opaciteBloc ?? 62} onChange={(e) => majApparence({ opaciteBloc: Number(e.target.value) })} className="w-full accent-orange-400" />
                     </label>
                   </div>
                 </div>
@@ -251,19 +274,19 @@ export function ConstructeurPage() {
             <h2 className="mb-1 text-lg font-bold">3. Sections de la page</h2>
             <p className="mb-4 text-sm text-attenue">
               {sections.length === 0
-                ? 'Aucune section : la page de base s’affiche toute seule (titre, date, lieu, description, programme). Ajoutez des sections pour la personnaliser.'
-                : 'Seules les sections ajoutées et activées s’affichent, en plus du titre, de la date et de la réservation.'}
+                ? 'La page de base est prête. Ajoute des blocs depuis la bibliothèque ci-dessous; tu verras chaque changement dans l’aperçu.'
+                : 'Réorganise les blocs avec les flèches, modifie leur contenu ou masque ceux que tu ne veux pas afficher.'}
             </p>
 
             <div className="flex flex-col gap-3">
-              {sections.map((s) => {
+              {sections.map((s, index) => {
                 const info = TYPES_SECTION[s.type]
                 const ouvert = ouverte === s.id
                 return (
                   <article key={s.id} className={`rounded-xl border ${s.actif ? 'border-neutral-300' : 'border-neutral-200 opacity-70'}`}>
                     <header className="flex items-center gap-3 px-4 py-3">
                       <button type="button" className="flex flex-1 items-center gap-3 text-left" aria-expanded={ouvert} onClick={() => setOuverte(ouvert ? null : s.id)}>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-800 text-white">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-yellow-100 text-orange-600">
                           <Icone nom={info.icone} taille={20} />
                         </span>
                         <span>
@@ -276,6 +299,14 @@ export function ConstructeurPage() {
                         <input type="checkbox" checked={s.actif} disabled={verrouille} onChange={(e) => majSection({ ...s, actif: e.target.checked })} />
                         Affichée
                       </label>
+                      <div className="flex items-center gap-1" aria-label="Ordre du bloc">
+                        <button type="button" disabled={verrouille || index === 0} onClick={() => deplacerSection(index, -1)} aria-label={`Monter ${info.libelle}`} className="rounded-md p-1.5 text-neutral-600 hover:bg-yellow-50 hover:text-orange-600 disabled:opacity-30">
+                          <Icone nom="arrow_upward" taille={18} />
+                        </button>
+                        <button type="button" disabled={verrouille || index === sections.length - 1} onClick={() => deplacerSection(index, 1)} aria-label={`Descendre ${info.libelle}`} className="rounded-md p-1.5 text-neutral-600 hover:bg-yellow-50 hover:text-orange-600 disabled:opacity-30">
+                          <Icone nom="arrow_downward" taille={18} />
+                        </button>
+                      </div>
                       <Bouton
                         variante="fantome"
                         taille="petit"
@@ -301,14 +332,25 @@ export function ConstructeurPage() {
             </div>
 
             {!verrouille && (
-              <div className="mt-5">
-                <p className="etiquette">Ajouter une section</p>
-                <div className="flex flex-wrap gap-2">
-                  {ORDRE.filter((t) => ['TEXTE', 'CARTES', 'COLONNES'].includes(t) || !presents.has(t)).map((t) => (
-                    <Bouton key={t} variante="secondaire" taille="petit" icone={TYPES_SECTION[t].icone} title={TYPES_SECTION[t].aide} onClick={() => ajouter(t)}>
-                      {TYPES_SECTION[t].libelle}
-                    </Bouton>
-                  ))}
+              <div className="mt-5 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+                <div className="mb-3">
+                  <p className="text-sm font-bold text-neutral-800">Bibliothèque de blocs</p>
+                  <p className="mt-1 text-xs text-neutral-500">Clique sur un bloc pour l’ajouter à ta page; tu pourras ensuite le modifier et le déplacer.</p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {ORDRE.filter((t) => ['TEXTE', 'CARTES', 'COLONNES'].includes(t) || !presents.has(t)).map((t) => {
+                    const info = TYPES_SECTION[t]
+                    return (
+                      <button key={t} type="button" title={info.aide} onClick={() => ajouter(t)} className="group flex min-h-16 items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yellow-100 text-orange-600"><Icone nom={info.icone} taille={20} /></span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-bold text-neutral-800">{info.libelle}</span>
+                          <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">{info.aide}</span>
+                        </span>
+                        <Icone nom="add" taille={18} className="shrink-0 text-neutral-400 group-hover:text-orange-500" />
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}

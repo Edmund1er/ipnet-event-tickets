@@ -40,17 +40,22 @@ export function EditeurSection({ evenementId, section: s, surChangement, apercus
     <div className="flex flex-col gap-4">
       <Champ libelle="Titre" facultatif value={s.titre ?? ''} onChange={(e) => maj({ titre: e.target.value })} maxLength={150} />
 
-      <section className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
-        <h3 className="mb-1 text-sm font-bold">Couleurs de ce bloc seulement</h3>
-        <p className="mb-3 text-xs text-attenue">Laissez une couleur vide pour hériter du thème général.</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <ChampCouleur libelle="Fond du bloc" valeur={s.couleurFond} defaut="#ffffff" surChangement={(couleur) => maj({ couleurFond: couleur })} />
-          <ChampCouleur libelle="Texte" valeur={s.couleurTexte} defaut="#172033" surChangement={(couleur) => maj({ couleurTexte: couleur })} />
-          <ChampCouleur libelle="Titres / accents" valeur={s.couleurAccent} defaut="#2563eb" surChangement={(couleur) => maj({ couleurAccent: couleur })} />
-          <ChampCouleur libelle="Fond des cartes" valeur={s.couleurCarte} defaut="#f8fafc" surChangement={(couleur) => maj({ couleurCarte: couleur })} />
-          <ChampCouleur libelle="Boutons de ce bloc" valeur={s.couleurBouton} defaut="#2563eb" surChangement={(couleur) => maj({ couleurBouton: couleur })} />
+      <details className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold text-neutral-800">
+          <span>Style et couleurs du bloc <span className="ml-1 text-xs font-normal text-neutral-500">(facultatif)</span></span>
+          <Icone nom="expand_more" className="text-neutral-500" />
+        </summary>
+        <div className="mt-3 border-t border-neutral-200 pt-3">
+          <p className="mb-3 text-xs text-attenue">Par défaut, le bloc reprend les couleurs du modèle choisi.</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <ChampCouleur libelle="Fond du bloc" valeur={s.couleurFond} defaut="#ffffff" surChangement={(couleur) => maj({ couleurFond: couleur })} />
+            <ChampCouleur libelle="Texte" valeur={s.couleurTexte} defaut="#172033" surChangement={(couleur) => maj({ couleurTexte: couleur })} />
+            <ChampCouleur libelle="Titres / accents" valeur={s.couleurAccent} defaut="#ea580c" surChangement={(couleur) => maj({ couleurAccent: couleur })} />
+            <ChampCouleur libelle="Fond des cartes" valeur={s.couleurCarte} defaut="#f8fafc" surChangement={(couleur) => maj({ couleurCarte: couleur })} />
+            <ChampCouleur libelle="Boutons de ce bloc" valeur={s.couleurBouton} defaut="#f97316" surChangement={(couleur) => maj({ couleurBouton: couleur })} />
+          </div>
         </div>
-      </section>
+      </details>
 
       {s.type === 'HERO' && (
         <>

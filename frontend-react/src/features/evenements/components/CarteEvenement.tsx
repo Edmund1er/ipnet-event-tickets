@@ -23,8 +23,8 @@ export function VisuelEvenement({ evenement, className = '' }: { evenement: Even
       <div className="event-vibe-orb absolute -right-16 -top-20 h-72 w-72 rounded-full border border-white/15" />
       <div className="event-vibe-orb absolute -right-4 top-[-2.5rem] h-52 w-52 rounded-full border border-white/10" />
       <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'repeating-linear-gradient(118deg, transparent 0 27px, rgba(255,255,255,.14) 28px, transparent 29px 54px)' }} />
-      <div className="absolute bottom-12 right-8 flex h-36 items-end gap-2 opacity-50" aria-hidden="true">
-        {[38, 64, 48, 94, 58, 112, 74, 44].map((height, index) => (
+      <div className="absolute bottom-8 right-8 flex h-28 items-end gap-2 opacity-45" aria-hidden="true">
+        {[30, 52, 38, 76, 46, 92, 58, 34].map((height, index) => (
           <span key={index} className="w-2 rounded-t-full bg-white/75" style={{ height }} />
         ))}
       </div>
@@ -38,7 +38,7 @@ export function VisuelEvenement({ evenement, className = '' }: { evenement: Even
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/10 to-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/35" />
     </div>
   )
 }
@@ -49,13 +49,13 @@ export function JaugePlaces({ evenement }: { evenement: Evenement }) {
   return (
     <div className="w-full">
       <div className="mb-1 flex justify-between gap-2 text-xs">
-        <span className={`font-semibold ${complet ? 'text-rose-200' : 'text-white'}`}>
+        <span className={`font-semibold ${complet ? 'text-red-700' : 'text-neutral-700'}`}>
           {complet ? 'Complet' : `${evenement.placesRestantes} place${evenement.placesRestantes > 1 ? 's' : ''} restante${evenement.placesRestantes > 1 ? 's' : ''}`}
         </span>
-        <span className="chiffres text-white/75">{evenement.placesReservees} / {evenement.capacite}</span>
+        <span className="chiffres text-neutral-500">{evenement.placesReservees} / {evenement.capacite}</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/25" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Taux de remplissage">
-        <div className={`h-full rounded-full ${pct >= 90 ? 'bg-rose-300' : 'bg-lime-300'}`} style={{ width: `${pct}%` }} />
+      <div className="h-1.5 overflow-hidden rounded-full bg-neutral-200" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Taux de remplissage">
+        <div className={`h-full rounded-full ${pct >= 90 ? 'bg-red-500' : 'bg-orange-400'}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   )
@@ -70,31 +70,31 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
     <Link
       to={`/evenements/${evenement.id}`}
       aria-label={`${evenement.titre} — ${dateLongue(evenement.dateDebut)}${evenement.lieu ? `, ${evenement.lieu}` : ''}`}
-      className="group relative isolate flex min-h-[390px] overflow-hidden rounded-[1.4rem] bg-[#101116] text-white shadow-[0_20px_55px_-24px_rgba(12,10,20,.7)] ring-1 ring-black/10 transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-25px_rgba(12,10,20,.82)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400"
+      className="group flex h-full min-h-[340px] flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
     >
-      <VisuelEvenement evenement={evenement} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10" />
-      <div className="relative z-10 flex min-h-[390px] w-full flex-col justify-between p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <span className="inline-flex max-w-[72%] items-center gap-2 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md">
-            <Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-lime-300" />{etiquette}
+      <div className="relative h-44 shrink-0 overflow-hidden bg-neutral-900 sm:h-48">
+        <VisuelEvenement evenement={evenement} className="transition-transform duration-500 group-hover:scale-[1.03]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3.5">
+          <span className="inline-flex max-w-[72%] items-center gap-1.5 rounded-md border border-white/25 bg-neutral-900/60 px-2.5 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
+            <Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-yellow-300" />{etiquette}
           </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-extrabold text-neutral-950 shadow-lg">
-            <Ticket aria-hidden="true" className="h-4 w-4" />{prix}
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-yellow-400 px-2.5 py-1.5 text-xs font-bold text-neutral-900 shadow-sm">
+            <Ticket aria-hidden="true" className="h-3.5 w-3.5" />{prix}
           </span>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-white/90 sm:text-sm">
-            <span className="inline-flex items-center gap-1.5"><CalendarDays aria-hidden="true" className="h-4 w-4 text-lime-300" />{dateLongue(evenement.dateDebut)}</span>
-            {evenement.lieu && <span className="inline-flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-4 w-4 text-orange-300" />{evenement.lieu}</span>}
-          </div>
-          <h2 className="max-w-[22ch] text-balance text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl">{evenement.titre}</h2>
-          {evenement.type !== 'CADRE' && !evenement.accesLibre && <JaugePlaces evenement={evenement} />}
-          <div className="mt-1 flex items-center justify-between rounded-xl border border-white/25 bg-white/10 px-4 py-3 backdrop-blur-md transition group-hover:border-white/45 group-hover:bg-white/20">
-            <span className="text-sm font-bold">Découvrir l’événement</span>
-            <ArrowRight aria-hidden="true" className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </div>
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-neutral-600">
+          <span className="inline-flex items-center gap-1.5"><CalendarDays aria-hidden="true" className="h-4 w-4 text-orange-500" />{dateLongue(evenement.dateDebut)}</span>
+          {evenement.lieu && <span className="inline-flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-4 w-4 text-orange-500" />{evenement.lieu}</span>}
+        </div>
+        <h2 className="mt-3 line-clamp-2 text-balance font-titre text-xl font-bold leading-snug text-neutral-800 sm:text-2xl">{evenement.titre}</h2>
+        {evenement.type !== 'CADRE' && !evenement.accesLibre && <div className="mt-4"><JaugePlaces evenement={evenement} /></div>}
+        <div className="mt-auto flex items-center justify-between border-t border-neutral-200 pt-4 text-sm font-semibold text-orange-600">
+          <span>Découvrir l’événement</span>
+          <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </Link>

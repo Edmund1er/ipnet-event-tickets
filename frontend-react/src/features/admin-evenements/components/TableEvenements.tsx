@@ -5,7 +5,6 @@ import { Bouton, classeBouton } from '../../../core/components/ui/Bouton'
 import { Icone } from '../../../core/components/ui/Icone'
 import { STATUTS_EVENEMENT } from '../../../core/constants/statuts'
 import { heure, montant } from '../../../core/utils/format'
-import { themeDe } from '../../evenements/theme/ambiances'
 
 export type TypeAction = 'publier' | 'cloturer' | 'annuler' | 'fermer_ventes' | 'rouvrir_ventes' | 'masquer'
 
@@ -14,17 +13,13 @@ interface Props {
   surAction: (type: TypeAction, evt: Evenement) => void
 }
 
-/** Pastille de date : jour en grand, mois en dessous, dans la couleur de l'événement. */
+/** Repère calendrier discret, dans la palette neutre/jaune ScrewFast. */
 function PastilleDate({ e }: { e: Evenement }) {
   const d = new Date(e.dateDebut)
   return (
-    <div
-      className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl leading-none shadow-sm"
-      style={{ ...themeDe(e), backgroundImage: 'linear-gradient(135deg, var(--ev-primaire), var(--ev-fonce))', color: 'var(--ev-sur-primaire)' }}
-      aria-hidden
-    >
-      <span className="chiffres text-xl font-extrabold">{d.getDate()}</span>
-      <span className="mt-0.5 text-[11px] font-bold uppercase">{d.toLocaleDateString('fr-FR', { month: 'short' })}</span>
+    <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 leading-none text-neutral-800" aria-hidden>
+      <span className="chiffres text-lg font-bold">{d.getDate()}</span>
+      <span className="mt-0.5 text-[10px] font-bold uppercase text-orange-600">{d.toLocaleDateString('fr-FR', { month: 'short' })}</span>
     </div>
   )
 }
@@ -34,7 +29,7 @@ function Remplissage({ e }: { e: Evenement }) {
   if (e.accesLibre) return <span className="text-attenue">Accès libre</span>
   const pct = Math.min(100, Math.round((e.placesReservees / e.capacite) * 100))
   return (
-    <div className="w-36">
+    <div className="w-32">
       <div className="mb-1 flex justify-between text-xs">
         <span className="chiffres font-semibold">
           {e.placesReservees} / {e.capacite}
@@ -53,13 +48,16 @@ function MenuPlus({ e, surAction }: { e: Evenement; surAction: Props['surAction'
   const peutMasquer = e.passe || e.statut === 'TERMINE' || e.statut === 'ANNULE'
   const actives = e.statut === 'BROUILLON' || e.statut === 'PUBLIE'
   if (!peutMasquer && !actives) return null
-  const item = 'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-neutral-100'
+  const item = 'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-neutral-700 hover:bg-yellow-50 hover:text-neutral-900'
   return (
     <details className="group relative">
       <summary className={`${classeBouton('fantome', 'petit')} list-none [&::-webkit-details-marker]:hidden`} aria-label={`Plus d'actions pour ${e.titre}`}>
         <Icone nom="more_horiz" taille={20} />
       </summary>
-      <div className="absolute right-0 z-20 mt-1 w-52 rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-black/10">
+      <div className="absolute right-0 z-20 mt-1 w-56 rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-black/10">
+        {actives && <Link to={`/admin/evenements/${e.id}/page`} className={item}><Icone nom="web" taille={18} /> Personnaliser la page</Link>}
+        {e.type === 'CADRE' && actives && <Link to={`/admin/evenements/${e.id}/programme`} className={item}><Icone nom="calendar_view_week" taille={18} /> Programme et pass</Link>}
+        {e.type !== 'CADRE' && e.statut === 'PUBLIE' && <Link to={`/admin/evenements/${e.id}/participants`} className={item}><Icone nom="group" taille={18} /> Participants</Link>}
         {e.statut === 'PUBLIE' &&
           (e.ventesSuspendues ? (
             <button type="button" className={item} onClick={() => surAction('rouvrir_ventes', e)}>
@@ -90,22 +88,69 @@ function MenuPlus({ e, surAction }: { e: Evenement; surAction: Props['surAction'
   )
 }
 
+function ActionsEvenement({ e, surAction }: { e: Evenement; surAction: Props['surAction'] }) {
+  return (
+    <div className="flex items-center justify-end gap-2">
+      {e.statut === 'BROUILLON' && <Bouton taille="petit" variante="sombre" icone="publish" onClick={() => surAction('publier', e)}>Publier</Bouton>}
+      {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
+        <Link to={`/admin/evenements/${e.id}`} className={classeBouton('secondaire', 'petit')}>
+          <Icone nom="edit" taille={18} /> Modifier
+        </Link>
+      )}
+      <MenuPlus e={e} surAction={surAction} />
+    </div>
+  )
+}
+
+function CarteEvenementMobile({ e, surAction }: { e: Evenement; surAction: Props['surAction'] }) {
+  const statut = STATUTS_EVENEMENT[e.statut]
+  return (
+    <article className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <PastilleDate e={e} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 className="min-w-0 flex-1 font-bold text-neutral-800">{e.titre}</h2>
+            <Badge ton={statut.ton}>{statut.libelle}</Badge>
+          </div>
+          <p className="mt-1 flex items-center gap-1 text-xs text-neutral-500">
+            <Icone nom={e.type === 'CADRE' ? 'calendar_view_week' : 'location_on'} taille={14} />
+            {e.type === 'CADRE' ? 'Programme festif' : (e.lieu ?? 'Lieu non précisé')}
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-neutral-100 pt-3 text-xs">
+        <span className="text-neutral-600">{new Date(e.dateDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} · {heure(e.dateDebut)}</span>
+        <strong className="text-neutral-800">{e.type === 'CADRE' ? 'Prix par activité' : e.accesLibre || e.prix === 0 ? 'Gratuit' : montant(e.prix, e.devise)}</strong>
+      </div>
+      {e.type !== 'CADRE' && !e.accesLibre && <div className="mt-3"><Remplissage e={e} /></div>}
+      <div className="mt-3 border-t border-neutral-100 pt-3">
+        <ActionsEvenement e={e} surAction={surAction} />
+      </div>
+    </article>
+  )
+}
+
 /**
- * Tableau des événements : largeur minimale fixe et défilement horizontal (rien n'est compressé),
+ * Tableau des événements compact sur ordinateur; cartes faciles à lire sur téléphone.
  * en-tête figé, lignes aérées, actions principales visibles et secondaires dans un menu.
  */
 export function TableEvenements({ elements, surAction }: Props) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/10">
-      <div className="max-h-[70vh] overflow-auto">
-        <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-sm">
+    <>
+      <div className="grid gap-3 lg:hidden">
+        {elements.map((e) => <CarteEvenementMobile key={e.id} e={e} surAction={surAction} />)}
+      </div>
+      <div className="hidden overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5 lg:block">
+        <div className="max-h-[70vh] overflow-auto">
+        <table className="w-full min-w-[860px] border-separate border-spacing-0 text-sm">
           <thead>
             <tr>
               {['Événement', 'Date', 'Tarif', 'Remplissage', 'Statut', 'Actions'].map((h, i) => (
                 <th
                   key={h}
                   scope="col"
-                  className={`sticky top-0 z-10 border-b border-neutral-300 bg-neutral-800 px-5 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-white ${i === 5 ? 'text-right' : ''}`}
+                  className={`sticky top-0 z-10 border-b border-neutral-200 bg-neutral-100 px-3 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-neutral-600 ${i === 5 ? 'text-right' : ''}`}
                 >
                   {h}
                 </th>
@@ -116,12 +161,12 @@ export function TableEvenements({ elements, surAction }: Props) {
             {elements.map((e) => {
               const s = STATUTS_EVENEMENT[e.statut]
               return (
-                <tr key={e.id} className="transition-colors hover:bg-indigo-50/60">
-                  <td className="border-b border-neutral-200 px-5 py-4">
-                    <div className="flex items-center gap-4">
+                <tr key={e.id} className="transition-colors hover:bg-yellow-50/70">
+                  <td className="border-b border-neutral-200 px-3 py-3">
+                    <div className="flex items-center gap-3">
                       <PastilleDate e={e} />
                       <div className="min-w-0">
-                        <p className="max-w-[320px] truncate font-bold text-encre">{e.titre}</p>
+                        <p className="max-w-[240px] truncate font-bold text-encre">{e.titre}</p>
                         <p className="mt-0.5 flex items-center gap-1 text-xs text-attenue">
                           <Icone nom={e.type === 'CADRE' ? 'calendar_view_week' : 'location_on'} taille={14} />
                           {e.type === 'CADRE' ? 'Programme sur plusieurs jours' : (e.lieu ?? 'Lieu non précisé')}
@@ -129,62 +174,36 @@ export function TableEvenements({ elements, surAction }: Props) {
                       </div>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap border-b border-neutral-200 px-5 py-4">
+                  <td className="whitespace-nowrap border-b border-neutral-200 px-3 py-3">
                     <p className="chiffres font-semibold">{new Date(e.dateDebut).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}</p>
                     <p className="chiffres text-xs text-attenue">
                       {heure(e.dateDebut)}
                       {e.dateFin && ` → ${e.type === 'CADRE' ? new Date(e.dateFin).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : heure(e.dateFin)}`}
                     </p>
                   </td>
-                  <td className="whitespace-nowrap border-b border-neutral-200 px-5 py-4 font-semibold">
+                  <td className="whitespace-nowrap border-b border-neutral-200 px-3 py-3 font-semibold">
                     {e.type === 'CADRE' ? <span className="text-attenue">Par activité</span> : e.prix === 0 ? 'Gratuit' : montant(e.prix, e.devise)}
                   </td>
-                  <td className="border-b border-neutral-200 px-5 py-4">
+                  <td className="border-b border-neutral-200 px-3 py-3">
                     <Remplissage e={e} />
                   </td>
-                  <td className="whitespace-nowrap border-b border-neutral-200 px-5 py-4">
+                  <td className="whitespace-nowrap border-b border-neutral-200 px-3 py-3">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Badge ton={s.ton}>{s.libelle}</Badge>
                       {e.passe && e.statut === 'PUBLIE' && <Badge ton="gris">Passé</Badge>}
                       {e.ventesSuspendues && e.statut === 'PUBLIE' && <Badge ton="orange">Ventes fermées</Badge>}
                     </div>
                   </td>
-                  <td className="border-b border-neutral-200 px-5 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      {e.statut === 'BROUILLON' && (
-                        <Bouton taille="petit" variante="succes" icone="publish" onClick={() => surAction('publier', e)}>
-                          Publier
-                        </Bouton>
-                      )}
-                      {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
-                        <Link to={`/admin/evenements/${e.id}`} className={classeBouton('secondaire', 'petit')}>
-                          <Icone nom="edit" taille={18} /> Modifier
-                        </Link>
-                      )}
-                      {(e.statut === 'BROUILLON' || e.statut === 'PUBLIE') && (
-                        <Link to={`/admin/evenements/${e.id}/page`} className={classeBouton('primaire', 'petit')}>
-                          <Icone nom="web" taille={18} /> Page
-                        </Link>
-                      )}
-                      {e.type === 'CADRE' && (
-                        <Link to={`/admin/evenements/${e.id}/programme`} className={classeBouton('sombre', 'petit')}>
-                          <Icone nom="calendar_view_week" taille={18} /> Programme
-                        </Link>
-                      )}
-                      {e.statut !== 'BROUILLON' && e.type !== 'CADRE' && (
-                        <Link to={`/admin/evenements/${e.id}/participants`} className={classeBouton('sombre', 'petit')}>
-                          <Icone nom="group" taille={18} /> Participants
-                        </Link>
-                      )}
-                      <MenuPlus e={e} surAction={surAction} />
-                    </div>
+                  <td className="border-b border-neutral-200 px-3 py-3">
+                    <ActionsEvenement e={e} surAction={surAction} />
                   </td>
                 </tr>
               )
             })}
           </tbody>
         </table>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
