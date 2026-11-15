@@ -38,3 +38,6 @@ backend-spring/technology/target/
 
 # Identifiants locaux (mot de passe base de donnees...)
 **/application-local.properties
+
+# Templates HTML de référence (volumineux, hors application)
+/templates/
