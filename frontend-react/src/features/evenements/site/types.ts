@@ -13,9 +13,9 @@ export interface DescriptionModele {
 export const MODELES: DescriptionModele[] = [
   { cle: 'SOIREE', nom: 'Soirée étudiante, club et nuit dansante', pourQui: 'Ambiance nocturne, DJ, danse et réservation rapide.', dossier: 'soiree' },
   { cle: 'CONFERENCE', nom: 'Concert & showcase — scène live', pourQui: 'Line-up d’artistes, horaires de scène et billets de concert.', dossier: 'conference' },
-  { cle: 'RENCONTRE', nom: 'Plage & beach day', pourQui: 'Sortie au bord de l’eau, activités, soleil et programme de la journée.', dossier: 'rencontre' },
+  { cle: 'RENCONTRE', nom: 'Journée d’intégration & sortie de groupe', pourQui: 'Rencontre entre étudiants, activités en équipe et programme de la journée.', dossier: 'rencontre' },
   { cle: 'CEREMONIE', nom: 'Bal de promo, gala et remise des diplômes', pourQui: 'Grande soirée habillée, dîner, distinctions et danse.', dossier: 'ceremonie' },
-  { cle: 'ATELIER', nom: 'Nature & plein air', pourQui: 'Escapade nature, activités extérieures et moments à partager.', dossier: 'atelier' },
+  { cle: 'ATELIER', nom: 'Atelier créatif & festival jeunesse', pourQui: 'Animations, ateliers et programmation en plusieurs temps.', dossier: 'atelier' },
   { cle: 'TOURNOI', nom: 'Tournoi sportif et e-sport', pourQui: 'Matchs, équipes, journées de compétition et accès.', dossier: 'tournoi' },
   { cle: 'SALON', nom: 'Gospel, louange et concert', pourQui: 'Concert live, invités, programme et billetterie.', dossier: 'salon' },
   { cle: 'RESEAUTAGE', nom: 'Soirée DJ, club et nuit électro', pourQui: 'Line-up de DJs, ambiance nocturne et accès à la soirée.', dossier: 'reseautage' },
