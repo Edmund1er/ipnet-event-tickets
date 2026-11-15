@@ -30,14 +30,16 @@ public class PaiementController {
         this.servicePaiement = servicePaiement;
     }
 
-    /** EF-21 : multipart avec referenceOperateur (obligatoire) et fichier (facultatif). */
+    /** Paiement déclaré manuellement : référence, canal, numéro payeur et preuve facultative. */
     @PostMapping(value = "/reservations/{id}/preuve", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> soumettrePreuve(
             @PathVariable Long id,
             @RequestParam("referenceOperateur") String referenceOperateur,
+            @RequestParam(value = "operateur", required = false) String operateur,
+            @RequestParam(value = "numeroPayeur", required = false) String numeroPayeur,
             @RequestParam(value = "fichier", required = false) MultipartFile fichier,
             @AuthenticationPrincipal Long utilisateurId) {
-        servicePaiement.soumettrePreuve(id, utilisateurId, referenceOperateur, fichier);
+        servicePaiement.soumettrePreuve(id, utilisateurId, referenceOperateur, operateur, numeroPayeur, fichier);
         return ResponseEntity.ok(Map.of("message", "Référence de paiement enregistrée."));
     }
 

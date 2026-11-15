@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableException;
+import tg.ipnetinstitute.technology.common.validation.telephone.UsageTelephone;
+import tg.ipnetinstitute.technology.common.validation.telephone.ValidateurTelephone;
 import tg.ipnetinstitute.technology.config.Auditable;
 import tg.ipnetinstitute.technology.features.evenement.dto.response.EvenementResume;
 import tg.ipnetinstitute.technology.features.evenement.service.EvenementAnnuleEvent;
@@ -62,6 +64,7 @@ public class ServicePaiement {
     private final ApplicationEventPublisher publieur;
     private final ServiceEvenement serviceEvenement;
     private final ServiceIdentite serviceIdentite;
+    private final ValidateurTelephone validateurTelephone;
     private final Tika tika = new Tika();
 
     public ServicePaiement(PaiementRepository paiements,
@@ -71,7 +74,8 @@ public class ServicePaiement {
                            ReleveCsvWrapper releveCsv,
                            ApplicationEventPublisher publieur,
                            ServiceEvenement serviceEvenement,
-                           ServiceIdentite serviceIdentite) {
+                           ServiceIdentite serviceIdentite,
+                           ValidateurTelephone validateurTelephone) {
         this.paiements = paiements;
         this.inscriptions = inscriptions;
         this.releves = releves;
@@ -80,13 +84,28 @@ public class ServicePaiement {
         this.publieur = publieur;
         this.serviceEvenement = serviceEvenement;
         this.serviceIdentite = serviceIdentite;
+        this.validateurTelephone = validateurTelephone;
     }
 
-    /** EF-21 : référence obligatoire, capture facultative (JPG, PNG, PDF ≤ 5 Mo). */
+    /** Compatibilité avec les clients antérieurs : une référence reste enregistrable sans métadonnées du canal. */
     @Transactional
     @PreAuthorize("hasRole('ROLE_PARTICIPANT')")
     @Auditable(action = "SOUMISSION_PREUVE", typeCible = "PAIEMENT")
     public void soumettrePreuve(Long inscriptionId, Long utilisateurId, String referenceBrute, MultipartFile fichier) {
+        soumettrePreuveInterne(inscriptionId, utilisateurId, referenceBrute, null, null, fichier);
+    }
+
+    /** EF-21 : preuve manuelle avec opérateur et ligne réellement utilisée pour payer. */
+    @Transactional
+    @PreAuthorize("hasRole('ROLE_PARTICIPANT')")
+    @Auditable(action = "SOUMISSION_PREUVE", typeCible = "PAIEMENT")
+    public void soumettrePreuve(Long inscriptionId, Long utilisateurId, String referenceBrute,
+                                String operateur, String numeroPayeur, MultipartFile fichier) {
+        soumettrePreuveInterne(inscriptionId, utilisateurId, referenceBrute, operateur, numeroPayeur, fichier);
+    }
+
+    private void soumettrePreuveInterne(Long inscriptionId, Long utilisateurId, String referenceBrute,
+                                        String operateur, String numeroPayeur, MultipartFile fichier) {
         Inscription inscription = inscriptions.findById(inscriptionId)
                 .orElseThrow(() -> new RessourceIntrouvableException("Réservation", inscriptionId));
 
@@ -98,6 +117,17 @@ public class ServicePaiement {
         if (inscription.getStatut() != StatutInscription.EN_ATTENTE_PAIEMENT
                 && inscription.getStatut() != StatutInscription.REJETEE) {
             throw new IllegalStateException("Une référence a déjà été soumise pour cette réservation, ou elle n'est plus active");
+        }
+
+        String codeOperateur = null;
+        String payeurE164 = null;
+        if (operateur != null && !operateur.isBlank()) {
+            codeOperateur = operateur.trim().toUpperCase();
+            if (!List.of("MOOV", "MIXX").contains(codeOperateur)) throw new IllegalArgumentException("Opérateur de paiement inconnu");
+            if (numeroPayeur == null || numeroPayeur.isBlank()) throw new IllegalArgumentException("Le numéro utilisé pour payer est obligatoire");
+            payeurE164 = validateurTelephone.valider(numeroPayeur, UsageTelephone.MOBILE_MONEY).e164();
+        } else if (numeroPayeur != null && !numeroPayeur.isBlank()) {
+            throw new IllegalArgumentException("L'opérateur de paiement est obligatoire avec le numéro payeur");
         }
 
         String referenceOperateur = ReferencePaiementUtils.normaliser(referenceBrute);
@@ -147,7 +177,7 @@ public class ServicePaiement {
         Paiement paiement = paiements.findByInscriptionId(inscriptionId)
                 .orElseGet(() -> Paiement.initialiser(inscriptionId, montant, devise));
 
-        paiement.soumettrePreuve(referenceOperateur, cheminFichier, empreinteSha256);
+        paiement.soumettrePreuve(referenceOperateur, codeOperateur, payeurE164, cheminFichier, empreinteSha256);
         paiements.save(paiement);
 
         inscription.transitionnerVers(StatutInscription.PREUVE_ENVOYEE, null);
@@ -261,7 +291,7 @@ public class ServicePaiement {
             EvenementResume evt = cacheEvenements.computeIfAbsent(i.getEvenementId(), serviceEvenement::consulter);
             var c = serviceIdentite.coordonnees(i.getUtilisateurId());
             return new PaiementAdminResponse(
-                    p.getId(), p.getInscriptionId(), p.getReferenceOperateur(), p.getMontant(), p.getDevise(),
+                    p.getId(), p.getInscriptionId(), p.getReferenceOperateur(), p.getOperateurPaiement(), p.getNumeroPayeur(), p.getMontant(), p.getDevise(),
                     p.getCheminPreuve() != null, p.getStatut(), p.getValideLe(),
                     p.getStatut() == StatutPaiement.VALIDE && p.getValidePar() == null,
                     p.getMotifRejet(), evt.id(), evt.titre(),

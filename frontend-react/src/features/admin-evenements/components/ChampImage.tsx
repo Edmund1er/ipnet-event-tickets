@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { messageErreur } from '../../../core/api/httpClient'
 import { Bouton } from '../../../core/components/ui/Bouton'
 import { Icone } from '../../../core/components/ui/Icone'
@@ -22,20 +22,34 @@ export function ChampImage({ evenementId, libelle, nom, surChangement, apercus, 
   const entree = useRef<HTMLInputElement>(null)
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
+  const [apercuLocal, setApercuLocal] = useState<string | null>(null)
+  const urlTemporaire = useRef<string | null>(null)
+  useEffect(() => () => { if (urlTemporaire.current) URL.revokeObjectURL(urlTemporaire.current) }, [])
   const distant = useImageProtegee(nom && !apercus[nom] ? `/admin/evenements/${evenementId}/page/images/${nom}` : null)
-  const miniature = nom ? (apercus[nom] ?? distant.url) : null
+  const miniature = apercuLocal ?? (nom ? (apercus[nom] ?? distant.url) : null)
 
   async function choisir(fichier: File | undefined) {
     if (!fichier) return
     setErreur(null)
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(fichier.type)) return setErreur('Formats acceptés : JPG, PNG ou WebP')
     if (fichier.size > 5 * 1024 * 1024) return setErreur('Image trop volumineuse (5 Mo maximum)')
+    if (urlTemporaire.current) URL.revokeObjectURL(urlTemporaire.current)
+    const urlLocale = URL.createObjectURL(fichier)
+    urlTemporaire.current = urlLocale
+    setApercuLocal(urlLocale)
     setEnCours(true)
     try {
       const envoye = await adminEvenementService.envoyerImagePage(evenementId, fichier)
-      surApercu(envoye, URL.createObjectURL(fichier))
+      surApercu(envoye, urlLocale)
+      urlTemporaire.current = null // Le constructeur prend en charge cette URL jusqu'au remplacement/démontage.
+      setApercuLocal(null)
       surChangement(envoye)
     } catch (e) {
+      if (urlTemporaire.current === urlLocale) {
+        URL.revokeObjectURL(urlLocale)
+        urlTemporaire.current = null
+      }
+      setApercuLocal(null)
       setErreur(messageErreur(e))
     } finally {
       setEnCours(false)

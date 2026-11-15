@@ -10,6 +10,7 @@ import tg.ipnetinstitute.technology.common.exception.RessourceIntrouvableExcepti
 import tg.ipnetinstitute.technology.config.Auditable;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Apparence;
+import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.BlocElement;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Creneau;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Intervenant;
 import tg.ipnetinstitute.technology.features.evenement.dto.PageEvenement.Section;
@@ -33,6 +34,7 @@ public class ServicePageEvenement {
     private static final int MAX_SECTIONS = 12;
     private static final int MAX_INTERVENANTS = 40;
     private static final int MAX_CRENEAUX = 300;
+    private static final int MAX_ELEMENTS = 30;
     private static final Pattern NOM_IMAGE = Pattern.compile("[0-9a-fA-F-]{36}\\.(jpg|png|webp)");
     private static final Pattern ID_SECTION = Pattern.compile("[A-Za-z0-9_-]{1,40}");
     private static final Pattern JOUR = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
@@ -118,10 +120,13 @@ public class ServicePageEvenement {
             }
             String id = s.id() == null || s.id().isBlank() ? s.type().toLowerCase() + "-" + (propres.size() + 1) : s.id();
             if (!ID_SECTION.matcher(id).matches()) throw new IllegalArgumentException("Identifiant de section invalide");
+            int colonnes = s.colonnes() == null ? 3 : s.colonnes();
+            if (colonnes < 2 || colonnes > 4) throw new IllegalArgumentException("Une grille doit contenir de 2 à 4 colonnes");
             propres.add(new Section(id, s.type(), s.actif(),
                     texte(s.titre(), 150), texte(s.sousTitre(), 300), texte(s.texte(), 5000), image(s.image()),
                     texte(s.bouton(), 40), texte(s.adresse(), 300), texte(s.telephone(), 40), texte(s.email(), 120),
-                    intervenants(s.intervenants()), creneaux(s.creneaux())));
+                    intervenants(s.intervenants()), creneaux(s.creneaux()), blocs(s.elements()), colonnes,
+                    couleur(s.couleurFond()), couleur(s.couleurTexte()), couleur(s.couleurAccent()), couleur(s.couleurCarte()), couleur(s.couleurBouton())));
         }
         return new PageEvenement(1, apparence, propres);
     }
@@ -131,12 +136,20 @@ public class ServicePageEvenement {
         String principale = couleur(valeur.couleurPrincipale());
         String secondaire = couleur(valeur.couleurSecondaire());
         String bloc = couleur(valeur.couleurBloc());
+        String entete = couleur(valeur.couleurEntete());
+        String texteEntete = couleur(valeur.couleurTexteEntete());
+        String fond = couleur(valeur.couleurFondPage());
+        String pied = couleur(valeur.couleurPied());
+        String textePied = couleur(valeur.couleurTextePied());
+        String texte = couleur(valeur.couleurTexte());
+        String carte = couleur(valeur.couleurCarte());
+        String bouton = couleur(valeur.couleurBouton());
         Integer opacite = valeur.opaciteBloc();
         if (opacite != null && (opacite < 20 || opacite > 90)) {
             throw new IllegalArgumentException("L’intensité du voile doit être comprise entre 20 et 90");
         }
-        if (principale == null && secondaire == null && bloc == null && opacite == null) return null;
-        return new Apparence(principale, secondaire, bloc, opacite);
+        if (principale == null && secondaire == null && bloc == null && opacite == null && entete == null && texteEntete == null && fond == null && pied == null && textePied == null && texte == null && carte == null && bouton == null) return null;
+        return new Apparence(principale, secondaire, bloc, opacite, entete, texteEntete, fond, pied, textePied, texte, carte, bouton);
     }
 
     private String couleur(String valeur) {
@@ -172,6 +185,20 @@ public class ServicePageEvenement {
         return res;
     }
 
+    private List<BlocElement> blocs(List<BlocElement> liste) {
+        if (liste == null) return List.of();
+        if (liste.size() > MAX_ELEMENTS) throw new IllegalArgumentException("Une section ne peut pas dépasser " + MAX_ELEMENTS + " cartes");
+        List<BlocElement> resultat = new ArrayList<>();
+        int index = 0;
+        for (BlocElement bloc : liste) {
+            if (bloc == null || bloc.titre() == null || bloc.titre().isBlank()) continue;
+            String id = bloc.id() == null || bloc.id().isBlank() ? "carte-" + (++index) : bloc.id();
+            if (!ID_SECTION.matcher(id).matches()) throw new IllegalArgumentException("Identifiant de carte invalide");
+            resultat.add(new BlocElement(id, texte(bloc.titre(), 150), texte(bloc.texte(), 1000), image(bloc.image())));
+        }
+        return resultat;
+    }
+
     private static String texte(String valeur, int max) {
         if (valeur == null) return null;
         String v = valeur.strip();
@@ -191,6 +218,7 @@ public class ServicePageEvenement {
         for (Section s : page.sections()) {
             if (s.image() != null) noms.add(s.image());
             if (s.intervenants() != null) s.intervenants().forEach(i -> { if (i.photo() != null) noms.add(i.photo()); });
+            if (s.elements() != null) s.elements().forEach(e -> { if (e.image() != null) noms.add(e.image()); });
         }
         return noms;
     }

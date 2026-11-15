@@ -6,6 +6,8 @@ export interface PaiementAdmin {
   id: number
   inscriptionId: number
   referenceOperateur: string | null
+  operateurPaiement: 'MOOV' | 'MIXX' | null
+  numeroPayeur: string | null
   montant: number
   devise: string
   aCapture: boolean

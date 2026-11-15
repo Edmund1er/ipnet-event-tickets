@@ -13,12 +13,13 @@ export function appliquerRencontre(doc: Document, c: ContenuPage) {
 
   /* Hero */
   const hero = un(doc, '.slider_area')
+  ancre(hero, 'hero')
   if (c.imageHero) fond(hero, c.imageHero, c)
   ecrire(doc, '.opcity_text', c.titre.split(/\s+/)[0].slice(0, 14).toUpperCase())
   const titre = un(doc, '.title_text h3')
   if (titre) {
     titre.textContent = c.titre
-    if (c.titre.length > 40) titre.style.fontSize = '44px'
+    if (c.titre.length > 40) titre.style.fontSize = 'clamp(2rem, 5.5vw, 3rem)'
   }
   action(un(doc, '.title_text a'), 'reserver', null, c.boutonHero)
   const dates = tous(doc, '.countDOwn_area .single_date')
@@ -56,6 +57,7 @@ export function appliquerRencontre(doc: Document, c: ContenuPage) {
   for (const t of c.textes) {
     if (!modeleTexte || !dernier) break
     const bloc = modeleTexte.cloneNode(true) as HTMLElement
+    ancre(bloc, t.id)
     remplirTexte(bloc, t, false)
     dernier.after(bloc)
     dernier = bloc
@@ -89,6 +91,8 @@ export function appliquerRencontre(doc: Document, c: ContenuPage) {
   if (ev && c.programme) {
     ancre(ev, 'programme')
     ecrire(ev, '.vr_text', c.programme.titre)
+    // Le squelette contient un deuxième jour de démonstration hors de la classe prototype.
+    tous(ev, '.container > .row:not(.double_line)').forEach((exemple) => exemple.remove())
     repeter(un(ev, '.double_line'), c.programme.jours, (ligneJour, j) => {
       ecrire(ligneJour, '.date h3', j.dateLongue)
       repeter(un(ligneJour, '.single_speaker'), j.lignes, (row, l) => {

@@ -48,12 +48,17 @@ export function DetailEvenementPage() {
   const ouvrirReservation = useCallback(() => setOuverte(true), [])
   // La page prend toute la place et habille l'en-tête et le menu aux couleurs de son template
   const modeleCourant = modeleEffectif(evt?.modele, parent?.modele, evt?.type === 'CADRE')
-  const accentPage = config?.apparence?.couleurPrincipale
+  const apparencePage = config?.apparence
+  const accentPage = apparencePage?.couleurBouton ?? apparencePage?.couleurPrincipale
   const accentValide = estHex(accentPage) ? accentPage : null
+  const fondEntete = estHex(apparencePage?.couleurEntete) ? apparencePage.couleurEntete : null
+  const texteEntete = estHex(apparencePage?.couleurTexteEntete) ? apparencePage.couleurTexteEntete : null
   useImmersion(
     evt
       ? {
           ...COULEURS_MODELE[modeleCourant],
+          ...(fondEntete ? { fond: fondEntete } : {}),
+          ...(texteEntete ? { texte: texteEntete } : {}),
           ...(accentValide ? { accent: accentValide, surAccent: texteSur(accentValide) } : {}),
           retour: { libelle: parent ? parent.titre : 'Événements', vers: parent ? `/evenements/${parent.id}` : '/' },
           badge: evt.statut === 'BROUILLON' ? 'Brouillon : visible par vous seul' : undefined,

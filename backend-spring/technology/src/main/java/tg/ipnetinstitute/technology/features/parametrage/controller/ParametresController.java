@@ -45,6 +45,12 @@ public class ParametresController {
         return ResponseEntity.ok(serviceParametres.modifierPaiement(demande, adminId));
     }
 
+    @PutMapping("/admin/parametres/paiement/canaux")
+    public ResponseEntity<ParametresPaiement> modifierCanaux(@Valid @RequestBody ModificationCanauxPaiement demande,
+                                                              @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(serviceParametres.modifierCanaux(demande, adminId));
+    }
+
     @GetMapping("/admin/parametres/analyse-numero")
     public ResponseEntity<AnalyseNumero> analyser(@RequestParam String numero) {
         return ResponseEntity.ok(serviceParametres.analyser(numero));

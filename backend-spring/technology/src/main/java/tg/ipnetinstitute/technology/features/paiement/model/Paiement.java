@@ -23,6 +23,12 @@ public class Paiement {
     @Column(name = "reference_operateur", length = 50, unique = true)
     private String referenceOperateur;
 
+    @Column(name = "operateur_paiement", length = 10)
+    private String operateurPaiement;
+
+    @Column(name = "numero_payeur", length = 20)
+    private String numeroPayeur;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal montant;
 
@@ -64,7 +70,14 @@ public class Paiement {
     }
 
     public void soumettrePreuve(String referenceOperateur, String cheminPreuve, String empreinteSha256) {
+        soumettrePreuve(referenceOperateur, null, null, cheminPreuve, empreinteSha256);
+    }
+
+    public void soumettrePreuve(String referenceOperateur, String operateurPaiement, String numeroPayeur,
+                                String cheminPreuve, String empreinteSha256) {
         this.referenceOperateur = referenceOperateur;
+        this.operateurPaiement = operateurPaiement;
+        this.numeroPayeur = numeroPayeur;
         this.cheminPreuve = cheminPreuve;
         this.empreintePreuve = empreinteSha256;
         this.statut = StatutPaiement.EN_ATTENTE;
@@ -95,6 +108,8 @@ public class Paiement {
     public Long getId() { return id; }
     public Long getInscriptionId() { return inscriptionId; }
     public String getReferenceOperateur() { return referenceOperateur; }
+    public String getOperateurPaiement() { return operateurPaiement; }
+    public String getNumeroPayeur() { return numeroPayeur; }
     public BigDecimal getMontant() { return montant; }
     public String getDevise() { return devise; }
     public String getCheminPreuve() { return cheminPreuve; }

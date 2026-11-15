@@ -4,7 +4,7 @@ import { useAuth } from '../../../core/auth/AuthContext'
 import { Bouton } from '../../../core/components/ui/Bouton'
 import { Champ } from '../../../core/components/ui/Champ'
 import { Alerte } from '../../../core/components/ui/Divers'
-import { messageErreur, rafraichirSession } from '../../../core/api/httpClient'
+import { messageErreur, rafraichirSession, versErreurApi } from '../../../core/api/httpClient'
 import { accueilPour } from '../../../core/routing/Gardes'
 import { schemaEmail } from '../../../core/utils/validateurs'
 import { CadreAuth } from '../components/CadreAuth'
@@ -12,6 +12,7 @@ import { SaisieCode } from '../components/SaisieCode'
 import { authService } from '../services/authService'
 
 const DUREE_VALIDITE = 5 * 60 // RG-03 : 5 minutes
+const DELAI_RENVOI = 30
 
 /** RG-01 : confirmation de l'adresse e-mail par code (envoyé à l'adresse du compte). */
 export function VerificationPage() {
@@ -20,6 +21,7 @@ export function VerificationPage() {
   const location = useLocation()
   const [code, setCode] = useState('')
   const [restant, setRestant] = useState(DUREE_VALIDITE)
+  const [renvoiRestant, setRenvoiRestant] = useState(0)
   const [erreur, setErreur] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
@@ -36,6 +38,11 @@ export function VerificationPage() {
     const t = setInterval(() => setRestant((r) => Math.max(0, r - 1)), 1000)
     return () => clearInterval(t)
   }, [])
+  useEffect(() => {
+    if (!renvoiRestant) return
+    const t = window.setTimeout(() => setRenvoiRestant((r) => Math.max(0, r - 1)), 1000)
+    return () => window.clearTimeout(t)
+  }, [renvoiRestant])
 
   // Après une connexion, un nouveau code est envoyé automatiquement (l'inscription l'a déjà fait)
   useEffect(() => {
@@ -63,8 +70,9 @@ export function VerificationPage() {
         await ouvrir(await authService.verifierOtp(code))
       }
     } catch (err) {
-      setErreur(messageErreur(err))
-      setCode('')
+      const api = versErreurApi(err)
+      setErreur(api.message)
+      if (!(api.status === 0 && api.message.startsWith('Serveur injoignable')) && api.status < 500) setCode('')
     } finally {
       setEnCours(false)
     }
@@ -76,6 +84,7 @@ export function VerificationPage() {
     try {
       await authService.envoyerOtp()
       setRestant(DUREE_VALIDITE)
+      setRenvoiRestant(DELAI_RENVOI)
       setChangement(null)
       if (!silencieux) setInfo('Un nouveau code vient de vous être envoyé.')
     } catch (err) {
@@ -99,6 +108,7 @@ export function VerificationPage() {
       setChangement('code')
       setCode('')
       setRestant(DUREE_VALIDITE)
+      setRenvoiRestant(DELAI_RENVOI)
     } catch (err) {
       setErreur(messageErreur(err))
     } finally {
@@ -145,8 +155,8 @@ export function VerificationPage() {
             Confirmer
           </Bouton>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Bouton variante="secondaire" className="flex-1" enCours={renvoiEnCours} icone="refresh" onClick={() => renvoyer()}>
-              Renvoyer un code
+            <Bouton variante="secondaire" className="flex-1" disabled={renvoiRestant > 0} enCours={renvoiEnCours} icone="refresh" onClick={() => renvoyer()}>
+              {renvoiRestant > 0 ? `Renvoyer dans 00:${String(renvoiRestant).padStart(2, '0')}` : 'Renvoyer un code'}
             </Bouton>
             <Bouton variante="fantome" className="flex-1" icone="alternate_email" onClick={() => setChangement('saisie')}>
               Changer d'adresse

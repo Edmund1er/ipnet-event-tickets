@@ -89,6 +89,24 @@ class ServicePageEvenementTest {
     }
 
     @Test
+    void sectionsGrilleEtCouleursParZone_sontConserveesEtValidees() {
+        var apparence = new Apparence(null, null, null, null, "#102030", "#ffffff", "#f8fafc", "#111827", "#ffffff", "#172033", "#ffffff", "#2563eb");
+        var carte = new PageEvenement.BlocElement("carte-1", "Accueil", "Un premier temps d'accueil", null);
+        var section = new Section("grille-1", "CARTES", true, "Temps forts", null, null, null, null, null, null, null,
+                null, null, List.of(carte), 3, "#ffffff", "#172033", "#2563eb", "#f8fafc", "#2563eb");
+        var enregistree = service.enregistrer(1L, new PageEvenement(1, apparence, List.of(section)), 1L);
+
+        assertThat(enregistree.apparence().couleurEntete()).isEqualTo("#102030");
+        assertThat(enregistree.sections().get(0).elements()).containsExactly(carte);
+        assertThat(enregistree.sections().get(0).couleurCarte()).isEqualTo("#f8fafc");
+        var mauvaiseCarte = new PageEvenement.BlocElement("carte-1", "Titre", "x".repeat(1001), null);
+        var mauvaiseSection = new Section("grille-1", "CARTES", true, "Grille", null, null, null, null, null, null, null,
+                null, null, List.of(mauvaiseCarte), 5, "#ffffff", null, null, null, null);
+        assertThatThrownBy(() -> service.enregistrer(1L, new PageEvenement(1, null, List.of(mauvaiseSection)), 1L))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void typeInconnu_jourOuHeureInvalides_imageInvalide_sontRefuses() {
         assertThatThrownBy(() -> service.enregistrer(1L, new PageEvenement(1, List.of(section("SCRIPT", "x", null, null, null))), 1L))
                 .isInstanceOf(IllegalArgumentException.class);

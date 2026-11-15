@@ -32,6 +32,9 @@ function dateTexte(e: Evenement): string {
   if (e.type === 'CADRE' && e.dateFin) {
     const f = new Date(e.dateFin)
     const mois = (x: Date) => x.toLocaleDateString('fr-FR', { month: 'long' })
+    if (d.getFullYear() !== f.getFullYear()) {
+      return `${d.getDate()} ${mois(d)} ${d.getFullYear()} – ${f.getDate()} ${mois(f)} ${f.getFullYear()}`
+    }
     return d.getMonth() === f.getMonth()
       ? `${d.getDate()} – ${f.getDate()} ${mois(f)} ${f.getFullYear()}`
       : `${d.getDate()} ${mois(d)} – ${f.getDate()} ${mois(f)} ${f.getFullYear()}`
@@ -88,6 +91,31 @@ export function construireContenu(
   const lieuSec = premiere('LIEU')
 
   const imageHero = hero?.image ? urlImage(hero.image) : evt.aImage ? `/api/evenements/${evt.id}/image` : undefined
+  const couleur = (valeur?: string | null) => estHex(valeur) ? valeur : undefined
+  const ancreType: Partial<Record<SectionConfig['type'], string>> = {
+    HERO: 'hero', A_PROPOS: 'apropos', INTERVENANTS: 'intervenants', PROGRAMME: 'programme', LIEU: 'lieu',
+  }
+  const stylesSections = sections.map((s) => ({
+    id: ancreType[s.type] ?? s.id,
+    couleurFond: couleur(s.couleurFond),
+    couleurTexte: couleur(s.couleurTexte),
+    couleurAccent: couleur(s.couleurAccent),
+    couleurCarte: couleur(s.couleurCarte),
+    couleurBouton: couleur(s.couleurBouton),
+  }))
+  const blocs = sections
+    .filter((s) => (s.type === 'CARTES' || s.type === 'COLONNES') && s.elements?.length)
+    .map((s) => ({
+      id: s.id,
+      type: s.type as 'CARTES' | 'COLONNES',
+      titre: s.titre?.trim() || (s.type === 'CARTES' ? 'À découvrir' : 'Informations'),
+      sousTitre: s.sousTitre?.trim() || undefined,
+      colonnes: Math.min(4, Math.max(2, s.colonnes ?? 3)),
+      elements: (s.elements ?? []).filter((x) => x.titre.trim()).map((x) => ({
+        id: x.id, titre: x.titre.trim(), texte: x.texte?.trim() || undefined, image: x.image ? urlImage(x.image) : undefined,
+      })),
+      style: stylesSections.find((style) => style.id === s.id)!,
+    }))
 
   // Programme : activités du cadre + créneaux saisis à la main
   const lignes: (Ligne & { jour: string })[] = []
@@ -132,17 +160,29 @@ export function construireContenu(
     couleurSecondaire: estHex(apparence?.couleurSecondaire) ? apparence.couleurSecondaire : undefined,
     couleurBloc: estHex(apparence?.couleurBloc) ? apparence.couleurBloc : undefined,
     opaciteBloc: Math.min(90, Math.max(20, apparence?.opaciteBloc ?? 62)),
+    apparencePage: {
+      couleurEntete: couleur(apparence?.couleurEntete),
+      couleurTexteEntete: couleur(apparence?.couleurTexteEntete),
+      couleurFondPage: couleur(apparence?.couleurFondPage),
+      couleurPied: couleur(apparence?.couleurPied),
+      couleurTextePied: couleur(apparence?.couleurTextePied),
+      couleurTexte: couleur(apparence?.couleurTexte),
+      couleurCarte: couleur(apparence?.couleurCarte),
+      couleurBouton: couleur(apparence?.couleurBouton),
+    },
+    stylesSections,
+    blocs,
     accroche: hero?.sousTitre ?? undefined,
     dateTexte: dateTexte(evt),
     debutMs: new Date(evt.dateDebut).getTime(),
     lieu: evt.lieu ?? undefined,
     imageHero,
-    boutonHero: hero?.bouton?.trim() || (evt.prix === 0 ? 'Je m’inscris' : 'Réserver ma place'),
+    boutonHero: hero?.bouton?.trim() || (evt.accesLibre ? 'Entrée libre' : evt.prix === 0 ? 'Je m’inscris' : 'Réserver ma place'),
     textes: sections
       .filter((s) => s.type === 'TEXTE' && (s.texte || s.titre))
       .map((s) => ({ id: s.id, titre: s.titre ?? '', texte: s.texte ?? '', image: s.image ? urlImage(s.image) : undefined })),
     offres,
-    boutonReserver: evt.prix === 0 && !estCadre ? 'Je m’inscris' : 'Réserver',
+    boutonReserver: evt.accesLibre ? 'Entrée libre' : evt.prix === 0 && !estCadre ? 'Je m’inscris' : 'Réserver',
     menu: [],
     nomSite: NOM_SITE,
   }

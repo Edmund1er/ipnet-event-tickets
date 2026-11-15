@@ -3,13 +3,15 @@ import { Link, useParams } from 'react-router-dom'
 import { messageErreur } from '../../../core/api/httpClient'
 import { Bouton } from '../../../core/components/ui/Bouton'
 import { Champ } from '../../../core/components/ui/Champ'
+import { ChampTelephone } from '../../../core/components/ui/ChampTelephone'
 import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useRequete } from '../../../core/hooks/useRequete'
 import { dateLongue, montant, tempsRestant } from '../../../core/utils/format'
+import { analyserTelephone, TYPES_MOBILE_MONEY } from '../../../core/utils/telephone'
 import { themeDe } from '../../evenements/theme/ambiances'
-import { reservationService } from '../services/reservationService'
+import { reservationService, type CanalPaiement } from '../services/reservationService'
 
 const TAILLE_MAX = 5 * 1024 * 1024
 const TYPES = ['image/jpeg', 'image/png', 'application/pdf']
@@ -20,6 +22,8 @@ export function PaiementPage() {
   const reservation = useRequete(() => reservationService.uneReservation(Number(id)), [id])
   const parametres = useRequete(() => reservationService.parametresPaiement(), [])
   const [reference, setReference] = useState('')
+  const [operateurChoisi, setOperateurChoisi] = useState('')
+  const [numeroPayeur, setNumeroPayeur] = useState('')
   const [capture, setCapture] = useState<File | null>(null)
   const [apercu, setApercu] = useState<string | null>(null)
   const [erreurs, setErreurs] = useState<Record<string, string>>({})
@@ -32,10 +36,12 @@ export function PaiementPage() {
   if (reservation.erreur || !reservation.donnees) return <Alerte ton="erreur">{reservation.erreur ?? 'Réservation introuvable'}</Alerte>
   const r = reservation.donnees
   const p = parametres.donnees
+  const canaux = (p?.canaux ?? []).filter((x): x is CanalPaiement & { code: 'MOOV' | 'MIXX' } => x.code === 'MOOV' || x.code === 'MIXX')
+  const canal = canaux.find((x) => x.code === operateurChoisi) ?? canaux[0]
 
   async function copier() {
-    if (!p?.numeroMobileMoney) return
-    await navigator.clipboard.writeText(p.numeroMobileMoney)
+    if (!canal?.numeroMobileMoney) return
+    await navigator.clipboard.writeText(canal.numeroMobileMoney)
     setCopie(true)
     setTimeout(() => setCopie(false), 2500)
   }
@@ -74,11 +80,20 @@ export function PaiementPage() {
       setErreurs({ reference: '50 caractères maximum' })
       return
     }
+    if (!canal) {
+      setErreur("Aucun numéro de réception n'est configuré pour Moov ou Mixx. Contactez l'administration.")
+      return
+    }
+    const payeur = analyserTelephone(numeroPayeur, undefined, TYPES_MOBILE_MONEY)
+    if (!payeur.valide) {
+      setErreurs({ numeroPayeur: payeur.message ?? 'Numéro de paiement invalide' })
+      return
+    }
     setErreurs({})
     setErreur(null)
     setEnCours(true)
     try {
-      await reservationService.soumettreReference(r.id, ref, capture)
+      await reservationService.soumettreReference(r.id, ref, canal.code, payeur.e164!, capture)
       setEnvoye(true)
     } catch (err) {
       setErreur(messageErreur(err))
@@ -144,19 +159,36 @@ export function PaiementPage() {
             {parametres.erreur || !p || !p.configure ? (
               <div className="mt-4">
                 <Alerte ton="erreur">
-                  {parametres.erreur ?? "Le numéro de paiement n'est pas encore renseigné par l'administration. Réessayez plus tard."}
+                  {parametres.erreur ?? "Aucun numéro de réception n'est encore renseigné par l'administration."}
                 </Alerte>
               </div>
+            ) : canaux.length === 0 ? (
+              <div className="mt-4"><Alerte ton="erreur">L’ancien numéro de réception doit être réattribué à Moov ou Mixx dans les paramètres avant de payer.</Alerte></div>
             ) : (
-              <div className="mt-5 rounded-lg bg-primaire-clair p-4">
-                <p className="titre-section">Numéro Mobile Money{p.operateur ? ` ${p.operateur}` : ''} de l'administration</p>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <p className="chiffres font-titre text-2xl font-bold text-primaire-fonce">{p.numeroAffiche}</p>
-                  <Bouton variante="secondaire" taille="petit" icone={copie ? 'check' : 'content_copy'} onClick={copier}>
-                    {copie ? 'Copié' : 'Copier'}
-                  </Bouton>
-                </div>
-                {p.titulaire && <p className="mt-1 text-sm text-attenue">Bénéficiaire : {p.titulaire}</p>}
+              <div className="mt-4 flex flex-col gap-4">
+                <fieldset>
+                  <legend className="etiquette mb-2">Choisissez le portefeuille depuis lequel vous payez</legend>
+                  <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Opérateur utilisé pour payer">
+                    {canaux.map((x) => (
+                      <button key={x.code} type="button" role="radio" aria-checked={canal?.code === x.code} onClick={() => setOperateurChoisi(x.code)}
+                        className={`rounded-lg border-2 p-3 text-left font-semibold ${canal?.code === x.code ? 'border-primaire bg-primaire-clair text-primaire-fonce' : 'border-bordure hover:border-primaire'}`}>
+                        {x.libelle}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                {canal && <div className="rounded-lg bg-primaire-clair p-4">
+                  <p className="titre-section">Numéro personnel {canal.libelle} de réception</p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="chiffres font-titre text-2xl font-bold text-primaire-fonce">{canal.numeroAffiche}</p>
+                    <Bouton variante="secondaire" taille="petit" icone={copie ? 'check' : 'content_copy'} onClick={copier}>{copie ? 'Copié' : 'Copier'}</Bouton>
+                  </div>
+                  {canal.titulaire && <p className="mt-1 text-sm text-attenue">Bénéficiaire à vérifier avant envoi : {canal.titulaire}</p>}
+                  <a href={`tel:${canal.code === 'MIXX' ? '*145*1%23' : '*155%23'}`} className="mt-3 inline-flex h-10 items-center gap-2 rounded-lg bg-primaire px-3 text-sm font-semibold text-white">
+                    <Icone nom="call" taille={18} /> {canal.code === 'MIXX' ? 'Ouvrir Mixx (*145*1#)' : 'Ouvrir Moov (*155#)'}
+                  </a>
+                  <p className="mt-2 text-xs text-attenue">Le téléphone ouvre le composeur USSD (Moov : option 1). Saisissez le montant, vérifiez le numéro et le nom affichés par l’opérateur, puis confirmez vous-même le transfert.</p>
+                </div>}
               </div>
             )}
             {r.statut === 'REJETEE' && r.motif && (
@@ -189,6 +221,14 @@ export function PaiementPage() {
               autoComplete="off"
               maxLength={50}
             />
+            <ChampTelephone
+              libelle="Numéro du portefeuille utilisé pour payer"
+              valeur={numeroPayeur}
+              surChangement={setNumeroPayeur}
+              erreur={erreurs.numeroPayeur}
+              typesAcceptes={TYPES_MOBILE_MONEY}
+            />
+            <p className="-mt-3 text-xs text-attenue">Ce numéro peut être différent de celui de votre compte IPNET.</p>
             <div>
               <label htmlFor="capture" className="etiquette">
                 Capture d'écran <span className="font-normal text-attenue">(facultatif)</span>

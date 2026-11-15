@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Bouton } from '../../../core/components/ui/Bouton'
 import { Champ, ChampTexte } from '../../../core/components/ui/Champ'
 import { Icone } from '../../../core/components/ui/Icone'
-import type { CreneauConfig, IntervenantConfig, SectionConfig, TypeSection } from '../../evenements/site/types'
+import type { BlocElementConfig, CreneauConfig, IntervenantConfig, SectionConfig, TypeSection } from '../../evenements/site/types'
 import { ChampImage } from './ChampImage'
+import { ChampCouleur } from './ChampCouleur'
 
 export const TYPES_SECTION: Record<TypeSection, { libelle: string; icone: string; aide: string }> = {
   HERO: { libelle: 'Bannière', icone: 'panorama', aide: 'Grande image en haut de page, titre et bouton.' },
@@ -12,6 +13,8 @@ export const TYPES_SECTION: Record<TypeSection, { libelle: string; icone: string
   PROGRAMME: { libelle: 'Programme', icone: 'schedule', aide: 'Horaires jour par jour.' },
   LIEU: { libelle: 'Lieu', icone: 'location_on', aide: 'Adresse, plan, téléphone, e-mail.' },
   TEXTE: { libelle: 'Texte libre', icone: 'notes', aide: 'Un paragraphe avec un titre et, si vous voulez, une image.' },
+  CARTES: { libelle: 'Grille de cartes', icone: 'grid_view', aide: 'Une grille de cartes personnalisées avec image et description.' },
+  COLONNES: { libelle: 'Colonnes', icone: 'view_column', aide: 'Un bloc à colonnes pour les informations complémentaires.' },
 }
 
 interface Props {
@@ -36,6 +39,18 @@ export function EditeurSection({ evenementId, section: s, surChangement, apercus
   return (
     <div className="flex flex-col gap-4">
       <Champ libelle="Titre" facultatif value={s.titre ?? ''} onChange={(e) => maj({ titre: e.target.value })} maxLength={150} />
+
+      <section className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+        <h3 className="mb-1 text-sm font-bold">Couleurs de ce bloc seulement</h3>
+        <p className="mb-3 text-xs text-attenue">Laissez une couleur vide pour hériter du thème général.</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <ChampCouleur libelle="Fond du bloc" valeur={s.couleurFond} defaut="#ffffff" surChangement={(couleur) => maj({ couleurFond: couleur })} />
+          <ChampCouleur libelle="Texte" valeur={s.couleurTexte} defaut="#172033" surChangement={(couleur) => maj({ couleurTexte: couleur })} />
+          <ChampCouleur libelle="Titres / accents" valeur={s.couleurAccent} defaut="#2563eb" surChangement={(couleur) => maj({ couleurAccent: couleur })} />
+          <ChampCouleur libelle="Fond des cartes" valeur={s.couleurCarte} defaut="#f8fafc" surChangement={(couleur) => maj({ couleurCarte: couleur })} />
+          <ChampCouleur libelle="Boutons de ce bloc" valeur={s.couleurBouton} defaut="#2563eb" surChangement={(couleur) => maj({ couleurBouton: couleur })} />
+        </div>
+      </section>
 
       {s.type === 'HERO' && (
         <>
@@ -73,6 +88,45 @@ export function EditeurSection({ evenementId, section: s, surChangement, apercus
 
       {s.type === 'INTERVENANTS' && <ListeIntervenants {...{ evenementId, apercus, surApercu }} liste={s.intervenants ?? []} surChangement={(l) => maj({ intervenants: l })} />}
       {s.type === 'PROGRAMME' && <EditeurProgramme creneaux={s.creneaux ?? []} surChangement={(c) => maj({ creneaux: c })} estProgramme={estProgramme} />}
+      {(s.type === 'CARTES' || s.type === 'COLONNES') && <EditeurBlocs evenementId={evenementId} section={s} apercus={apercus} surApercu={surApercu} surChangement={maj} />}
+    </div>
+  )
+}
+
+function EditeurBlocs({ evenementId, section, apercus, surApercu, surChangement }: {
+  evenementId: number
+  section: SectionConfig
+  apercus: Record<string, string>
+  surApercu: (nom: string, url: string) => void
+  surChangement: (s: SectionConfig) => void
+}) {
+  const elements = section.elements ?? []
+  const mettreAJour = (i: number, p: Partial<BlocElementConfig>) =>
+    surChangement({ ...section, elements: elements.map((x, k) => k === i ? { ...x, ...p } : x) })
+  const typeBloc = section.type === 'COLONNES' ? 'colonne' : 'carte'
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+        <Champ libelle="Colonnes sur grand écran" type="number" min={2} max={4} value={section.colonnes ?? 3} onChange={(e) => surChangement({ ...section, colonnes: Math.min(4, Math.max(2, Number(e.target.value) || 2)) })} />
+        <p className="self-end pb-2 text-sm text-attenue">Sur téléphone, les {typeBloc}s s’empilent automatiquement pour rester lisibles.</p>
+      </div>
+      {elements.map((element, i) => (
+        <article key={element.id} className="grid gap-3 rounded-xl border border-neutral-200 bg-white p-3 sm:grid-cols-[1fr_auto]">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Champ libelle={`Titre ${typeBloc}`} value={element.titre} onChange={(e) => mettreAJour(i, { titre: e.target.value })} maxLength={150} />
+            <ChampTexte libelle="Description" facultatif rows={3} value={element.texte ?? ''} onChange={(e) => mettreAJour(i, { texte: e.target.value })} maxLength={1000} />
+            <div className="sm:col-span-2">
+              <ChampImage evenementId={evenementId} libelle="Image de la carte (facultative)" nom={element.image} surChangement={(nom) => mettreAJour(i, { image: nom })} apercus={apercus} surApercu={surApercu} />
+            </div>
+          </div>
+          <Bouton variante="fantome" taille="petit" icone="delete" aria-label={`Supprimer ${typeBloc} ${element.titre || i + 1}`} onClick={() => surChangement({ ...section, elements: elements.filter((_, k) => k !== i) })} />
+        </article>
+      ))}
+      <div>
+        <Bouton variante="secondaire" taille="petit" icone="add" onClick={() => surChangement({ ...section, elements: [...elements, { id: `item-${Math.random().toString(36).slice(2, 10)}`, titre: '', texte: '', image: null }] })}>
+          Ajouter {typeBloc === 'carte' ? 'une carte' : 'une colonne'}
+        </Bouton>
+      </div>
     </div>
   )
 }

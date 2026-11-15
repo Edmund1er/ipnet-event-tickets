@@ -1,7 +1,12 @@
+import { appliquerAtelier } from './modeles/atelier'
 import { appliquerCeremonie } from './modeles/ceremonie'
 import { appliquerConference } from './modeles/conference'
 import { appliquerRencontre } from './modeles/rencontre'
+import { appliquerReseautage } from './modeles/reseautage'
+import { appliquerSalon } from './modeles/salon'
 import { appliquerSoiree } from './modeles/soiree'
+import { appliquerTournoi } from './modeles/tournoi'
+import { estHex, texteSur } from '../theme/ambiances'
 import { MODELES, type CleModele, type ContenuPage } from './types'
 
 /**
@@ -17,17 +22,21 @@ const ADAPTATEURS: Record<CleModele, Adaptateur> = {
   CONFERENCE: appliquerConference,
   RENCONTRE: appliquerRencontre,
   CEREMONIE: appliquerCeremonie,
+  ATELIER: appliquerAtelier,
+  TOURNOI: appliquerTournoi,
+  SALON: appliquerSalon,
+  RESEAUTAGE: appliquerReseautage,
 }
 
-const squelettes = new Map<string, Promise<string>>()
+const squelettes = new Map<string, Promise<Document>>()
 
-function chargerSquelette(dossier: string): Promise<string> {
+function chargerSquelette(dossier: string): Promise<Document> {
   let p = squelettes.get(dossier)
   if (!p) {
     p = fetch(`/modeles/${dossier}/squelette.html`).then((r) => {
       if (!r.ok) throw new Error(`Modèle introuvable (${r.status})`)
       return r.text()
-    })
+    }).then((html) => new DOMParser().parseFromString(html, 'text/html'))
     p.catch(() => squelettes.delete(dossier))
     squelettes.set(dossier, p)
   }
@@ -40,8 +49,11 @@ document.addEventListener('click', function (e) {
   var cible = e.target && e.target.closest ? e.target.closest('[data-ipnet]') : null;
   if (cible) {
     e.preventDefault();
-    var id = cible.getAttribute('data-id');
-    window.parent.postMessage({ source: 'ipnet', type: cible.getAttribute('data-ipnet'), id: id ? Number(id) : null }, '*');
+    var type = cible.getAttribute('data-ipnet');
+    var id = Number(cible.getAttribute('data-id'));
+    if (type !== 'reserver' && type !== 'ouvrir') return;
+    if (type === 'ouvrir' && (!Number.isSafeInteger(id) || id < 1)) return;
+    window.parent.postMessage({ source: 'ipnet', type: type, id: type === 'ouvrir' ? id : null }, '*');
     return;
   }
   var lien = e.target && e.target.closest ? e.target.closest('a') : null;
@@ -55,44 +67,158 @@ document.addEventListener('click', function (e) {
     if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }, true);
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  var cible = e.target && e.target.closest ? e.target.closest('[data-ipnet]') : null;
+  if (!cible) return;
+  e.preventDefault();
+  cible.click();
+}, true);
 `;
 
 function appliquerPalette(doc: Document, contenu: ContenuPage) {
-  const primaire = contenu.couleurPrincipale
-  if (!primaire) return
-  const secondaire = contenu.couleurSecondaire ?? primaire
-  const style = doc.createElement('style')
-  style.textContent = `
-    :root {
-      --ipnet-primary: ${primaire};
-      --ipnet-secondary: ${secondaire};
-      --accent-color: var(--ipnet-primary);
-      --heading-color: var(--ipnet-secondary);
+  const apparence = contenu.apparencePage
+  const primaire = estHex(contenu.couleurPrincipale) ? contenu.couleurPrincipale : undefined
+  const secondaire = estHex(contenu.couleurSecondaire) ? contenu.couleurSecondaire : undefined
+  const bouton = estHex(apparence.couleurBouton) ? apparence.couleurBouton : primaire
+  const declarations = [
+    primaire && `--ipnet-primary:${primaire};--accent-color:${primaire};`,
+    secondaire && `--ipnet-secondary:${secondaire};--heading-color:${secondaire};`,
+    bouton && `--ipnet-button:${bouton};`,
+    estHex(apparence.couleurCarte) && `--ipnet-card-bg:${apparence.couleurCarte};`,
+  ].filter(Boolean).join('')
+  const regles = [
+    declarations && `:root{${declarations}}`,
+    estHex(apparence.couleurFondPage) && `body{background-color:${apparence.couleurFondPage}!important;}`,
+    estHex(apparence.couleurTexte) && `body{color:${apparence.couleurTexte}!important;}`,
+    estHex(apparence.couleurEntete) && `body > header,#header,.header,.navbar,.navbar-area,.topbar,.rn-header,.atelier-header{background-color:${apparence.couleurEntete}!important;}`,
+    estHex(apparence.couleurTexteEntete) && `body > header,#header,.header,.navbar,.navbar-area,.topbar,.rn-header,.atelier-header{color:${apparence.couleurTexteEntete}!important;}body > header :where(a,span,p,button),#header :where(a,span,p,button),.topbar :where(a,span,p,button),.rn-header :where(a,span,p,button),.atelier-header :where(a,span,p,button){color:inherit!important;}`,
+    estHex(apparence.couleurPied) && `footer,#footer,.footer,.atelier-footer,.rn-footer{background-color:${apparence.couleurPied}!important;}`,
+    estHex(apparence.couleurTextePied) && `footer,#footer,.footer,.atelier-footer,.rn-footer{color:${apparence.couleurTextePied}!important;}footer :where(a,span,p),#footer :where(a,span,p),.atelier-footer :where(a,span,p),.rn-footer :where(a,span,p){color:inherit!important;}`,
+    bouton && `.cta-btn,.buy_ticket a,.buy_tkt a,.boxed-btn3,.boxed-btn-white,.ticket,.btn-main-md,.buy-btn,a[data-ipnet="reserver"]{background-color:${bouton}!important;border-color:${bouton}!important;color:${texteSur(bouton)}!important;}`,
+    estHex(apparence.couleurCarte) && `.pricing-item,.single_propram,.single_performer,.single_speaker,.speaker-item,.member,.speaker-card,.rn-speaker,.rn-offer,.atelier-speaker,.atelier-day,.match-card,.expo-card,.ipnet-custom-card{background-color:${apparence.couleurCarte}!important;}`,
+    secondaire && `.alternate,.section-title h2,.section-title h3,.section_title h3{color:${secondaire}!important;}`,
+    primaire && `.nav-tabs .nav-link.active,.nav-pills .nav-link.active{background-color:${primaire}!important;}`,
+    `img{max-width:100%}.ipnet-custom-block{padding:clamp(24px,4vw,64px) 20px;margin:0 auto;max-width:1200px}.ipnet-custom-block__head{margin:0 auto 24px;max-width:720px}.ipnet-custom-block__head h2{font-size:clamp(1.4rem,3vw,2.2rem);margin:0 0 8px}.ipnet-custom-grid{display:grid;grid-template-columns:repeat(var(--ipnet-columns,3),minmax(0,1fr));gap:18px}.ipnet-custom-card{min-width:0;overflow:hidden;border:1px solid rgba(15,23,42,.1);border-radius:16px;background:var(--ipnet-section-card,var(--ipnet-card-bg,#fff));box-shadow:0 8px 28px rgba(15,23,42,.08)}.ipnet-custom-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.ipnet-custom-card__body{padding:18px}.ipnet-custom-card h3{margin:0 0 8px;font-size:1.1rem}.ipnet-custom-card p{margin:0;line-height:1.6}@media(max-width:760px){.ipnet-custom-grid{grid-template-columns:1fr!important}}`,
+    `[data-ipnet-section]{background-color:var(--ipnet-section-bg)!important;color:var(--ipnet-section-text)!important}[data-ipnet-section] h1,[data-ipnet-section] h2,[data-ipnet-section] h3,[data-ipnet-section] h4{color:var(--ipnet-section-accent)!important}[data-ipnet-section] .cta-btn,[data-ipnet-section] .buy_ticket a,[data-ipnet-section] .buy_tkt a,[data-ipnet-section] .boxed-btn3,[data-ipnet-section] .boxed-btn-white,[data-ipnet-section] .btn-main-md,[data-ipnet-section] .buy-btn,[data-ipnet-section] a[data-ipnet="reserver"]{background-color:var(--ipnet-section-button)!important;border-color:var(--ipnet-section-button)!important;color:var(--ipnet-section-button-text,#fff)!important}[data-ipnet-section] .ipnet-custom-card,[data-ipnet-section] .pricing-item,[data-ipnet-section] .single_propram,[data-ipnet-section] .single_speaker{background-color:var(--ipnet-section-card,var(--ipnet-card-bg,#fff))!important}`,
+  ].filter(Boolean)
+  if (regles.length) {
+    const style = doc.createElement('style')
+    style.textContent = regles.join('\n')
+    doc.head.append(style)
+  }
+}
+
+function appliquerStylesSections(doc: Document, contenu: ContenuPage) {
+  for (const style of contenu.stylesSections) {
+    const couleurs = [style.couleurFond, style.couleurTexte, style.couleurAccent, style.couleurCarte, style.couleurBouton]
+    if (!couleurs.some(estHex)) continue
+    const element = doc.getElementById(style.id)
+    if (!element) continue
+    element.setAttribute('data-ipnet-section', '')
+    if (estHex(style.couleurFond)) element.style.setProperty('--ipnet-section-bg', style.couleurFond)
+    if (estHex(style.couleurTexte)) element.style.setProperty('--ipnet-section-text', style.couleurTexte)
+    if (estHex(style.couleurAccent)) element.style.setProperty('--ipnet-section-accent', style.couleurAccent)
+    if (estHex(style.couleurCarte)) element.style.setProperty('--ipnet-section-card', style.couleurCarte)
+    if (estHex(style.couleurBouton)) {
+      element.style.setProperty('--ipnet-section-button', style.couleurBouton)
+      element.style.setProperty('--ipnet-section-button-text', texteSur(style.couleurBouton))
     }
-    .cta-btn, .buy_ticket a, .buy_tkt a, .boxed-btn3, .boxed-btn-white,
-    .ticket, .btn-main-md, .buy-btn, a[data-ipnet="reserver"] {
-      background-color: var(--ipnet-primary) !important;
-      border-color: var(--ipnet-primary) !important;
-      color: #fff !important;
+  }
+}
+
+function ajouterBlocs(doc: Document, contenu: ContenuPage) {
+  let zone = doc.getElementById('ipnet-custom-blocks')
+  const textesManquants = contenu.textes.filter((texte) => !doc.getElementById(texte.id))
+  if (!contenu.blocs.length && !textesManquants.length) return
+  if (!zone) {
+    zone = doc.createElement('div')
+    zone.id = 'ipnet-custom-blocks'
+    const pied = doc.querySelector('footer,#footer,.footer')
+    if (pied?.parentElement) pied.parentElement.insertBefore(zone, pied)
+    else (doc.querySelector('main') ?? doc.body).append(zone)
+  }
+  for (const texte of textesManquants) {
+    const section = doc.createElement('section')
+    section.id = texte.id
+    section.className = 'ipnet-custom-block ipnet-text-block'
+    const titre = doc.createElement('h2')
+    titre.textContent = texte.titre
+    const description = doc.createElement('p')
+    description.textContent = texte.texte
+    section.append(titre, description)
+    if (texte.image) {
+      const photo = doc.createElement('img')
+      photo.loading = 'lazy'
+      photo.decoding = 'async'
+      photo.alt = texte.titre
+      photo.src = texte.image
+      section.append(photo)
     }
-    .alternate, .section-title h2, .section-title h3, .section_title h3,
-    .nav-tabs .nav-link.active, .nav-pills .nav-link.active {
-      color: var(--ipnet-secondary) !important;
+    zone.append(section)
+  }
+  for (const bloc of contenu.blocs) {
+    const section = doc.createElement('section')
+    section.id = bloc.id
+    section.className = `ipnet-custom-block ipnet-custom-block--${bloc.type.toLowerCase()}`
+    section.style.setProperty('--ipnet-columns', String(bloc.colonnes))
+    const head = doc.createElement('header')
+    head.className = 'ipnet-custom-block__head'
+    const titre = doc.createElement('h2')
+    titre.textContent = bloc.titre
+    head.append(titre)
+    if (bloc.sousTitre) {
+      const intro = doc.createElement('p')
+      intro.textContent = bloc.sousTitre
+      head.append(intro)
     }
-    .nav-tabs .nav-link.active, .nav-pills .nav-link.active {
-      background-color: var(--ipnet-primary) !important;
+    section.append(head)
+    const grille = doc.createElement('div')
+    grille.className = 'ipnet-custom-grid'
+    for (const element of bloc.elements) {
+      const carte = doc.createElement('article')
+      carte.className = 'ipnet-custom-card'
+      if (element.image) {
+        const photo = doc.createElement('img')
+        photo.loading = 'lazy'
+        photo.decoding = 'async'
+        photo.alt = element.titre
+        photo.src = element.image
+        carte.append(photo)
+      }
+      const corps = doc.createElement('div')
+      corps.className = 'ipnet-custom-card__body'
+      const titreCarte = doc.createElement('h3')
+      titreCarte.textContent = element.titre
+      corps.append(titreCarte)
+      if (element.texte) {
+        const description = doc.createElement('p')
+        description.textContent = element.texte
+        corps.append(description)
+      }
+      carte.append(corps)
+      grille.append(carte)
     }
-  `
-  doc.head.append(style)
+    section.append(grille)
+    zone.append(section)
+  }
 }
 
 function finaliser(doc: Document, dossier: string, contenu: ContenuPage, origine: string) {
+  ajouterBlocs(doc, contenu)
+  appliquerStylesSections(doc, contenu)
   appliquerPalette(doc, contenu)
   // Scripts de cartes et de suivi : retirés (la carte est remplacée par un plan intégré sans clé d'API)
   doc.querySelectorAll('script').forEach((s) => {
     const src = s.getAttribute('src') ?? '';
-    if (/googleapis\.com\/maps|google-map|gmap\.js|analytics|googletagmanager/i.test(src) || /initMap|google\.maps/.test(s.textContent ?? '')) s.remove();
+    if (/googleapis\.com\/maps|google-map|gmap\.js|analytics|googletagmanager|smoothscroll/i.test(src) || /initMap|google\.maps/.test(s.textContent ?? '')) s.remove();
   });
+  // Les polices d'icônes locales seraient cross-origin dans l'iframe sandboxée ; le site utilise des fontes système en secours.
+  doc.querySelectorAll('link[rel="stylesheet"][href]').forEach((l) => {
+    if (/font.?awesome|bootstrap-icons|themify|flaticon/i.test(l.getAttribute('href') ?? '')) l.remove();
+  })
+  // Les scripts classiques sont différés, dans leur ordre initial, pour laisser le contenu se peindre avant leur exécution.
+  doc.querySelectorAll<HTMLScriptElement>('script[src]:not([async]):not([defer])').forEach((script) => { script.defer = true })
   // Retire les animations et préchargeurs des sites démo : le contenu reste visible sans JS tiers.
   doc.querySelectorAll('[data-aos]').forEach((el) => {
     el.removeAttribute('data-aos')
@@ -129,6 +255,7 @@ function finaliser(doc: Document, dossier: string, contenu: ContenuPage, origine
   meta.setAttribute('content', 'width=device-width, initial-scale=1');
   if (!doc.querySelector('meta[name="viewport"]')) head.append(meta);
   doc.title = contenu.titre;
+  doc.documentElement.lang = 'fr';
 
   const pont = doc.createElement('script');
   pont.textContent = SCRIPT_PONT;
@@ -139,8 +266,8 @@ function finaliser(doc: Document, dossier: string, contenu: ContenuPage, origine
 export async function genererPage(cle: CleModele, contenu: ContenuPage, origine = window.location.origin): Promise<string> {
   const dossier = MODELES.find((m) => m.cle === cle)?.dossier
   if (!dossier) throw new Error('Modèle inconnu')
-  const html = await chargerSquelette(dossier)
-  const doc = new DOMParser().parseFromString(html, 'text/html')
+  const prototype = await chargerSquelette(dossier)
+  const doc = prototype.cloneNode(true) as Document
   ADAPTATEURS[cle](doc, contenu)
   finaliser(doc, dossier, contenu, origine)
   return '<!doctype html>' + doc.documentElement.outerHTML

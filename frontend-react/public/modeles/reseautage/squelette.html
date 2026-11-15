@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <title>Événement professionnel</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; scroll-behavior: smooth; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #18302e; background: #f7f9f7; line-height: 1.6; }
+    a { color: inherit; }
+    .rn-shell { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+    .rn-header { position: relative; z-index: 2; background: #fff; border-bottom: 1px solid #e8eeeb; }
+    .rn-header-inner { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .rn-brand { color: var(--ipnet-primary, #176c60); font-size: 1.05rem; font-weight: 800; letter-spacing: -.03em; text-decoration: none; white-space: nowrap; }
+    .rn-nav ul { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; list-style: none; margin: 0; padding: 0; }
+    .rn-nav a { color: #445652; font-size: .9rem; font-weight: 650; text-decoration: none; }
+    .rn-nav a:hover, .rn-nav a:focus-visible { color: var(--ipnet-primary, #176c60); }
+    .rn-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 20px; border: 0; border-radius: 999px; background: var(--ipnet-primary, #176c60); color: #fff; font: inherit; font-size: .92rem; font-weight: 750; text-decoration: none; cursor: pointer; transition: transform .2s ease, background .2s ease; }
+    .rn-button:hover { background: var(--ipnet-secondary, #d48d50); color: #172e2b; transform: translateY(-1px); }
+    .rn-header-cta { white-space: nowrap; }
+    .rn-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 540px; display: grid; align-items: center; padding: 80px 0 126px; background: linear-gradient(120deg, #103f3a, #176c60 62%, #619b82); color: #fff; }
+    .rn-hero::before, .rn-hero::after { position: absolute; z-index: -1; content: ""; border-radius: 50%; pointer-events: none; }
+    .rn-hero::before { width: 430px; height: 430px; right: -70px; top: -190px; border: 1px solid rgba(255,255,255,.22); box-shadow: 0 0 0 44px rgba(255,255,255,.045), 0 0 0 90px rgba(255,255,255,.035); }
+    .rn-hero::after { width: 260px; height: 260px; right: 17%; bottom: -200px; background: rgba(255,255,255,.07); }
+    .rn-hero-content { max-width: 790px; }
+    .rn-kicker { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 22px; color: #cde6d9; font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .rn-kicker::before { content: ""; width: 28px; height: 2px; background: var(--ipnet-secondary, #e3ad70); }
+    .rn-hero h1 { max-width: 850px; margin: 0; font-size: clamp(2.7rem, 7vw, 5.8rem); line-height: 1.03; letter-spacing: -.055em; text-wrap: balance; }
+    .rn-hero-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 26px 0 30px; color: #e4f1eb; font-weight: 600; }
+    .rn-hero-meta p { margin: 0; }
+    .rn-hero .rn-button { background: var(--ipnet-secondary, #e3ad70); color: #18302e; }
+    .rn-hero .rn-button:hover { background: #fff; }
+    .rn-hero-art { position: absolute; z-index: -1; inset: 0; background-position: center; background-size: cover; opacity: .4; }
+    .rn-section { padding: 92px 0; }
+    .rn-section-heading { max-width: 700px; margin: 0 auto 44px; text-align: center; }
+    .rn-eyebrow { margin: 0 0 9px; color: var(--ipnet-primary, #176c60); font-size: .75rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .rn-section-heading h2 { margin: 0; color: #19332f; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.12; letter-spacing: -.045em; text-wrap: balance; }
+    .rn-section-heading p { margin: 14px 0 0; color: #63736e; }
+    .rn-about { background: #fff; }
+    .rn-about-copy { max-width: 790px; margin: auto; color: #53645f; font-size: 1.12rem; text-align: center; white-space: pre-line; }
+    .rn-about-copy:empty { display: none; }
+    .rn-people { background: #f2f6f3; }
+    .rn-speaker-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px; }
+    .rn-speaker { min-height: 170px; display: flex; align-items: center; gap: 18px; padding: 24px; border: 1px solid #e1eae5; border-radius: 18px; background: #fff; box-shadow: 0 12px 35px rgba(24,48,46,.04); }
+    .rn-speaker-photo { flex: 0 0 72px; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #e3efea; }
+    .rn-speaker h3 { margin: 0; color: #18302e; font-size: 1.06rem; line-height: 1.35; }
+    .rn-speaker p { margin: 5px 0 0; color: #71807b; font-size: .9rem; }
+    .rn-programme { background: #fff; }
+    .rn-day { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 38px; padding: 34px 0; border-top: 1px solid #e5ece8; }
+    .rn-day-date { color: var(--ipnet-primary, #176c60); font-size: 1.15rem; font-weight: 800; }
+    .rn-day-date p { margin: 0; }
+    .rn-rows { display: grid; gap: 14px; }
+    .rn-row { position: relative; padding: 4px 0 8px 24px; border-left: 2px solid #d5e6dc; }
+    .rn-row::before { position: absolute; top: 8px; left: -6px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: var(--ipnet-secondary, #d48d50); content: ""; box-shadow: 0 0 0 1px var(--ipnet-secondary, #d48d50); }
+    .rn-row[role="link"] { cursor: pointer; }
+    .rn-row[role="link"]:focus-visible { outline: 2px solid var(--ipnet-primary, #176c60); outline-offset: 4px; }
+    .rn-row-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+    .rn-row h3 { margin: 0; color: #18302e; font-size: 1.08rem; }
+    .rn-row time { color: var(--ipnet-primary, #176c60); font-size: .88rem; font-weight: 800; white-space: nowrap; }
+    .rn-row p { margin: 6px 0 0; color: #63736e; font-size: .93rem; }
+    .rn-row .rn-row-place { color: #52635e; font-size: .85rem; font-weight: 650; }
+    .rn-venue { background: #f2f6f3; }
+    .rn-venue-card { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; padding: clamp(22px,4vw,42px); border: 1px solid #dce8e1; border-radius: 20px; background: #fff; box-shadow: 0 12px 35px rgba(24,48,46,.045); }
+    .rn-venue-card h2 { margin: 0 0 12px; color: #18302e; font-size: clamp(1.5rem,3vw,2.2rem); }
+    .rn-venue-card p { margin: 0 0 10px; color: #63736e; }
+    .rn-venue-image { width: 100%; height: 230px; border-radius: 14px; object-fit: cover; background: #e3efea; }
+    @media(max-width:700px){.rn-venue-card{grid-template-columns:1fr}}
+    .rn-offers { color: #fff; background: #153f39; }
+    .rn-offers .rn-section-heading h2 { color: #fff; }
+    .rn-offers .rn-eyebrow { color: #c5e3d4; }
+    .rn-offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 18px; align-items: stretch; }
+    .rn-offer { display: flex; flex-direction: column; min-height: 280px; padding: 28px; border: 1px solid rgba(255,255,255,.17); border-radius: 18px; background: rgba(255,255,255,.07); }
+    .rn-offer h3 { margin: 0; font-size: 1.2rem; }
+    .rn-price { margin: 14px 0 18px; color: #e7bc83; font-size: 1.8rem; font-weight: 800; }
+    .rn-offer ul { display: grid; gap: 8px; margin: 0 0 26px; padding-left: 20px; color: #e0ece6; font-size: .92rem; }
+    .rn-offer .rn-button { margin-top: auto; background: var(--ipnet-secondary, #e3ad70); color: #18302e; }
+    .rn-offer .rn-button:hover { background: #fff; }
+    .rn-footer { padding: 30px 0; color: #667771; background: #fff; font-size: .88rem; }
+    .rn-footer p { margin: 0; }
+    #ipnet-custom-blocks:empty { display: none; }
+    @media (max-width: 760px) {
+      .rn-shell { width: min(100% - 32px, 1160px); }
+      .rn-header-inner { min-height: 70px; flex-wrap: wrap; gap: 12px; padding-block: 14px; }
+      .rn-nav { order: 3; width: 100%; overflow-x: auto; }
+      .rn-nav ul { flex-wrap: nowrap; gap: 20px; padding: 3px 0 6px; }
+      .rn-nav a { white-space: nowrap; }
+      .rn-header-cta { min-height: 40px; padding: 7px 14px; font-size: .82rem; }
+      .rn-hero { min-height: 490px; padding: 70px 0 90px; }
+      .rn-section { padding: 68px 0; }
+      .rn-day { grid-template-columns: 1fr; gap: 18px; padding: 26px 0; }
+      .rn-day-date { font-size: 1.05rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { :root { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="rn-header">
+    <div class="rn-shell rn-header-inner">
+      <a class="rn-brand" href="#accueil"></a>
+      <nav class="rn-nav" aria-label="Navigation principale">
+        <ul><li><a href="#accueil"></a></li></ul>
+      </nav>
+      <a class="rn-button rn-header-cta" href="#"></a>
+    </div>
+  </header>
+  <main>
+    <section class="rn-hero" id="accueil" aria-labelledby="rn-title">
+      <div class="rn-hero-art" aria-hidden="true"></div>
+      <div class="rn-shell rn-hero-content">
+        <p class="rn-kicker">Réseautage professionnel</p>
+        <h1 id="rn-title"></h1>
+        <div class="rn-hero-meta">
+          <p class="rn-hero-date"></p>
+          <p class="rn-hero-location"></p>
+        </div>
+        <a class="rn-button rn-hero-cta" href="#"></a>
+      </div>
+    </section>
+    <section class="rn-section rn-about" aria-labelledby="rn-about-title">
+      <div class="rn-shell">
+        <header class="rn-section-heading">
+          <p class="rn-eyebrow">L’événement</p>
+          <h2 id="rn-about-title"></h2>
+        </header>
+        <p class="rn-about-copy"></p>
+      </div>
+    </section>
+    <section class="rn-section rn-people" aria-labelledby="rn-people-title">
+      <div class="rn-shell">
+        <header class="rn-section-heading">
+          <p class="rn-eyebrow">Celles et ceux qui font le réseau</p>
+          <h2 id="rn-people-title"></h2>
+          <p class="rn-people-subtitle"></p>
+        </header>
+        <div class="rn-speaker-grid">
+          <article class="rn-speaker">
+            <img class="rn-speaker-photo" alt="">
+            <div><h3></h3><p></p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="rn-section rn-programme" aria-labelledby="rn-programme-title">
+      <div class="rn-shell">
+        <header class="rn-section-heading">
+          <p class="rn-eyebrow">Le temps fort</p>
+          <h2 id="rn-programme-title"></h2>
+          <p class="rn-programme-subtitle"></p>
+        </header>
+        <div class="rn-days">
+          <article class="rn-day">
+            <div class="rn-day-date"><p></p></div>
+            <div class="rn-rows">
+              <article class="rn-row" tabindex="0">
+                <div class="rn-row-top"><h3></h3><time></time></div>
+                <p class="rn-row-description"></p>
+                <p class="rn-row-place"></p>
+              </article>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="rn-section rn-venue" aria-labelledby="rn-venue-title">
+      <div class="rn-shell"><div class="rn-venue-card">
+        <div><p class="rn-eyebrow">Informations pratiques</p><h2 id="rn-venue-title"></h2><p class="rn-venue-address"></p><p class="rn-venue-description"></p><p class="rn-venue-contact"></p></div>
+        <img class="rn-venue-image" alt="">
+      </div></div>
+    </section>
+    <section class="rn-section rn-offers" aria-labelledby="rn-offers-title">
+      <div class="rn-shell">
+        <header class="rn-section-heading">
+          <p class="rn-eyebrow">Votre participation</p>
+          <h2 id="rn-offers-title"></h2>
+        </header>
+        <div class="rn-offer-grid">
+          <article class="rn-offer">
+            <h3></h3>
+            <p class="rn-price"></p>
+            <ul><li></li></ul>
+            <a class="rn-button rn-offer-cta" href="#"></a>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section id="ipnet-custom-blocks"></section>
+  </main>
+  <footer class="rn-footer"><div class="rn-shell"><p class="rn-footer-name"></p></div></footer>
+</body>
+</html>

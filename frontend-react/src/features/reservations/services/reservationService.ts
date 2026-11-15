@@ -13,12 +13,23 @@ export interface Reservation {
   evenement: Evenement
 }
 
+export type CodeCanalPaiement = 'MOOV' | 'MIXX' | 'AUTRE'
+export interface CanalPaiement {
+  code: CodeCanalPaiement
+  libelle: string
+  numeroMobileMoney: string
+  numeroAffiche: string
+  titulaire: string | null
+  modifieLe: string
+}
+
 export interface ParametresPaiement {
   configure: boolean
   numeroMobileMoney: string | null
   numeroAffiche: string | null
   operateur: string | null
   titulaire: string | null
+  canaux: CanalPaiement[]
 }
 
 export const reservationService = {
@@ -37,9 +48,11 @@ export const reservationService = {
   async parametresPaiement() {
     return (await http.get<ParametresPaiement>('/parametres/paiement')).data
   },
-  async soumettreReference(id: number, reference: string, capture: File | null) {
+  async soumettreReference(id: number, reference: string, operateur: 'MOOV' | 'MIXX', numeroPayeur: string, capture: File | null) {
     const fd = new FormData()
     fd.append('referenceOperateur', reference)
+    fd.append('operateur', operateur)
+    fd.append('numeroPayeur', numeroPayeur)
     if (capture) fd.append('fichier', capture)
     return (await http.post<{ message: string }>(`/reservations/${id}/preuve`, fd)).data
   },

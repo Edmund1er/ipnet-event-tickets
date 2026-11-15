@@ -1,6 +1,6 @@
 import { avatar } from '../contenu'
 import type { ContenuPage } from '../types'
-import { action, ancre, ecrire, fond, image, logoTexte, menu, miniature, plan, repeter, retirer, tous, un } from './outils'
+import { action, ancre, ecrire, fond, image, logoTexte, menu, miniature, plage, plan, repeter, retirer, tous, un } from './outils'
 
 /** Écrit un titre « Début <mot en couleur> » comme dans le template. */
 function titreDouble(doc: Document, el: HTMLElement | null, texte: string) {
@@ -38,6 +38,7 @@ export function appliquerCeremonie(doc: Document, c: ContenuPage) {
 
   /* Bannière */
   const banniere = un(doc, 'section.banner')
+  ancre(banniere, 'hero')
   if (c.imageHero) fond(banniere, c.imageHero, c)
   const mots = c.titre.trim().split(/\s+/)
   ecrire(doc, '.banner .block h1', mots[0])
@@ -78,6 +79,7 @@ export function appliquerCeremonie(doc: Document, c: ContenuPage) {
   for (const t of c.textes) {
     if (!modeleTexte || !dernier) break
     const bloc = modeleTexte.cloneNode(true) as HTMLElement
+    ancre(bloc, t.id)
     remplirTexte(bloc, t, false)
     dernier.after(bloc)
     dernier = bloc
@@ -129,7 +131,7 @@ export function appliquerCeremonie(doc: Document, c: ContenuPage) {
       ecrire(pane, '.headings .subject', 'Sujet')
       ecrire(pane, '.headings .venue', 'Lieu')
       repeter(un(pane, 'li.schedule-details'), j.lignes, (li, l) => {
-        ecrire(li, '.block .time span.time', l.debut.replace(':', 'h'))
+        ecrire(li, '.block .time span.time', plage(l.debut, l.fin))
         const speaker = un(li, '.speaker')
         if (l.intervenant && speaker) {
           miniature(un(speaker, 'img'), avatar(l.intervenant), l.intervenant, 36)
@@ -137,11 +139,12 @@ export function appliquerCeremonie(doc: Document, c: ContenuPage) {
         } else if (speaker) {
           speaker.textContent = ''
         }
-        ecrire(li, '.subject', l.titre)
+        ecrire(li, '.subject', [l.titre, l.description].filter(Boolean).join(' — '))
         ecrire(li, '.venue', l.lieu ?? '')
         if (l.lienId) {
           action(li, 'ouvrir', l.lienId)
           li.style.cursor = 'pointer'
+          li.setAttribute('aria-label', `Ouvrir ${l.titre}`)
         }
       })
     })

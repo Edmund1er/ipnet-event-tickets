@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Page d'événement sportif ou e-sport">
+  <title>Tournoi</title>
+  <style>
+    :root{color-scheme:dark;--fond:#090d17;--surface:#111827;--surface-2:#151f31;--texte:#f4f7fb;--secondaire-texte:#aab5c7;--ligne:rgba(255,255,255,.1)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:88px}
+    body{margin:0;background:var(--fond);color:var(--texte);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+    a{color:inherit;text-decoration:none}
+    button,a{-webkit-tap-highlight-color:transparent}
+    .wrap{width:min(1160px,calc(100% - 40px));margin-inline:auto}
+    .topbar{position:sticky;top:0;z-index:10;background:rgba(9,13,23,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--ligne)}
+    .topbar-inner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:26px}
+    .brand{font-size:1.05rem;font-weight:850;letter-spacing:.04em;color:var(--texte)}
+    .nav{display:flex;align-items:center;gap:clamp(12px,2.3vw,30px);font-size:.88rem;color:var(--secondaire-texte)}
+    .nav a:hover,.nav a:focus-visible{color:var(--texte)}
+    .button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 21px;border:0;border-radius:9px;background:var(--ipnet-primary,#7c5cff);color:#fff;font-weight:800;letter-spacing:.01em;cursor:pointer;transition:transform .2s,filter .2s}
+    .button:hover{transform:translateY(-2px);filter:brightness(1.1)}
+    .button.secondary{background:transparent;border:1px solid rgba(255,255,255,.35)}
+    .hero{position:relative;isolation:isolate;min-height:min(760px,90vh);display:grid;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 78% 15%,color-mix(in srgb,var(--ipnet-primary,#7c5cff) 28%,transparent),transparent 40%),linear-gradient(130deg,#101829 0%,#090d17 72%);background-position:center;background-size:cover}
+    .hero:before,.hero:after{content:"";position:absolute;z-index:-1;pointer-events:none}
+    .hero:before{inset:0;background:linear-gradient(90deg,rgba(9,13,23,.94) 0%,rgba(9,13,23,.7) 55%,rgba(9,13,23,.22) 100%)}
+    .hero:after{width:min(38vw,460px);aspect-ratio:1;right:-8vw;bottom:-18vw;border:1px solid rgba(255,255,255,.17);border-radius:50%;box-shadow:0 0 0 36px rgba(255,255,255,.025),0 0 0 84px rgba(255,255,255,.02)}
+    .hero-content{padding-block:100px 125px;max-width:830px}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;margin:0 0 18px;color:var(--ipnet-secondary,#20d9b1);font-size:.78rem;font-weight:850;letter-spacing:.2em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:28px;height:2px;background:currentColor}
+    h1,h2,h3,p{margin-top:0}
+    h1{max-width:900px;margin-bottom:20px;font-size:clamp(2.6rem,7vw,6.2rem);line-height:.98;letter-spacing:-.055em;font-weight:900;text-wrap:balance}
+    .hero-subtitle{max-width:650px;margin-bottom:28px;color:#c7d0df;font-size:clamp(1rem,2vw,1.22rem)}
+    .event-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:30px;color:#e5eaf2;font-weight:650}
+    .event-meta span{display:inline-flex;align-items:center;gap:8px}
+    .meta-dot{width:7px;height:7px;border-radius:50%;background:var(--ipnet-secondary,#20d9b1)}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+    .section{padding:92px 0}
+    .section-heading{max-width:700px;margin-bottom:38px}
+    .kicker{margin-bottom:9px;color:var(--ipnet-secondary,#20d9b1);font-size:.74rem;font-weight:850;letter-spacing:.2em;text-transform:uppercase}
+    h2{margin-bottom:12px;font-size:clamp(2rem,4vw,3.25rem);line-height:1.08;letter-spacing:-.035em}
+    .section-heading p,.muted{color:var(--secondaire-texte)}
+    .about-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(250px,.88fr);gap:clamp(28px,6vw,84px);align-items:center}
+    .about-copy{max-width:690px;color:#c1cada;font-size:1.08rem;white-space:pre-line}
+    .about-image{width:100%;max-height:410px;object-fit:cover;border-radius:18px;border:1px solid var(--ligne);background:var(--surface)}
+    .info-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:32px;overflow:hidden;border:1px solid var(--ligne);border-radius:14px;background:var(--ligne)}
+    .info-cell{padding:18px 20px;background:var(--surface)}
+    .info-cell strong{display:block;margin-bottom:3px;color:var(--ipnet-secondary,#20d9b1);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+    .speaker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .speaker-card{overflow:hidden;border:1px solid var(--ligne);border-radius:15px;background:var(--surface)}
+    .speaker-card img{display:block;width:100%;height:260px;object-fit:cover;background:var(--surface-2)}
+    .speaker-copy{padding:20px}
+    .speaker-copy h3{margin-bottom:3px;font-size:1.1rem}
+    .speaker-copy p{margin-bottom:0;color:var(--secondaire-texte);font-size:.9rem}
+    .schedule-days{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+    .day-link{display:inline-block;padding:10px 15px;border:1px solid var(--ligne);border-radius:8px;color:#dfe6f1;font-size:.9rem;font-weight:750}
+    .day-link:hover,.day-link:focus-visible{border-color:var(--ipnet-secondary,#20d9b1)}
+    .day-card{margin-top:22px;padding:clamp(18px,3vw,30px);border:1px solid var(--ligne);border-radius:18px;background:linear-gradient(145deg,var(--surface),#0f1623)}
+    .day-card h3{margin-bottom:20px;font-size:1.28rem}
+    .match-list{display:grid;gap:10px}
+    .match-card{display:grid;grid-template-columns:minmax(92px,.2fr) minmax(0,1fr);gap:18px;padding:17px;border:1px solid rgba(255,255,255,.075);border-radius:11px;background:rgba(255,255,255,.025);transition:border-color .18s,background .18s}
+    .match-card[data-ipnet]{cursor:pointer}
+    .match-card[data-ipnet]:hover{border-color:var(--ipnet-primary,#7c5cff);background:rgba(255,255,255,.05)}
+    .match-time{margin:0;color:var(--ipnet-secondary,#20d9b1);font-weight:850;font-variant-numeric:tabular-nums}
+    .match-card h4{margin:0 0 4px;font-size:1rem}
+    .match-details{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--secondaire-texte);font-size:.88rem}
+    .match-details p{margin:0;white-space:pre-line}
+    .venue-panel{display:grid;grid-template-columns:.8fr 1.2fr;gap:28px;padding:clamp(24px,5vw,50px);border:1px solid var(--ligne);border-radius:18px;background:linear-gradient(125deg,var(--surface-2),var(--surface))}
+    .venue-label{color:var(--ipnet-secondary,#20d9b1);font-size:.75rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+    .venue-panel address{font-style:normal;color:var(--secondaire-texte);white-space:pre-line}
+    .offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px;align-items:stretch}
+    .offer-card{display:flex;flex-direction:column;padding:26px;border:1px solid var(--ligne);border-radius:16px;background:var(--surface)}
+    .offer-card.featured{border-color:var(--ipnet-primary,#7c5cff);box-shadow:0 16px 60px rgba(0,0,0,.24)}
+    .offer-card h3{margin-bottom:7px;font-size:1.15rem}
+    .offer-price{margin-bottom:18px;color:var(--ipnet-secondary,#20d9b1);font-size:1.8rem;font-weight:900;letter-spacing:-.03em}
+    .offer-card ul{display:grid;gap:9px;margin:0 0 24px;padding:0;list-style:none;color:#c2cada}
+    .offer-card li:before{content:"✓";margin-right:10px;color:var(--ipnet-secondary,#20d9b1);font-weight:900}
+    .offer-card .button{margin-top:auto}
+    .text-block{padding:52px 0;border-top:1px solid var(--ligne)}
+    .text-block p{max-width:760px;color:#c1cada;white-space:pre-line}
+    #ipnet-custom-blocks:empty{display:none}
+    .footer{padding:30px 0;border-top:1px solid var(--ligne);color:var(--secondaire-texte);font-size:.88rem}
+    .footer-inner{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    @media(max-width:760px){.wrap{width:min(100% - 32px,1160px)}.topbar-inner{min-height:68px;flex-wrap:wrap;padding-block:12px}.nav{order:3;width:100%;overflow-x:auto;padding:4px 0 8px;white-space:nowrap}.topbar .button{min-height:42px;padding-inline:14px;font-size:.85rem}.hero{min-height:650px}.hero-content{padding-block:75px 95px}.section{padding:68px 0}.about-grid,.venue-panel{grid-template-columns:1fr}.about-image{max-height:300px}.match-card{grid-template-columns:1fr;gap:5px}.info-panel{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#hero" aria-label="Accueil de l'événement"></a>
+      <nav class="nav" aria-label="Navigation principale"><ul class="nav-list" style="display:contents"><li><a href="#hero">Accueil</a></li></ul></nav>
+      <a class="button header-cta" href="#billets">Réserver</a>
+    </div>
+  </header>
+  <main>
+    <section class="hero" id="hero" aria-labelledby="event-title">
+      <div class="wrap"><div class="hero-content">
+        <p class="eyebrow">Tournoi · compétition</p>
+        <h1 id="event-title"></h1>
+        <p class="hero-subtitle"></p>
+        <div class="event-meta"><span class="event-date"><i class="meta-dot" aria-hidden="true"></i><span></span></span><span class="event-location"><i class="meta-dot" aria-hidden="true"></i><span></span></span></div>
+        <div class="hero-actions"><a class="button hero-cta" href="#">Participer</a></div>
+      </div></div>
+    </section>
+    <section class="section" id="apropos"><div class="wrap">
+      <div class="about-grid">
+        <div><div class="section-heading"><p class="kicker">L'événement</p><h2 class="about-title"></h2></div><p class="about-copy"></p><div class="about-action"><a class="button about-cta" href="#">Découvrir</a></div></div>
+        <div class="about-image-wrap"><img class="about-image" alt=""></div>
+      </div>
+      <div class="info-panel"><div class="info-cell"><strong>Date</strong><span class="about-date"></span></div><div class="info-cell"><strong>Lieu</strong><span class="about-location"></span></div></div>
+    </div></section>
+    <section class="section" id="intervenants"><div class="wrap"><div class="section-heading"><p class="kicker">Les talents</p><h2 class="speakers-title"></h2><p class="speakers-subtitle"></p></div><div class="speaker-grid"><article class="speaker-card"><img alt=""><div class="speaker-copy"><h3></h3><p></p></div></article></div></div></section>
+    <section class="section" id="programme"><div class="wrap"><div class="section-heading"><p class="kicker">Le déroulé</p><h2 class="schedule-title"></h2><p class="schedule-subtitle"></p></div><nav class="schedule-days" aria-label="Jours du programme"><a class="day-link" href="#"></a></nav><div class="day-list"><section class="day-card" id="jour-modele"><h3></h3><div class="match-list"><article class="match-card"><p class="match-time"></p><div><h4></h4><div class="match-details"><p class="match-description"></p><p class="match-location"></p></div></div></article></div></section></div></div></section>
+    <section class="section" id="lieu"><div class="wrap"><div class="venue-panel"><div><p class="venue-label">Sur place</p><h2 class="venue-title"></h2></div><div><address class="venue-address"></address><p class="venue-description"></p><div class="venue-contact"></div></div></div></div></section>
+    <section class="section" id="billets"><div class="wrap"><div class="section-heading"><p class="kicker">Accès au tournoi</p><h2 class="offers-title"></h2></div><div class="offer-grid"><article class="offer-card"><h3></h3><p class="offer-price"></p><ul><li></li></ul><a class="button offer-cta" href="#">Réserver</a></article></div></div></section>
+    <div class="wrap"><div class="text-sections"></div><section id="ipnet-custom-blocks"></section></div>
+  </main>
+  <footer class="footer"><div class="wrap footer-inner"><span class="footer-name"></span><span class="footer-copy"></span></div></footer>
+</body>
+</html>

@@ -1,5 +1,16 @@
 import { http } from '../../../core/api/httpClient'
 
+export type CodeCanalPaiement = 'MOOV' | 'MIXX' | 'AUTRE'
+
+export interface CanalPaiement {
+  code: CodeCanalPaiement
+  libelle: string
+  numeroMobileMoney: string
+  numeroAffiche: string
+  titulaire: string | null
+  modifieLe: string
+}
+
 export interface ParametresPaiement {
   configure: boolean
   numeroMobileMoney: string | null
@@ -7,6 +18,7 @@ export interface ParametresPaiement {
   operateur: string | null
   titulaire: string | null
   modifieLe: string | null
+  canaux: CanalPaiement[]
 }
 
 export interface ParametresAdmin {
@@ -31,6 +43,9 @@ export const parametresService = {
   },
   async enregistrerPaiement(numero: string, titulaire: string, operateur: string) {
     return (await http.put<ParametresPaiement>('/admin/parametres/paiement', { numero, titulaire, operateur: operateur || null })).data
+  },
+  async enregistrerCanaux(canaux: { code: 'MOOV' | 'MIXX'; numero: string | null; titulaire: string | null }[]) {
+    return (await http.put<ParametresPaiement>('/admin/parametres/paiement/canaux', { canaux })).data
   },
   async testerEmail() {
     return (await http.post<{ message: string }>('/admin/parametres/test-email')).data

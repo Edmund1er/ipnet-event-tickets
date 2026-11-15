@@ -80,7 +80,11 @@ export function repeter<T>(modele: HTMLElement | null, donnees: T[], remplir: (c
 /** Transforme un bouton ou un lien en action de l'application (réserver, ouvrir une activité). */
 export function action(el: Element | null, type: 'reserver' | 'ouvrir' = 'reserver', id?: number | null, libelle?: string) {
   if (!el) return
-  el.setAttribute('href', '#')
+  if (el.tagName === 'A') el.setAttribute('href', '#')
+  if (el.tagName !== 'A' && el.tagName !== 'BUTTON') {
+    el.setAttribute('role', 'link')
+    el.setAttribute('tabindex', '0')
+  }
   el.setAttribute('data-ipnet', type)
   if (id != null) el.setAttribute('data-id', String(id))
   if (libelle !== undefined) el.textContent = libelle

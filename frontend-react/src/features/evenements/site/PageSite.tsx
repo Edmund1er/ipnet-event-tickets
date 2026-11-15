@@ -52,12 +52,12 @@ export function PageSite({ evenement, elements, config, modele, surReserver, sur
   useEffect(() => {
     function recu(e: MessageEvent) {
       if (e.source !== cadre.current?.contentWindow || e.data?.source !== 'ipnet') return
-      if (e.data.type === 'reserver') surReserver()
-      if (e.data.type === 'ouvrir' && typeof e.data.id === 'number') surOuvrir(e.data.id)
+      if (e.data.type === 'reserver' && e.data.id === null && !evenement.accesLibre) surReserver()
+      if (e.data.type === 'ouvrir' && Number.isSafeInteger(e.data.id) && e.data.id > 0) surOuvrir(e.data.id)
     }
     window.addEventListener('message', recu)
     return () => window.removeEventListener('message', recu)
-  }, [surReserver, surOuvrir])
+  }, [surReserver, surOuvrir, evenement.accesLibre])
 
   if (erreur) return <Alerte ton="erreur">{erreur}</Alerte>
   if (!html)
@@ -71,7 +71,7 @@ export function PageSite({ evenement, elements, config, modele, surReserver, sur
       ref={cadre}
       title={evenement.titre}
       srcDoc={html}
-      sandbox="allow-scripts allow-same-origin allow-popups"
+      sandbox="allow-scripts allow-popups"
       className="block h-full w-full border-0 bg-white"
     />
   )

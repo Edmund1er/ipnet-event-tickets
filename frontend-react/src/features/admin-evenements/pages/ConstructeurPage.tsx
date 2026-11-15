@@ -8,17 +8,17 @@ import { Alerte, EnteteSection } from '../../../core/components/ui/Divers'
 import { Icone } from '../../../core/components/ui/Icone'
 import { useToast } from '../../../core/components/ui/Toasts'
 import { PageSite } from '../../evenements/site/PageSite'
-import { COULEURS_MODELE } from '../../evenements/site/immersion'
 import { MODELES, PAGE_VIDE, modeleDe, type CleModele, type PageConfig, type SectionConfig, type TypeSection } from '../../evenements/site/types'
 import { evenementService } from '../../evenements/services/evenementService'
 import { EditeurSection, TYPES_SECTION } from '../components/EditeurSection'
+import { ChampCouleur } from '../components/ChampCouleur'
 import { PALETTES_PAGE } from '../../evenements/theme/palettes'
 import { adminEvenementService } from '../services/adminEvenementService'
 
-const ORDRE: TypeSection[] = ['HERO', 'A_PROPOS', 'INTERVENANTS', 'PROGRAMME', 'LIEU', 'TEXTE']
+const ORDRE: TypeSection[] = ['HERO', 'A_PROPOS', 'INTERVENANTS', 'PROGRAMME', 'LIEU', 'TEXTE', 'CARTES', 'COLONNES']
 
 function nouvelleSection(type: TypeSection): SectionConfig {
-  return { id: `${type.toLowerCase()}-${Math.random().toString(36).slice(2, 8)}`, type, actif: true, intervenants: [], creneaux: [] }
+  return { id: `${type.toLowerCase()}-${Math.random().toString(36).slice(2, 8)}`, type, actif: true, intervenants: [], creneaux: [], elements: [], colonnes: 3 }
 }
 
 /**
@@ -35,6 +35,7 @@ export function ConstructeurPage() {
   const [modele, setModele] = useState<CleModele | null>(null)
   const [ouverte, setOuverte] = useState<string | null>(null)
   const [apercus, setApercus] = useState<Record<string, string>>({})
+  const nomsImages = useMemo(() => new Set(config.sections.flatMap((s) => [s.image, ...(s.intervenants ?? []).map((i) => i.photo), ...(s.elements ?? []).map((e) => e.image)].filter((n): n is string => !!n))), [config.sections])
   const apercusTemporaires = useRef(new Set<string>())
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -59,6 +60,15 @@ export function ConstructeurPage() {
     void charger()
   }, [charger])
   useEffect(() => () => apercusTemporaires.current.forEach((url) => URL.revokeObjectURL(url)), [])
+  useEffect(() => {
+    const obsolete = Object.entries(apercus).filter(([nom]) => !nomsImages.has(nom))
+    if (!obsolete.length) return
+    obsolete.forEach(([, url]) => {
+      URL.revokeObjectURL(url)
+      apercusTemporaires.current.delete(url)
+    })
+    setApercus((courant) => Object.fromEntries(Object.entries(courant).filter(([nom]) => nomsImages.has(nom))))
+  }, [apercus, nomsImages])
 
   const surApercu = useCallback((nom: string, url: string) => {
     apercusTemporaires.current.add(url)
@@ -89,7 +99,15 @@ export function ConstructeurPage() {
     p.couleurPrincipale === (apparence.couleurPrincipale ?? null) &&
     p.couleurSecondaire === (apparence.couleurSecondaire ?? null) &&
     p.couleurBloc === (apparence.couleurBloc ?? null) &&
-    p.opaciteBloc === (apparence.opaciteBloc ?? 62),
+    p.opaciteBloc === (apparence.opaciteBloc ?? 62) &&
+    p.couleurEntete === (apparence.couleurEntete ?? null) &&
+    p.couleurTexteEntete === (apparence.couleurTexteEntete ?? null) &&
+    p.couleurFondPage === (apparence.couleurFondPage ?? null) &&
+    p.couleurPied === (apparence.couleurPied ?? null) &&
+    p.couleurTextePied === (apparence.couleurTextePied ?? null) &&
+    p.couleurTexte === (apparence.couleurTexte ?? null) &&
+    p.couleurCarte === (apparence.couleurCarte ?? null) &&
+    p.couleurBouton === (apparence.couleurBouton ?? null),
   )?.cle
 
   async function enregistrer() {
@@ -140,22 +158,21 @@ export function ConstructeurPage() {
                 const actif = modelePropose === m.cle
                 return (
                   <div key={m.cle} className={`flex flex-col rounded-xl border-2 p-3 transition ${actif ? 'border-indigo-600 bg-indigo-50' : 'border-neutral-200 bg-white hover:border-neutral-400'}`}>
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={actif}
-                      disabled={verrouille}
-                      onClick={() => {
-                        setModele(m.cle)
-                        setModifie(true)
-                      }}
-                      className="flex-1 text-left"
-                    >
+                    <label className="flex flex-1 cursor-pointer flex-col text-left outline-none focus-within:ring-2 focus-within:ring-indigo-500">
+                      <input
+                        type="radio"
+                        name="modelePage"
+                        value={m.cle}
+                        checked={actif}
+                        disabled={verrouille}
+                        onChange={() => { setModele(m.cle); setModifie(true) }}
+                        className="sr-only"
+                      />
                       <span className="flex items-center gap-2 font-bold">
                         <Icone nom={actif ? 'radio_button_checked' : 'radio_button_unchecked'} className={actif ? 'text-indigo-600' : 'text-neutral-400'} /> {m.nom}
                       </span>
                       <span className="mt-1 block text-xs text-attenue">{m.pourQui}</span>
-                    </button>
+                    </label>
                     <Link to={`/apercu-modele/${m.cle.toLowerCase()}`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 underline">
                       <Icone nom="visibility" taille={16} /> Voir un exemple
                     </Link>
@@ -178,14 +195,16 @@ export function ConstructeurPage() {
                       key={p.cle}
                       type="button"
                       aria-pressed={active}
-                      onClick={() => majApparence({ couleurPrincipale: p.couleurPrincipale, couleurSecondaire: p.couleurSecondaire, couleurBloc: p.couleurBloc, opaciteBloc: p.opaciteBloc })}
+                      onClick={() => majApparence({ couleurPrincipale: p.couleurPrincipale, couleurSecondaire: p.couleurSecondaire, couleurBloc: p.couleurBloc, opaciteBloc: p.opaciteBloc, couleurEntete: p.couleurEntete, couleurTexteEntete: p.couleurTexteEntete, couleurFondPage: p.couleurFondPage, couleurPied: p.couleurPied, couleurTextePied: p.couleurTextePied, couleurTexte: p.couleurTexte, couleurCarte: p.couleurCarte, couleurBouton: p.couleurBouton })}
                       className={`rounded-xl border-2 p-3 text-left transition ${active ? 'border-indigo-600 bg-indigo-50' : 'border-neutral-200 hover:border-neutral-400'}`}
                     >
                       <span className="mb-2 flex items-center gap-2">
                         <span className="flex -space-x-1">
                           <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurPrincipale ?? '#334155' }} />
                           <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurSecondaire ?? '#cbd5e1' }} />
-                          <i className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurBloc ?? '#0f172a' }} />
+                          <i title="Voile" className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurBloc ?? '#0f172a' }} />
+                          <i title="En-tête" className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurEntete ?? '#475569' }} />
+                          <i title="Carte" className="h-5 w-5 rounded-full border-2 border-white" style={{ backgroundColor: p.couleurCarte ?? '#ffffff' }} />
                         </span>
                         <strong className="text-sm">{p.nom}</strong>
                       </span>
@@ -194,23 +213,33 @@ export function ConstructeurPage() {
                   )
                 })}
               </div>
-              <div className="grid gap-3 rounded-xl bg-neutral-50 p-4 sm:grid-cols-2">
-                <label className="flex items-center justify-between gap-3 text-sm font-semibold">
-                  <span>Couleur principale <small className="block font-normal text-attenue">Boutons et accents</small></span>
-                  <input aria-label="Couleur principale" type="color" value={apparence.couleurPrincipale ?? COULEURS_MODELE[modelePropose].accent} onChange={(e) => majApparence({ couleurPrincipale: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
-                </label>
-                <label className="flex items-center justify-between gap-3 text-sm font-semibold">
-                  <span>Couleur secondaire <small className="block font-normal text-attenue">Titres et détails</small></span>
-                  <input aria-label="Couleur secondaire" type="color" value={apparence.couleurSecondaire ?? COULEURS_MODELE[modelePropose].accent} onChange={(e) => majApparence({ couleurSecondaire: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
-                </label>
-                <label className="flex items-center justify-between gap-3 text-sm font-semibold sm:col-span-2">
-                  <span>Couleur du voile sur l’image <small className="block font-normal text-attenue">Le texte reste visible sur la bannière</small></span>
-                  <input aria-label="Couleur du voile sur l’image" type="color" value={apparence.couleurBloc ?? '#21133b'} onChange={(e) => majApparence({ couleurBloc: e.target.value })} className="h-10 w-14 cursor-pointer rounded border border-neutral-300 bg-white p-1" />
-                </label>
-                <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">
-                  <span className="flex justify-between">Intensité du voile <span>{apparence.opaciteBloc ?? 62}%</span></span>
-                  <input aria-label="Intensité du voile sur l’image" type="range" min={20} max={90} value={apparence.opaciteBloc ?? 62} onChange={(e) => majApparence({ opaciteBloc: Number(e.target.value) })} className="w-full accent-indigo-600" />
-                </label>
+              <div className="flex flex-col gap-4 rounded-xl bg-neutral-50 p-4">
+                <div>
+                  <p className="mb-2 text-sm font-bold">Zones générales</p>
+                  <p className="mb-3 text-xs text-attenue">Chaque réglage ne recolore que la zone nommée. Les blocs disposent aussi de leurs propres couleurs plus bas.</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <ChampCouleur libelle="En-tête" valeur={apparence.couleurEntete} defaut="#172554" surChangement={(v) => majApparence({ couleurEntete: v })} />
+                    <ChampCouleur libelle="Texte de l’en-tête" valeur={apparence.couleurTexteEntete} defaut="#ffffff" surChangement={(v) => majApparence({ couleurTexteEntete: v })} />
+                    <ChampCouleur libelle="Fond de page" valeur={apparence.couleurFondPage} defaut="#f8fafc" surChangement={(v) => majApparence({ couleurFondPage: v })} />
+                    <ChampCouleur libelle="Texte général" valeur={apparence.couleurTexte} defaut="#172033" surChangement={(v) => majApparence({ couleurTexte: v })} />
+                    <ChampCouleur libelle="Fond des cartes" valeur={apparence.couleurCarte} defaut="#ffffff" surChangement={(v) => majApparence({ couleurCarte: v })} />
+                    <ChampCouleur libelle="Boutons" valeur={apparence.couleurBouton} defaut={apparence.couleurPrincipale ?? '#2563eb'} surChangement={(v) => majApparence({ couleurBouton: v })} />
+                    <ChampCouleur libelle="Pied de page" valeur={apparence.couleurPied} defaut="#111827" surChangement={(v) => majApparence({ couleurPied: v })} />
+                    <ChampCouleur libelle="Texte du pied de page" valeur={apparence.couleurTextePied} defaut="#ffffff" surChangement={(v) => majApparence({ couleurTextePied: v })} />
+                  </div>
+                </div>
+                <div className="border-t border-neutral-200 pt-3">
+                  <p className="mb-2 text-sm font-bold">Accent et bannière</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <ChampCouleur libelle="Accent / liens actifs" valeur={apparence.couleurPrincipale} defaut="#2563eb" surChangement={(v) => majApparence({ couleurPrincipale: v })} />
+                    <ChampCouleur libelle="Titres / détails" valeur={apparence.couleurSecondaire} defaut="#60a5fa" surChangement={(v) => majApparence({ couleurSecondaire: v })} />
+                    <ChampCouleur libelle="Voile de l’image hero" valeur={apparence.couleurBloc} defaut="#21133b" surChangement={(v) => majApparence({ couleurBloc: v })} />
+                    <label className="flex flex-col justify-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-semibold">
+                      <span className="flex justify-between">Intensité du voile <span>{apparence.opaciteBloc ?? 62}%</span></span>
+                      <input aria-label="Intensité du voile sur l’image" type="range" min={20} max={90} value={apparence.opaciteBloc ?? 62} onChange={(e) => majApparence({ opaciteBloc: Number(e.target.value) })} className="w-full accent-indigo-600" />
+                    </label>
+                  </div>
+                </div>
               </div>
             </fieldset>
           </section>
@@ -273,7 +302,7 @@ export function ConstructeurPage() {
               <div className="mt-5">
                 <p className="etiquette">Ajouter une section</p>
                 <div className="flex flex-wrap gap-2">
-                  {ORDRE.filter((t) => t === 'TEXTE' || !presents.has(t)).map((t) => (
+                  {ORDRE.filter((t) => ['TEXTE', 'CARTES', 'COLONNES'].includes(t) || !presents.has(t)).map((t) => (
                     <Bouton key={t} variante="secondaire" taille="petit" icone={TYPES_SECTION[t].icone} title={TYPES_SECTION[t].aide} onClick={() => ajouter(t)}>
                       {TYPES_SECTION[t].libelle}
                     </Bouton>

@@ -14,6 +14,8 @@ public record PaiementAdminResponse(
         Long id,
         Long inscriptionId,
         String referenceOperateur,
+        String operateurPaiement,
+        String numeroPayeur,
         BigDecimal montant,
         String devise,
         boolean aCapture,

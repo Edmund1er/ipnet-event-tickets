@@ -39,9 +39,11 @@ function luminance(hex: string) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
-/** Noir ou blanc selon la couleur de fond, pour garder un texte toujours lisible (WCAG). */
+/** Choisit le premier plan qui offre le meilleur contraste WCAG parmi le texte sombre ou blanc. */
 export function texteSur(hex: string) {
-  return luminance(hex) > 0.35 ? '#111827' : '#ffffff'
+  const fond = luminance(hex)
+  const contraste = (l: number) => (Math.max(fond, l) + 0.05) / (Math.min(fond, l) + 0.05)
+  return contraste(luminance('#111827')) >= contraste(luminance('#ffffff')) ? '#111827' : '#ffffff'
 }
 
 function assombrir(hex: string, k: number) {

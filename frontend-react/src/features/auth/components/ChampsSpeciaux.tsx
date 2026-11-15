@@ -36,11 +36,11 @@ export function ChampMotDePasse({
           className={`champ pr-12 ${erreur ? '!border-erreur' : ''}`}
           value={valeur}
           aria-invalid={!!erreur || undefined}
+          aria-describedby={erreur ? `${id}-err` : undefined}
           onChange={(e) => surChangement(e.target.value)}
         />
         <button
           type="button"
-          tabIndex={-1}
           onClick={() => setVisible((v) => !v)}
           className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-lg text-attenue transition-colors hover:bg-surface hover:text-primaire focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaire"
           aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
@@ -60,7 +60,7 @@ export function ChampMotDePasse({
         </div>
       )}
       {erreur && (
-        <p role="alert" className="mt-1.5 text-sm text-erreur">
+        <p id={`${id}-err`} role="alert" className="mt-1.5 text-sm text-erreur">
           {erreur}
         </p>
       )}

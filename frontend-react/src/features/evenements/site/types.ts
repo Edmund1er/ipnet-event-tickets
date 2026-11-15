@@ -1,5 +1,5 @@
 /** Types de page, un par modèle de template. Le choix de l'admin est conservé dans `evenement.modele`. */
-export type CleModele = 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE'
+export type CleModele = 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE' | 'ATELIER' | 'TOURNOI' | 'SALON' | 'RESEAUTAGE'
 
 export interface DescriptionModele {
   cle: CleModele
@@ -15,13 +15,24 @@ export const MODELES: DescriptionModele[] = [
   { cle: 'CONFERENCE', nom: 'Conférence, séminaire et journée scientifique', pourQui: 'Présentation structurée des orateurs et du programme par jour.', dossier: 'conference' },
   { cle: 'RENCONTRE', nom: 'Forum, hackathon et rencontre étudiante', pourQui: 'Présentation dynamique avec compte à rebours et programme quotidien.', dossier: 'rencontre' },
   { cle: 'CEREMONIE', nom: 'Cérémonie, gala et portes ouvertes', pourQui: 'Présentation élégante avec programme par jour et offres de billets.', dossier: 'ceremonie' },
+  { cle: 'ATELIER', nom: 'Atelier, formation et masterclass', pourQui: 'Mise en avant des apprentissages, intervenants et ateliers pratiques.', dossier: 'atelier' },
+  { cle: 'TOURNOI', nom: 'Tournoi, compétition et e-sport', pourQui: 'Affichage dynamique des journées, matchs et informations de compétition.', dossier: 'tournoi' },
+  { cle: 'SALON', nom: 'Salon, exposition et foire', pourQui: 'Présentation visuelle des exposants, stands et temps forts.', dossier: 'salon' },
+  { cle: 'RESEAUTAGE', nom: 'Lancement, networking et rencontre professionnelle', pourQui: 'Page orientée rencontres, invités et échanges professionnels.', dossier: 'reseautage' },
 ]
 
 export const modeleDe = (cle?: string | null) => MODELES.find((m) => m.cle === cle) ?? null
 
 /* ---- Contenu saisi par l'administrateur (miroir de PageEvenement côté serveur) ---- */
 
-export type TypeSection = 'HERO' | 'A_PROPOS' | 'INTERVENANTS' | 'PROGRAMME' | 'LIEU' | 'TEXTE'
+export type TypeSection = 'HERO' | 'A_PROPOS' | 'INTERVENANTS' | 'PROGRAMME' | 'LIEU' | 'TEXTE' | 'CARTES' | 'COLONNES'
+
+export interface BlocElementConfig {
+  id: string
+  titre: string
+  texte?: string | null
+  image?: string | null
+}
 
 export interface IntervenantConfig {
   nom: string
@@ -53,6 +64,13 @@ export interface SectionConfig {
   email?: string | null
   intervenants?: IntervenantConfig[] | null
   creneaux?: CreneauConfig[] | null
+  elements?: BlocElementConfig[] | null
+  colonnes?: number | null
+  couleurFond?: string | null
+  couleurTexte?: string | null
+  couleurAccent?: string | null
+  couleurCarte?: string | null
+  couleurBouton?: string | null
 }
 
 export interface ApparencePage {
@@ -60,6 +78,33 @@ export interface ApparencePage {
   couleurSecondaire?: string | null
   couleurBloc?: string | null
   opaciteBloc?: number | null
+  couleurEntete?: string | null
+  couleurTexteEntete?: string | null
+  couleurFondPage?: string | null
+  couleurPied?: string | null
+  couleurTextePied?: string | null
+  couleurTexte?: string | null
+  couleurCarte?: string | null
+  couleurBouton?: string | null
+}
+
+export interface StyleSectionPage {
+  id: string
+  couleurFond?: string
+  couleurTexte?: string
+  couleurAccent?: string
+  couleurCarte?: string
+  couleurBouton?: string
+}
+
+export interface BlocPage {
+  id: string
+  type: 'CARTES' | 'COLONNES'
+  titre: string
+  sousTitre?: string
+  colonnes: number
+  elements: { id: string; titre: string; texte?: string; image?: string }[]
+  style: StyleSectionPage
 }
 
 export interface PageConfig {
@@ -107,6 +152,9 @@ export interface ContenuPage {
   couleurSecondaire?: string
   couleurBloc?: string
   opaciteBloc: number
+  apparencePage: ApparencePage
+  stylesSections: StyleSectionPage[]
+  blocs: BlocPage[]
   accroche?: string
   dateTexte: string
   /** Date de début en millisecondes, pour les comptes à rebours. */

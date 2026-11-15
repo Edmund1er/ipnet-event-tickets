@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { Bouton } from '../../../core/components/ui/Bouton'
@@ -36,6 +36,8 @@ export function InscriptionPage() {
   const [type, setType] = useState<Type | null>(null)
   const [filieres, setFilieres] = useState<Filiere[]>([])
   const [categories, setCategories] = useState<Categorie[]>([])
+  const [referentielsCharges, setReferentielsCharges] = useState<Record<Type, boolean>>({ ETUDIANT: false, VISITEUR: false })
+  const [referentielChargement, setReferentielChargement] = useState<Type | null>(null)
   const [erreurReferentiel, setErreurReferentiel] = useState<string | null>(null)
   const [f, setF] = useState({
     nom: '',
@@ -53,16 +55,42 @@ export function InscriptionPage() {
   const [erreurGlobale, setErreurGlobale] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
 
-  useEffect(() => {
-    Promise.all([authService.filieres(), authService.categories()])
-      .then(([fi, ca]) => {
-        setFilieres(fi)
-        setCategories(ca)
-      })
-      .catch((e) => setErreurReferentiel(versErreurApi(e).message))
-  }, [])
+  const formRef = useRef<HTMLFormElement>(null)
 
-  const maj = (cle: keyof typeof f) => (v: string) => setF((x) => ({ ...x, [cle]: v }))
+  useEffect(() => {
+    if (!type || referentielsCharges[type]) return
+    let actif = true
+    setErreurReferentiel(null)
+    setReferentielChargement(type)
+    const charger = type === 'ETUDIANT' ? authService.filieres() : authService.categories()
+    charger.then((options) => {
+      if (!actif) return
+      if (type === 'ETUDIANT') setFilieres(options as Filiere[])
+      else setCategories(options as Categorie[])
+      setReferentielsCharges((x) => ({ ...x, [type]: true }))
+    }).catch((e) => {
+      if (actif) setErreurReferentiel(versErreurApi(e).message)
+    }).finally(() => {
+      if (actif) setReferentielChargement(null)
+    })
+    return () => { actif = false }
+  }, [type, referentielsCharges])
+
+  useEffect(() => {
+    if (!Object.keys(erreurs).length) return
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+  }, [erreurs])
+
+  const maj = (cle: keyof typeof f) => (v: string) => {
+    setF((x) => ({ ...x, [cle]: v }))
+    setErreurs((x) => {
+      if (!x[cle]) return x
+      const prochaines = { ...x }
+      delete prochaines[cle]
+      return prochaines
+    })
+    setErreurGlobale(null)
+  }
 
   async function soumettre(e: FormEvent) {
     e.preventDefault()
@@ -140,22 +168,37 @@ export function InscriptionPage() {
       sousTitre="Étape 2 sur 2 — Vos informations"
       large
     >
-      <form onSubmit={soumettre} noValidate className="flex flex-col gap-4">
-        {erreurReferentiel && <Alerte ton="erreur">{erreurReferentiel}</Alerte>}
+      <form ref={formRef} onSubmit={soumettre} noValidate className="flex flex-col gap-5">
         {erreurGlobale && <Alerte ton="erreur">{erreurGlobale}</Alerte>}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <section aria-labelledby="inscription-identite" className="flex flex-col gap-3">
+          <h2 id="inscription-identite" className="text-sm font-bold text-encre">Identité</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
           <Champ libelle="Nom" autoComplete="family-name" value={f.nom} onChange={(e) => maj('nom')(e.target.value)} erreur={erreurs.nom} />
           <Champ libelle="Prénom" autoComplete="given-name" value={f.prenom} onChange={(e) => maj('prenom')(e.target.value)} erreur={erreurs.prenom} />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+          </div>
+        </section>
+        <section aria-labelledby="inscription-contact" className="flex flex-col gap-3">
+          <h2 id="inscription-contact" className="text-sm font-bold text-encre">Coordonnées</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
           <Champ libelle="E-mail" type="email" autoComplete="email" value={f.email} onChange={(e) => maj('email')(e.target.value)} erreur={erreurs.email} />
           <ChampTelephone valeur={f.telephone} surChangement={maj('telephone')} erreur={erreurs.telephone} />
-        </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="inscription-profil" className="flex flex-col gap-3">
+          <h2 id="inscription-profil" className="text-sm font-bold text-encre">Profil</h2>
+        {referentielChargement === type && <p role="status" className="text-sm text-attenue">Chargement des options du profil…</p>}
+        {erreurReferentiel && (
+          <Alerte ton="erreur">
+            <span>{erreurReferentiel} </span>
+            <button type="button" className="font-semibold underline" onClick={() => setReferentielsCharges((x) => ({ ...x, [type]: false }))}>Réessayer</button>
+          </Alerte>
+        )}
 
         {type === 'ETUDIANT' ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ChampSelection libelle="Filière" value={f.filiereId} onChange={(e) => maj('filiereId')(e.target.value)} erreur={erreurs.filiereId}>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <ChampSelection disabled={!referentielsCharges.ETUDIANT || !!erreurReferentiel} libelle="Filière" value={f.filiereId} onChange={(e) => maj('filiereId')(e.target.value)} erreur={erreurs.filiereId}>
               <option value="">Sélectionnez…</option>
               {filieres.map((x) => (
                 <option key={x.id} value={x.id}>
@@ -178,8 +221,8 @@ export function InscriptionPage() {
             </ChampSelection>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ChampSelection libelle="Catégorie" value={f.categorieId} onChange={(e) => maj('categorieId')(e.target.value)} erreur={erreurs.categorieId}>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <ChampSelection disabled={!referentielsCharges.VISITEUR || !!erreurReferentiel} libelle="Catégorie" value={f.categorieId} onChange={(e) => maj('categorieId')(e.target.value)} erreur={erreurs.categorieId}>
               <option value="">Sélectionnez…</option>
               {categories.map((x) => (
                 <option key={x.id} value={x.id}>
@@ -196,8 +239,11 @@ export function InscriptionPage() {
             />
           </div>
         )}
+        </section>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <section aria-labelledby="inscription-securite" className="flex flex-col gap-3">
+          <h2 id="inscription-securite" className="text-sm font-bold text-encre">Sécurité du compte</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
           <ChampMotDePasse
             valeur={f.motDePasse}
             surChangement={maj('motDePasse')}
@@ -212,7 +258,8 @@ export function InscriptionPage() {
             erreur={erreurs.confirmation}
             autoComplete="new-password"
           />
-        </div>
+          </div>
+        </section>
 
         <Alerte ton="info">Un code de vérification vous sera envoyé par e-mail pour valider votre compte.</Alerte>
 
@@ -220,7 +267,7 @@ export function InscriptionPage() {
           <Bouton variante="fantome" icone="arrow_back" onClick={() => setType(null)}>
             Changer de profil
           </Bouton>
-          <Bouton type="submit" taille="grand" enCours={enCours} icone="how_to_reg">
+          <Bouton type="submit" taille="grand" enCours={enCours} disabled={referentielChargement === type || !!erreurReferentiel || !referentielsCharges[type]} icone="how_to_reg">
             Créer mon compte
           </Bouton>
         </div>

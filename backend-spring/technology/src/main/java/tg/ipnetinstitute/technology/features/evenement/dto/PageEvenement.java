@@ -8,7 +8,7 @@ import java.util.List;
  */
 public record PageEvenement(int version, Apparence apparence, List<Section> sections) {
 
-    public static final List<String> TYPES = List.of("HERO", "A_PROPOS", "INTERVENANTS", "PROGRAMME", "LIEU", "TEXTE");
+    public static final List<String> TYPES = List.of("HERO", "A_PROPOS", "INTERVENANTS", "PROGRAMME", "LIEU", "TEXTE", "CARTES", "COLONNES");
 
     /** Compatibilité avec les pages enregistrées avant l'ajout des réglages d'apparence. */
     public PageEvenement(int version, List<Section> sections) {
@@ -19,8 +19,15 @@ public record PageEvenement(int version, Apparence apparence, List<Section> sect
         return new PageEvenement(1, null, List.of());
     }
 
-    /** Couleurs contrôlées côté serveur avant insertion dans les styles de la page. */
-    public record Apparence(String couleurPrincipale, String couleurSecondaire, String couleurBloc, Integer opaciteBloc) {}
+    /** Couleurs indépendantes des zones globales et du voile de bannière. */
+    public record Apparence(String couleurPrincipale, String couleurSecondaire, String couleurBloc, Integer opaciteBloc,
+                            String couleurEntete, String couleurTexteEntete, String couleurFondPage,
+                            String couleurPied, String couleurTextePied, String couleurTexte,
+                            String couleurCarte, String couleurBouton) {
+        public Apparence(String couleurPrincipale, String couleurSecondaire, String couleurBloc, Integer opaciteBloc) {
+            this(couleurPrincipale, couleurSecondaire, couleurBloc, opaciteBloc, null, null, null, null, null, null, null, null);
+        }
+    }
 
     /** Une section. Les champs inutiles pour son type restent vides. */
     public record Section(
@@ -37,8 +44,24 @@ public record PageEvenement(int version, Apparence apparence, List<Section> sect
             String telephone,
             String email,
             List<Intervenant> intervenants,
-            List<Creneau> creneaux
-    ) {}
+            List<Creneau> creneaux,
+            List<BlocElement> elements,
+            Integer colonnes,
+            String couleurFond,
+            String couleurTexte,
+            String couleurAccent,
+            String couleurCarte,
+            String couleurBouton
+    ) {
+        public Section(String id, String type, boolean actif, String titre, String sousTitre, String texte, String image,
+                       String bouton, String adresse, String telephone, String email,
+                       List<Intervenant> intervenants, List<Creneau> creneaux) {
+            this(id, type, actif, titre, sousTitre, texte, image, bouton, adresse, telephone, email,
+                    intervenants, creneaux, List.of(), 3, null, null, null, null, null);
+        }
+    }
+
+    public record BlocElement(String id, String titre, String texte, String image) {}
 
     public record Intervenant(String nom, String role, String photo) {}
 

@@ -12,11 +12,14 @@ export function appliquerSoiree(doc: Document, c: ContenuPage) {
   action(un(doc, '.buy_tkt .book_btn a'), 'reserver', null, c.boutonReserver)
 
   /* Hero */
+  ancre(un(doc, '.slider_area'), 'hero')
   ecrire(doc, '.slider_text span', c.dateTexte)
   ecrire(doc, '.slider_text h3', c.titre)
   ecrire(doc, '.slider_text p', c.lieu ?? '')
   const titre = un(doc, '.slider_text h3')
-  if (titre) titre.style.fontSize = c.titre.length > 28 ? '40px' : c.titre.length > 16 ? '64px' : ''
+  if (titre) {
+    titre.style.fontSize = c.titre.length > 28 ? 'clamp(2rem, 5.5vw, 3rem)' : c.titre.length > 16 ? 'clamp(2rem, 7vw, 4rem)' : ''
+  }
   if (c.imageHero) fond(un(doc, '.single_slider'), c.imageHero, c)
 
   /* Intervenants */
@@ -65,6 +68,7 @@ export function appliquerSoiree(doc: Document, c: ContenuPage) {
   for (const t of c.textes) {
     if (!modeleTexte || !dernier) break
     const bloc = modeleTexte.cloneNode(true) as HTMLElement
+    ancre(bloc, t.id)
     remplirTexte(bloc, t, false)
     dernier.after(bloc)
     dernier = bloc
@@ -81,6 +85,18 @@ export function appliquerSoiree(doc: Document, c: ContenuPage) {
       ecrire(el, '.porgram_top h4', j.dateLongue)
       retirer(el, '.thumb')
       ecrire(el, '.inner_wrap > h4', [l.titre, l.intervenant].filter(Boolean).join(' · '))
+      const detail = [l.description, l.lieu, l.tarif].filter(Boolean).join(' · ')
+      if (detail) {
+        let meta = un(el, '.ipnet-session-detail')
+        if (!meta) {
+          meta = doc.createElement('p')
+          meta.className = 'ipnet-session-detail'
+          un(el, '.inner_wrap')?.append(meta)
+        }
+        meta.textContent = detail
+      } else {
+        retirer(el, '.ipnet-session-detail')
+      }
       if (l.lienId) {
         const zone = un(el, '.inner_wrap')
         action(zone, 'ouvrir', l.lienId)

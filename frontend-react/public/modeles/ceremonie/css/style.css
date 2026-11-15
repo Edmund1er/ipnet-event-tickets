@@ -1382,6 +1382,22 @@ select.form-control:not([size]):not([multiple]) {
   }
 }
 
+@media (max-width: 991px) {
+  .schedule .schedule-contents .schedule-item ul li.schedule-details .subject {
+    display: block !important;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .schedule .schedule-contents .schedule-item ul li.schedule-details .venue {
+    display: block !important;
+    width: 100%;
+    margin-top: 4px;
+  }
+}
+
 .schedule .schedule-contents .schedule-item li.headings {
   padding: 22px 40px;
   background: #ff6600;

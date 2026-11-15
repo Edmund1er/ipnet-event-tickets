@@ -14,6 +14,7 @@ import { dateHeure, montant } from '../../../core/utils/format'
 import { adminPaiementService, type PaiementAdmin } from '../services/adminPaiementService'
 
 const ONGLETS: StatutPaiement[] = ['EN_ATTENTE', 'VALIDE', 'REJETE', 'A_REMBOURSER', 'REMBOURSE']
+const libelleOperateur = (code: PaiementAdmin['operateurPaiement']) => code === 'MOOV' ? 'Moov Money' : code === 'MIXX' ? 'Mixx by Yas' : 'Ancienne déclaration'
 
 /** EF-22 : file des preuves non rapprochées automatiquement, validation ou rejet motivé. RG-19 : remboursements. */
 export function PaiementsPage() {
@@ -65,10 +66,10 @@ export function PaiementsPage() {
       )}
       {!chargement && donnees && donnees.elements.length > 0 && (
         <div className="carte overflow-x-auto">
-          <table className="w-full min-w-[860px] text-sm">
+          <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="border-b border-bordure bg-surface text-left">
-                {['Participant', 'Événement', 'Référence', 'Montant', 'Capture', 'Statut', ''].map((h) => (
+                {['Participant', 'Événement', 'Référence', 'Opérateur / payeur', 'Montant', 'Capture', 'Statut', ''].map((h) => (
                   <th key={h} scope="col" className="titre-section px-4 py-3">
                     {h}
                   </th>
@@ -86,6 +87,7 @@ export function PaiementsPage() {
                   </td>
                   <td className="px-4 py-3">{p.evenementTitre}</td>
                   <td className="px-4 py-3 font-mono text-[13px]">{p.referenceOperateur ?? '—'}</td>
+                  <td className="px-4 py-3">{libelleOperateur(p.operateurPaiement)}<span className="block text-xs text-attenue">{p.numeroPayeur ?? '—'}</span></td>
                   <td className="whitespace-nowrap px-4 py-3 font-semibold">{montant(p.montant, p.devise)}</td>
                   <td className="px-4 py-3">{p.aCapture ? <Icone nom="attach_file" className="text-primaire" /> : <span className="text-attenue">—</span>}</td>
                   <td className="px-4 py-3">
@@ -196,6 +198,8 @@ function PanneauPaiement({ paiement: p, surFermeture, surTraite }: { paiement: P
           <Info libelle="Événement" valeur={p.evenementTitre} />
           <Info libelle="Participant" valeur={`${p.participantNom} ${p.participantPrenom} — ${p.participantEmail}`} />
           <Info libelle="Référence déclarée" valeur={<span className="font-mono">{p.referenceOperateur ?? '—'}</span>} />
+          <Info libelle="Opérateur utilisé" valeur={libelleOperateur(p.operateurPaiement)} />
+          <Info libelle="Numéro payeur" valeur={p.numeroPayeur ?? '—'} />
           <Info libelle="Montant attendu" valeur={<strong className="text-rouge">{montant(p.montant, p.devise)}</strong>} />
           <Info libelle="Statut" valeur={<Badge ton={STATUTS_PAIEMENT[p.statut].ton}>{STATUTS_PAIEMENT[p.statut].libelle}</Badge>} />
           {p.valideLe && <Info libelle={p.statut === 'REJETE' ? 'Traité le' : 'Validé le'} valeur={`${dateHeure(p.valideLe)}${p.valideAutomatiquement ? ' (rapprochement automatique)' : ''}`} />}

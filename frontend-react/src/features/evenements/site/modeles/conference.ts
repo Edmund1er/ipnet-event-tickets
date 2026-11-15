@@ -1,6 +1,6 @@
 import { avatar } from '../contenu'
 import type { ContenuPage } from '../types'
-import { action, ancre, ecrire, image, imageHero, logoTexte, menu, miniature, plan, repeter, retirer, tous, un } from './outils'
+import { action, ancre, ecrire, image, imageHero, logoTexte, menu, miniature, plage, plan, repeter, retirer, tous, un } from './outils'
 
 /** Template « TheEvent » : conférence, séminaire. Orateurs en grille, programme par onglets de jours, billets en lignes. */
 export function appliquerConference(doc: Document, c: ContenuPage) {
@@ -21,6 +21,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
 
   /* Hero + bandeau « à propos » */
   const hero = un(doc, '#hero')
+  ancre(hero, 'hero')
   ecrire(hero ?? doc, 'h2', c.titre)
   ecrire(hero ?? doc, '.container.text-center p', [c.dateTexte, c.lieu].filter(Boolean).join(' · '))
   if (c.imageHero) imageHero(hero, un(doc, '#hero > img') as HTMLImageElement | null, c.imageHero, c)
@@ -52,6 +53,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   for (const t of c.textes) {
     if (!modeleTexte || !zoneAbout) break
     const bloc = modeleTexte.cloneNode(true) as HTMLElement
+    ancre(bloc, t.id)
     ecrire(bloc, 'h2', t.titre)
     ecrire(bloc, 'p', t.texte)
     zoneAbout.append(bloc)
@@ -60,7 +62,10 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   /* Intervenants */
   const sp = un(doc, '#speakers')
   if (sp && c.intervenants) {
+    ancre(sp, 'intervenants')
     ecrire(sp, '.section-title h2', c.intervenants.titre)
+    if (c.intervenants.sousTitre) ecrire(sp, '.section-title p', c.intervenants.sousTitre)
+    else retirer(sp, '.section-title p')
     repeter(un(sp, '.row.gy-4 > [class*="col-"]'), c.intervenants.liste, (el, p) => {
       image(un(el, 'img'), p.photo, p.nom)
       ecrire(el, 'h4 a', p.nom)
@@ -75,6 +80,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
   /* Programme : onglets de jours */
   const sc = un(doc, '#schedule')
   if (sc && c.programme) {
+    ancre(sc, 'programme')
     ecrire(sc, '.section-title h2', c.programme.titre)
     if (c.programme.sousTitre) ecrire(sc, '.section-title p', c.programme.sousTitre)
     else retirer(sc, '.section-title p')
@@ -92,7 +98,7 @@ export function appliquerConference(doc: Document, c: ContenuPage) {
       pane.classList.toggle('show', i === 0)
       pane.classList.toggle('active', i === 0)
       repeter(un(pane, '.schedule-item'), j.lignes, (row, l) => {
-        ecrire(row, 'time', l.debut)
+        ecrire(row, 'time', plage(l.debut, l.fin))
         const h4 = un(row, 'h4')
         if (h4) {
           h4.textContent = l.titre

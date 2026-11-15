@@ -257,6 +257,15 @@ class ContratApiIntegrationTest {
         mvc.perform(get("/api/parametres/paiement").header("Authorization", participant))
                 .andExpect(jsonPath("$.numeroMobileMoney").value(mobileMoney))
                 .andExpect(jsonPath("$.numeroAffiche").value(org.hamcrest.Matchers.startsWith("+228 ")));
+        String canauxPaiement = """
+                {"canaux":[{"code":"MOOV","numero":"%s","titulaire":"IPNET Moov"},
+                           {"code":"MIXX","numero":"%s","titulaire":"IPNET Mixx"}]}
+                """.formatted(mobileMoney, mobileAdmin);
+        mvc.perform(put("/api/admin/parametres/paiement/canaux").header("Authorization", admin)
+                        .contentType(MediaType.APPLICATION_JSON).content(canauxPaiement))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.canaux.length()").value(2))
+                .andExpect(jsonPath("$.canaux[1].code").value("MIXX"));
 
         // Agent de scan : numéro validé, e-mail à confirmer par l'agent lui-même
         mvc.perform(post("/api/admin/scanners").header("Authorization", admin).contentType(MediaType.APPLICATION_JSON)
@@ -282,6 +291,8 @@ class ContratApiIntegrationTest {
         // Référence de paiement
         mvc.perform(multipart("/api/reservations/" + reservationId + "/preuve")
                         .param("referenceOperateur", "tx 123 abc")
+                        .param("operateur", "MIXX")
+                        .param("numeroPayeur", mobileParticipant)
                         .header("Authorization", participant))
                 .andExpect(status().isOk());
         // RG-14 : pas de seconde soumission
@@ -293,6 +304,8 @@ class ContratApiIntegrationTest {
         String file = mvc.perform(get("/api/admin/paiements").header("Authorization", admin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elements[0].referenceOperateur").value("TX123ABC"))
+                .andExpect(jsonPath("$.elements[0].operateurPaiement").value("MIXX"))
+                .andExpect(jsonPath("$.elements[0].numeroPayeur").value(mobileParticipant))
                 .andExpect(jsonPath("$.elements[0].participantNom").value("Kossi"))
                 .andExpect(jsonPath("$.elements[0].evenementTitre").value("Gala"))
                 .andExpect(jsonPath("$.elements[0].cheminPreuve").doesNotExist())

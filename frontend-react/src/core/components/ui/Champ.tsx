@@ -52,6 +52,7 @@ export function ChampTexte({ libelle, erreur, aide, facultatif, className = '', 
       <textarea
         id={id}
         aria-invalid={!!erreur || undefined}
+        aria-describedby={erreur ? `${id}-err` : aide ? `${id}-aide` : undefined}
         className={`champ !h-auto min-h-28 py-2.5 ${erreur ? '!border-erreur' : ''}`}
         {...reste}
       />
@@ -73,7 +74,7 @@ export function ChampSelection({
   return (
     <div className={className}>
       <Entete id={id} libelle={libelle} facultatif={facultatif} />
-      <select id={id} aria-invalid={!!erreur || undefined} className={`champ ${erreur ? '!border-erreur' : ''}`} {...reste}>
+      <select id={id} aria-invalid={!!erreur || undefined} aria-describedby={erreur ? `${id}-err` : aide ? `${id}-aide` : undefined} className={`champ ${erreur ? '!border-erreur' : ''}`} {...reste}>
         {children}
       </select>
       <Pied id={id} erreur={erreur} aide={aide} />

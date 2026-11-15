@@ -54,6 +54,23 @@ describe('inscription en deux temps', () => {
     expect(screen.getByLabelText("Année d'inscription en L1").tagName).toBe('SELECT')
   })
 
+  it('charge uniquement le référentiel du profil choisi et réutilise les données au retour', async () => {
+    monter()
+    expect(service.filieres).not.toHaveBeenCalled()
+    expect(service.categories).not.toHaveBeenCalled()
+
+    await userEvent.click(await screen.findByText('Étudiant interne'))
+    await waitFor(() => expect(service.filieres).toHaveBeenCalledTimes(1))
+    expect(service.categories).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole('button', { name: /changer de profil/i }))
+    await userEvent.click(screen.getByText('Visiteur externe'))
+    await waitFor(() => expect(service.categories).toHaveBeenCalledTimes(1))
+    await userEvent.click(screen.getByRole('button', { name: /changer de profil/i }))
+    await userEvent.click(screen.getByText('Étudiant interne'))
+    expect(service.filieres).toHaveBeenCalledTimes(1)
+  })
+
   it('envoie la demande puis passe à la saisie du code, sans ouvrir de session', async () => {
     service.inscription.mockResolvedValue({ email: 'a@test.tg', codeValideMinutes: 5, message: 'ok' })
     monter()

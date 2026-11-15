@@ -3,11 +3,13 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../core/auth/AuthContext'
 import { Bouton } from '../../../core/components/ui/Bouton'
 import { Alerte } from '../../../core/components/ui/Divers'
-import { messageErreur } from '../../../core/api/httpClient'
+import { messageErreur, versErreurApi } from '../../../core/api/httpClient'
 import { accueilPour } from '../../../core/routing/Gardes'
 import { CadreAuth } from '../components/CadreAuth'
 import { SaisieCode } from '../components/SaisieCode'
 import { authService } from '../services/authService'
+
+const DELAI_RENVOI = 30
 
 interface EtatVerification {
   email: string
@@ -31,6 +33,7 @@ function Formulaire({ email, validiteMinutes }: { email: string; validiteMinutes
   const duree = validiteMinutes * 60
   const [code, setCode] = useState('')
   const [restant, setRestant] = useState(duree)
+  const [renvoiRestant, setRenvoiRestant] = useState(DELAI_RENVOI)
   const [erreur, setErreur] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
@@ -40,6 +43,11 @@ function Formulaire({ email, validiteMinutes }: { email: string; validiteMinutes
     const t = setInterval(() => setRestant((r) => Math.max(0, r - 1)), 1000)
     return () => clearInterval(t)
   }, [])
+  useEffect(() => {
+    if (!renvoiRestant) return
+    const t = window.setTimeout(() => setRenvoiRestant((r) => Math.max(0, r - 1)), 1000)
+    return () => window.clearTimeout(t)
+  }, [renvoiRestant])
 
   async function verifier(e: FormEvent) {
     e.preventDefault()
@@ -55,8 +63,9 @@ function Formulaire({ email, validiteMinutes }: { email: string; validiteMinutes
       await ouvrir(session)
       navigate(accueilPour(session.role), { replace: true })
     } catch (err) {
-      setErreur(messageErreur(err))
-      setCode('')
+      const api = versErreurApi(err)
+      setErreur(api.message)
+      if (!(api.status === 0 && api.message.startsWith('Serveur injoignable')) && api.status < 500) setCode('')
     } finally {
       setEnCours(false)
     }
@@ -69,6 +78,7 @@ function Formulaire({ email, validiteMinutes }: { email: string; validiteMinutes
     try {
       const r = await authService.renvoyerCodeInscription(email)
       setRestant(r.codeValideMinutes * 60)
+      setRenvoiRestant(DELAI_RENVOI)
       setCode('')
       setInfo('Un nouveau code vient de vous être envoyé.')
     } catch (err) {
@@ -101,8 +111,8 @@ function Formulaire({ email, validiteMinutes }: { email: string; validiteMinutes
           Valider et créer mon compte
         </Bouton>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Bouton variante="secondaire" className="flex-1" enCours={renvoiEnCours} icone="refresh" onClick={renvoyer}>
-            Renvoyer un code
+          <Bouton variante="secondaire" className="flex-1" disabled={renvoiRestant > 0} enCours={renvoiEnCours} icone="refresh" onClick={renvoyer}>
+            {renvoiRestant > 0 ? `Renvoyer dans 00:${String(renvoiRestant).padStart(2, '0')}` : 'Renvoyer un code'}
           </Bouton>
           <Link
             to="/inscription"
