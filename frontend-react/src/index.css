@@ -127,7 +127,10 @@
     font-variant-numeric: tabular-nums;
   }
   .carte {
-    @apply rounded-lg border border-bordure/60 bg-white shadow-[0_0_30px_rgba(0,0,0,0.06)];
+    @apply rounded-2xl border border-bordure/50 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-shadow duration-200;
+  }
+  .carte:hover {
+    @apply shadow-[0_16px_40px_rgba(15,23,42,0.12)];
   }
   /* Apparition douce des blocs (inspirée du gabarit ScrewFast) */
   .apparition {
@@ -149,7 +152,7 @@
     @apply inline-flex items-center gap-2 rounded-full border border-primaire/15 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-primaire shadow-sm backdrop-blur;
   }
   .champ {
-    @apply h-12 w-full rounded-lg border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-colors placeholder:text-attenue/70 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
+    @apply h-12 w-full rounded-xl border-[1.5px] border-bordure bg-white px-3.5 text-base text-encre sm:text-[15px] outline-none transition-all duration-150 placeholder:text-attenue/70 hover:border-neutral-400 focus:border-primaire focus:ring-2 focus:ring-primaire/20 disabled:bg-surface disabled:text-attenue;
   }
   /* Masquer le bouton natif de mot de passe (Edge, IE, etc.) pour éviter le doublon d'icône */
   input::-ms-reveal,

@@ -3,7 +3,6 @@ import type { Evenement } from '../../../core/api/types'
 import { Icone } from '../../../core/components/ui/Icone'
 import { dateLongue, montant } from '../../../core/utils/format'
 import { urlImageEvenement } from '../services/evenementService'
-import { themeDe } from '../theme/ambiances'
 
 // Photo Unsplash (photo-1492684223066-81342ee5ff30), locale pour éviter un appel réseau tiers à l'affichage.
 const IMAGE_EVENEMENT_DEFAUT = '/event-card-default.jpg'
@@ -11,7 +10,23 @@ const IMAGE_EVENEMENT_DEFAUT = '/event-card-default.jpg'
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
   // Photo locale par défaut, remplacée dès que l'organisateur fournit son propre visuel.
   const src = evenement.aImage ? urlImageEvenement(evenement.id) : IMAGE_EVENEMENT_DEFAUT
-  return <img src={src} alt="" loading="lazy" className={`object-cover ${className}`} />
+  return (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={(e) => {
+        if (e.currentTarget.dataset.repli) {
+          e.currentTarget.hidden = true
+          return
+        }
+        e.currentTarget.dataset.repli = '1'
+        e.currentTarget.src = IMAGE_EVENEMENT_DEFAUT
+      }}
+      className={`object-cover ${className}`}
+    />
+  )
 }
 
 export function JaugePlaces({ evenement }: { evenement: Evenement }) {
@@ -39,7 +54,6 @@ export function CarteEvenement({ evenement }: { evenement: Evenement }) {
     <Link
       to={`/evenements/${evenement.id}`}
       className="carte-service group transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-      style={themeDe(evenement)}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-neutral-900">
         <VisuelEvenement evenement={evenement} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />

@@ -16,6 +16,11 @@
 - **Événements** : création (titre, description, date et heure, lieu, prix, capacité, image choisie dès la création),
   publication, modification (tant qu'aucune réservation n'est confirmée), clôture, annulation (e-mail à chaque participant ;
   les paiements validés passent « À rembourser »).
+- **Page publique d’un événement** : dans la liste des événements, ouvrir « Page ». Choisir l’un des huit styles décrits selon le type d’événement (atelier, tournoi, salon, etc.), puis utiliser « Voir un exemple » avant de valider. La page s’affiche en aperçu pendant la personnalisation.
+  - **Image** : dans la section « Bannière », téléverser l’image qui servira de fond au grand visuel. Si aucune photo n’est fournie, les cartes publiques gardent une image locale de secours; elles n’utilisent plus le dégradé aléatoire.
+  - **Thème général** : sélectionner une palette pour appliquer un accord de couleurs, ou « Style natif du modèle » pour revenir à son apparence initiale. Les couleurs de l’en-tête, du fond, du texte, des cartes, des boutons et du pied de page se règlent séparément; « Hériter du thème » annule seulement la couleur de cette zone.
+  - **Sections et blocs** : ajouter/activer les sections utiles; dans chacune, ajuster ses propres couleurs sans recolorer les autres. « Grille de cartes » et « Colonnes » permettent d’ajouter plusieurs cartes, avec titre, description et image, puis de choisir 2 à 4 colonnes sur grand écran (elles s’empilent sur mobile). Le voile et son intensité règlent la lisibilité du texte sur l’image.
+  - **Programme** : ajouter un jour puis les créneaux; seules les journées et activités saisies apparaissent. Vérifier l’aperçu à une largeur mobile, puis cliquer « Enregistrer ». « Enregistrer » sauvegarde la page; publier l’événement reste une action séparée.
 - **Paiements** : file des références non rapprochées ; visualiser la capture, valider ou rejeter avec motif.
   **Import du relevé** (CSV `référence;montant;date`) : confirmation automatique quand référence et montant correspondent.
 - **Participants et exports** : liste par événement, export des présents en CSV ou PDF.
