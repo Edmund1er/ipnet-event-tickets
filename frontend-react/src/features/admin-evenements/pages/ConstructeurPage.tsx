@@ -26,6 +26,9 @@ const APERCUS_MODELE: Record<CleModele, string> = {
   ATELIER: 'radial-gradient(ellipse at 78% 20%,#a3e635 0,transparent 35%),linear-gradient(125deg,#1c1917,#365314)',
   TOURNOI: 'radial-gradient(ellipse at 78% 20%,#22d3ee 0,transparent 35%),linear-gradient(125deg,#0f172a,#155e75)',
   SALON: 'radial-gradient(ellipse at 78% 20%,#fcd34d 0,transparent 35%),linear-gradient(125deg,#1c1917,#713f12)',
+  LAGON: 'radial-gradient(ellipse at 78% 20%,#ffd166 0,transparent 35%),linear-gradient(125deg,#00b4d8,#ff6b6b)',
+  FORET: 'radial-gradient(ellipse at 78% 20%,#d9f99d 0,transparent 35%),linear-gradient(125deg,#14532d,#3f6212)',
+  FORUM: 'radial-gradient(ellipse at 78% 20%,#93c5fd 0,transparent 35%),linear-gradient(125deg,#0f172a,#1d4ed8)',
   RESEAUTAGE: 'radial-gradient(ellipse at 78% 20%,#e879f9 0,transparent 35%),linear-gradient(125deg,#18181b,#581c87)',
 }
 

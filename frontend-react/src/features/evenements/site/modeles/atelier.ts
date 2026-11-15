@@ -9,7 +9,7 @@ export function appliquerAtelier(doc: Document, c: ContenuPage) {
 
   const hero = un(doc, '#atelier-hero')
   ancre(hero, 'hero')
-  ecrire(hero ?? doc, '.atelier-hero__eyebrow', 'Festival de la jeunesse')
+  ecrire(hero ?? doc, '.atelier-hero__eyebrow', 'Atelier créatif')
   if (c.accroche) ecrire(hero ?? doc, '.atelier-hero__summary', c.accroche)
   else retirer(hero ?? doc, '.atelier-hero__summary')
   ecrire(hero ?? doc, 'h1', c.titre)

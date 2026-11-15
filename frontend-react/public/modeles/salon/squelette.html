@@ -142,6 +142,56 @@
       .day-card { padding: 21px 18px; }
       .footer-inner { flex-direction: column; }
     }
+    /* === Identité chaleureuse : or, ivoire, serif === */
+    :root { --or:#b8862b; --or-clair:#e8c777; --ivoire:#fbf5e6; --brun:#3a2814; }
+    body { background:var(--ivoire); color:var(--brun); overflow-x:hidden; }
+    h1, h2, h3, .brand { font-family: Georgia, "Times New Roman", serif; }
+    .topbar { background:var(--ivoire); border-bottom:2px solid var(--or-clair); }
+    .brand { color:var(--brun); overflow:hidden; text-overflow:ellipsis; max-width:60vw; letter-spacing:0; }
+    .brand-mark { background:linear-gradient(135deg,#d9a93f,#a8741c); border-radius:50%; }
+    .nav-list a { color:#6b5535; }
+    .nav-list a:hover { color:var(--or); }
+    .button { background:linear-gradient(135deg,#d9a93f,#a8741c); border-color:#a8741c; color:#fff; box-shadow:0 6px 16px rgba(168,116,28,.25); }
+    .button:hover { box-shadow:0 10px 24px rgba(168,116,28,.4); }
+    .button--quiet { background:transparent; color:var(--brun); border-color:var(--or); }
+    .hero { background:radial-gradient(circle at 75% 25%, #8a5a14, #3a2310 70%); }
+    .hero::before { background:linear-gradient(105deg, rgba(46,28,10,.88), rgba(58,36,12,.6) 55%, rgba(120,80,20,.28)); }
+    .hero::after { border-color:rgba(232,199,119,.5); box-shadow:0 0 0 34px rgba(232,199,119,.07), 0 0 0 78px rgba(232,199,119,.05); }
+    .eyebrow { color:var(--or-clair); }
+    .hero h1 { font-weight:700; letter-spacing:-.035em; overflow-wrap:anywhere; font-size:clamp(2.3rem,6.5vw,5.4rem); }
+    .hero-intro { color:#fbeed0; }
+    .meta-dot { background:var(--or-clair); box-shadow:0 0 8px var(--or-clair); }
+    .hero .button { background:var(--or-clair); border-color:var(--or-clair); color:#3a2310; }
+    .hero-stamp { border-color:var(--or-clair); color:var(--or-clair); }
+    .section-kicker, .expo-number, .day-heading time, .programme-row time, .offer-price { color:var(--or); }
+    .section--white { background:#fffaf0; }
+    .section-head h2, .about-copy h2, .venue-copy h2, .expo-card h3, .day-heading h3, .row-title, .offer-card h3, .custom-copy h2, .closing h2 { color:var(--brun); overflow-wrap:anywhere; }
+    .section-head p, .about-copy p, .venue-copy p, .expo-card p, .row-detail, .custom-copy p, .closing p, .offer-points { color:#6b5535; }
+    .about-art { border-radius:120px 120px 8px 8px; background:linear-gradient(140deg, rgba(217,169,63,.28), rgba(255,250,240,.6)), repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(184,134,43,.09) 19px); border:1px solid rgba(184,134,43,.35); }
+    .art-card { border-color:rgba(184,134,43,.5); background:rgba(255,250,240,.75); }
+    .art-card:nth-child(2) { background:rgba(232,199,119,.35); }
+    .art-seal { background:linear-gradient(135deg,#d9a93f,#a8741c); box-shadow:0 12px 30px rgba(168,116,28,.35); }
+    .expo-card, .day-card, .offer-card { border-color:rgba(184,134,43,.3); background:#fffdf7; box-shadow:0 10px 28px rgba(120,80,20,.08); min-width:0; }
+    .expo-card { border-radius:60px 60px 10px 10px; }
+    .expo-photo { background:linear-gradient(135deg,#f0d9a0,#d9b66a); aspect-ratio:4/3; height:auto; max-height:260px; }
+    .expo-photo:not([src]), .expo-photo[src=""] { display:none; }
+    .expo-body { text-align:center; }
+    .day-heading, .programme-row { border-color:rgba(184,134,43,.25); }
+    .programme-row { min-width:0; }
+    .row-title, .row-detail { overflow-wrap:anywhere; }
+    .venue-panel { background:linear-gradient(135deg,#4a2f12,#2e1c0a); border-radius:14px; }
+    .venue-copy h2 { color:#fff; }
+    .venue-copy p { color:rgba(255,244,220,.85); overflow-wrap:anywhere; }
+    .venue-address { color:var(--or-clair); overflow-wrap:anywhere; }
+    .venue-art { background:radial-gradient(ellipse at 50% 75%, rgba(232,199,119,.5), transparent 45%); }
+    .venue-art::before, .venue-art::after { border-color:rgba(232,199,119,.5); }
+    .offer-points li::before { color:var(--or); content:"✦"; font-size:.7rem; top:11px; }
+    .custom-copy { border-left-color:var(--or); background:#fffdf7; width:calc(100% - 32px); }
+    .custom-copy p { overflow-wrap:anywhere; }
+    #ipnet-custom-blocks:empty { display:none; }
+    .closing { background:linear-gradient(180deg,#f5e6bd,#ecd194); }
+    footer { background:#2e1c0a; color:#ead9b5; }
+    @media (max-width:540px){ .brand{max-width:55vw;} .hero h1{font-size:clamp(2.1rem,11vw,3.3rem);} .expo-card{border-radius:40px 40px 10px 10px;} .about-art{border-radius:80px 80px 8px 8px;} .venue-panel{border-radius:10px;} }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
 </head>

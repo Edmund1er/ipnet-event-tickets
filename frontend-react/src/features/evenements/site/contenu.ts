@@ -1,6 +1,6 @@
 import type { Evenement } from '../../../core/api/types'
 import { montant } from '../../../core/utils/format'
-import { ambianceDe, estHex } from '../theme/ambiances'
+import { ambianceDe, ambiancePourModele, estHex } from '../theme/ambiances'
 import type { ContenuPage, CreneauConfig, Jour, Ligne, Offre, PageConfig, SectionConfig } from './types'
 
 const NOM_SITE = 'IPNET Events'
@@ -32,8 +32,22 @@ export function avatar(nom: string): string {
 
 /** Affiche un visuel vectoriel premium selon l'ambiance si l'organisateur n'a pas fourni d'affiche. */
 function afficheDeSecours(evt: Evenement): string {
-  const accent = estHex(evt.couleurPrincipale) ? evt.couleurPrincipale : ambianceDe(evt.ambiance).couleur
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs><linearGradient id="fond" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#08090e"/><stop offset=".58" stop-color="#17111e"/><stop offset="1" stop-color="#090a10"/></linearGradient><radialGradient id="lumiere"><stop stop-color="${accent}" stop-opacity=".82"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient><linearGradient id="spot" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="1600" height="900" fill="url(#fond)"/><ellipse cx="1190" cy="280" rx="470" ry="390" fill="url(#lumiere)" opacity=".75"/><path d="M180 0h190l290 720H420zM990 0h130L950 760H820z" fill="url(#spot)" opacity=".5"/><circle cx="1190" cy="280" r="250" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/><circle cx="1190" cy="280" r="340" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/><g fill="none" stroke="#fff" stroke-opacity=".12"><path d="M0 760h1600M0 800h1600M0 840h1600"/><path d="M120 900l520-250M1480 900 960 650"/></g><g fill="${accent}" opacity=".72"><circle cx="300" cy="210" r="5"/><circle cx="440" cy="320" r="4"/><circle cx="1380" cy="500" r="6"/><circle cx="260" cy="570" r="3"/></g></svg>`
+  const cleAmbiance = evt.ambiance ?? ambiancePourModele(evt.modele)
+  const ambiance = ambianceDe(cleAmbiance)
+  const accent = estHex(evt.couleurPrincipale) ? evt.couleurPrincipale : ambiance.couleur
+  const plage = cleAmbiance === 'PLAGE' || evt.modele === 'RENCONTRE'
+  const nature = cleAmbiance === 'NATURE' || evt.modele === 'ATELIER'
+  const couleurs = plage
+    ? ['#f97316', '#06b6d4', '#075985']
+    : nature
+      ? ['#84cc16', '#166534', '#10251a']
+      : ['#08090e', '#17111e', '#090a10']
+  const decor = plage
+    ? `<circle cx="1260" cy="220" r="122" fill="#fde68a" opacity=".9"/><path d="M0 555c180-54 300-54 480 0s300 54 480 0 300-54 640 0v345H0z" fill="#0891b2"/><path d="M0 650c180-48 300-48 480 0s300 48 480 0 300-48 640 0M0 740c180-42 300-42 480 0s300 42 480 0 300-42 640 0" fill="none" stroke="#a5f3fc" stroke-opacity=".72" stroke-width="8"/><path d="M1030 900l130-340 28 0 130 340" fill="#fb7185" opacity=".75"/>`
+    : nature
+      ? `<circle cx="1270" cy="200" r="105" fill="#facc15" opacity=".86"/><path d="M0 640 300 330l245 260 250-360 355 410 230-270 220 220v310H0z" fill="#166534"/><path d="M0 730 270 500l260 210 250-290 340 300 250-210 280 210v180H0z" fill="#10251a"/><g fill="#365314"><path d="M300 600l95-250 95 250zM340 670l55-190 55 190zM1120 650l80-225 80 225zM1160 700l40-140 40 140z"/></g>`
+      : `<ellipse cx="1190" cy="280" rx="470" ry="390" fill="url(#lumiere)" opacity=".75"/><path d="M180 0h190l290 720H420zM990 0h130L950 760H820z" fill="url(#spot)" opacity=".5"/><circle cx="1190" cy="280" r="250" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/><circle cx="1190" cy="280" r="340" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/><g fill="none" stroke="#fff" stroke-opacity=".12"><path d="M0 760h1600M0 800h1600M0 840h1600"/><path d="M120 900l520-250M1480 900 960 650"/></g><g fill="${accent}" opacity=".72"><circle cx="300" cy="210" r="5"/><circle cx="440" cy="320" r="4"/><circle cx="1380" cy="500" r="6"/><circle cx="260" cy="570" r="3"/></g>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs><linearGradient id="fond" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${couleurs[0]}"/><stop offset=".58" stop-color="${couleurs[1]}"/><stop offset="1" stop-color="${couleurs[2]}"/></linearGradient><radialGradient id="lumiere"><stop stop-color="${accent}" stop-opacity=".82"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient><linearGradient id="spot" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="1600" height="900" fill="url(#fond)"/>${decor}</svg>`
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 

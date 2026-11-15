@@ -54,7 +54,7 @@ export interface Evenement {
   /** Terminé : la fin (ou le début) est derrière nous. */
   passe?: boolean
   masque?: boolean
-  modele?: 'CLASSIQUE' | 'AFFICHE' | 'MAGAZINE' | 'EPURE' | 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE' | 'ATELIER' | 'TOURNOI' | 'SALON' | 'RESEAUTAGE' | null
+  modele?: 'CLASSIQUE' | 'AFFICHE' | 'MAGAZINE' | 'EPURE' | 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE' | 'ATELIER' | 'TOURNOI' | 'SALON' | 'RESEAUTAGE' | 'LAGON' | 'FORET' | 'FORUM' | null
 }
 
 export interface ProfilResponse {

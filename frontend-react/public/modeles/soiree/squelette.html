@@ -26,6 +26,47 @@
 
     <link rel="stylesheet" href="css/style.css">
     <!-- <link rel="stylesheet" href="css/responsive.css"> -->
+<style>
+/* IPNET override : SOIREE - nuit club, magenta / jaune acide */
+:root{--nuit:#0a0014;--mag:#ff2bd6;--acid:#d4ff3a;--vio:#2a0a4d}
+html,body{overflow-x:hidden;background:var(--nuit)}
+body{font-family:'Muli',sans-serif;color:#e9ddff}
+.header-area .main-header-area{background:rgba(10,0,20,.92)!important}
+#navigation>li>a{color:#f3e8ff!important;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+#navigation>li>a:hover{color:var(--acid)!important}
+.header-area .main-header-area .buy_tkt .book_btn a,.boxed-btn3,.ipnet-hero-cta{background:var(--acid)!important;color:#12001f!important;border:0!important;border-radius:999px!important;font-family:'Anton',sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:13px 34px;box-shadow:0 0 28px rgba(212,255,58,.45);text-decoration:none!important}
+.slider_area .single_slider{min-height:78vh;background-color:var(--nuit);position:relative}
+.slider_area .single_slider.overlay::before{background:radial-gradient(ellipse at 50% 110%,rgba(255,43,214,.55),transparent 60%),linear-gradient(180deg,rgba(10,0,20,.55),rgba(10,0,20,.88))!important;opacity:1!important}
+.slider_text{position:relative;z-index:2;max-width:100%;padding:0 6px}
+.slider_text span{display:inline-block;color:var(--acid)!important;border:1px solid var(--acid);padding:6px 18px;border-radius:999px;letter-spacing:.2em;text-transform:uppercase;font-size:13px}
+.slider_area .single_slider .slider_text h3{color:var(--mag)!important;text-shadow:0 0 18px rgba(255,43,214,.8),0 0 60px rgba(255,43,214,.45);overflow-wrap:anywhere;word-break:normal;max-width:100%}
+.slider_text p{color:#fff!important;font-size:18px}
+.shape_1,.shape_2{display:none!important}
+.black_bg,.performar_area,.about_area,.program_details_area,.map_area{background:var(--nuit)!important}
+.about_area,.map_area{background:linear-gradient(180deg,var(--nuit),var(--vio))!important}
+.section_title h3{color:var(--acid)!important;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.08em;overflow-wrap:anywhere}
+.section_title p,.about_info p,.single_info p,.map_area p{color:#d9c8f5!important}
+.about_info h4,.about_info h3,.single_info span{color:var(--mag)!important}
+.single_performer{background:rgba(255,255,255,.04);border:1px solid rgba(255,43,214,.35);border-radius:18px;padding:14px;margin-bottom:24px;text-align:center}
+.single_performer .thumb img{width:100%;height:auto;max-height:340px;object-fit:cover;border-radius:12px;background:var(--vio)}
+.performer_heading h4{color:#fff!important}.performer_heading span{color:var(--acid)!important}
+.about_thumb img,.thumb_inner img{max-width:100%;height:auto;border-radius:16px}
+/* timeline en cartes : une colonne, sans chevauchement */
+.program_details_area .program_detail_wrap::before,.program_details_area .program_detail_wrap .single_propram::before{display:none!important}
+.program_details_area .program_detail_wrap .single_propram,.program_details_area .program_detail_wrap .single_propram:nth-child(n){float:none!important;width:100%!important;margin:0 0 16px!important;display:block}
+.program_details_area .program_detail_wrap .single_propram .inner_wrap,.program_details_area .program_detail_wrap .single_propram:nth-child(n) .inner_wrap{float:none!important;width:100%!important;max-width:760px;margin:0 auto!important;padding:20px 24px!important;text-align:left!important;background:rgba(255,255,255,.05);border-left:4px solid var(--mag);border-radius:12px}
+.program_details_area .circle_img,.program_details_area .thumb{display:none!important}
+.single_propram .porgram_top{max-width:760px;margin:0 auto 6px;padding:0 4px}
+.single_propram .porgram_top span{color:var(--acid)!important}.single_propram .porgram_top h4{color:#fff!important;display:inline-block;margin-left:10px}
+.single_propram .inner_wrap>h4{color:#fff!important;overflow-wrap:anywhere}
+.ipnet-session-detail{color:#cdb8ee;margin:6px 0 0}
+.map_area #map{height:420px!important;max-width:100%}.map_area iframe{width:100%;max-width:100%}
+footer,.address_details{background:var(--vio)!important}
+.address_details h3,.address_details h4,.address_details p{color:#fff!important;overflow-wrap:anywhere}
+.address_details h4{color:var(--acid)!important}
+img{max-width:100%}
+@media(max-width:767px){.slider_area .single_slider{min-height:70vh}.slider_area .single_slider .slider_text h3{font-size:clamp(1.6rem,9vw,2.4rem)!important}.single_propram .porgram_top h4{display:block;margin:0}}
+</style>
 </head>
 
 <body>

@@ -1,3 +1,6 @@
+import { appliquerForet } from './modeles/foret'
+import { appliquerForum } from './modeles/forum'
+import { appliquerLagon } from './modeles/lagon'
 import { appliquerAtelier } from './modeles/atelier'
 import { appliquerCeremonie } from './modeles/ceremonie'
 import { appliquerConference } from './modeles/conference'
@@ -26,6 +29,9 @@ const ADAPTATEURS: Record<CleModele, Adaptateur> = {
   TOURNOI: appliquerTournoi,
   SALON: appliquerSalon,
   RESEAUTAGE: appliquerReseautage,
+  LAGON: appliquerLagon,
+  FORET: appliquerForet,
+  FORUM: appliquerForum,
 }
 
 const squelettes = new Map<string, Promise<Document>>()

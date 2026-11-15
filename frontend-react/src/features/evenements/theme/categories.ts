@@ -1,4 +1,4 @@
-export type CleCategorie = 'SPORT' | 'CULTURE' | 'DANSE' | 'JEUX' | 'CONFERENCE' | 'SOIREE' | 'RAP' | 'GOSPEL' | 'PLAGE' | 'DJ' | 'FESTIVAL' | 'AUTRE'
+export type CleCategorie = 'SPORT' | 'CULTURE' | 'DANSE' | 'JEUX' | 'CONFERENCE' | 'SOIREE' | 'RAP' | 'GOSPEL' | 'PLAGE' | 'NATURE' | 'DJ' | 'FESTIVAL' | 'AUTRE'
 
 interface Categorie {
   libelle: string
@@ -17,14 +17,15 @@ export const CATEGORIES: Record<CleCategorie, Categorie> = {
   SOIREE: { libelle: 'Soirée / club', couleur: '#7c3aed', icone: 'nightlife' },
   RAP: { libelle: 'Rap & urbain', couleur: '#db2777', icone: 'mic_external_on' },
   GOSPEL: { libelle: 'Gospel & louange', couleur: '#b45309', icone: 'church' },
-  PLAGE: { libelle: 'Plage & chill', couleur: '#0891b2', icone: 'beach_access' },
+  PLAGE: { libelle: 'Plage & beach day', couleur: '#06b6d4', icone: 'beach_access' },
+  NATURE: { libelle: 'Nature & plein air', couleur: '#15803d', icone: 'park' },
   DJ: { libelle: 'DJ & électro', couleur: '#7c3aed', icone: 'album' },
   FESTIVAL: { libelle: 'Festival & live', couleur: '#ea580c', icone: 'festival' },
   AUTRE: { libelle: 'Autre fête', couleur: '#475569', icone: 'event' },
 }
 
 /** Nouvelles activités proposées : l'ancien code CONFERENCE reste affichable, mais n'est plus choisi. */
-export const CLES_CATEGORIE: CleCategorie[] = ['SOIREE', 'RAP', 'GOSPEL', 'PLAGE', 'DJ', 'FESTIVAL', 'SPORT', 'CULTURE', 'DANSE', 'JEUX', 'AUTRE']
+export const CLES_CATEGORIE: CleCategorie[] = ['SOIREE', 'RAP', 'GOSPEL', 'PLAGE', 'NATURE', 'DJ', 'FESTIVAL', 'SPORT', 'CULTURE', 'DANSE', 'JEUX', 'AUTRE']
 
 export function categorieDe(cle?: string | null): Categorie {
   return CATEGORIES[(cle as CleCategorie) ?? 'AUTRE'] ?? CATEGORIES.AUTRE

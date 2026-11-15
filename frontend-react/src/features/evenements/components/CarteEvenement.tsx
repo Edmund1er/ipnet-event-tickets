@@ -10,6 +10,8 @@ import { modeleDe } from '../site/types'
 
 /** Affiche l'affiche de l'organisateur, sinon une composition graphique adaptée à son ambiance. */
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
+  const plage = evenement.ambiance === 'PLAGE' || evenement.modele === 'RENCONTRE'
+  const nature = evenement.ambiance === 'NATURE' || evenement.modele === 'ATELIER'
   return (
     <div
       aria-hidden="true"
@@ -23,11 +25,29 @@ export function VisuelEvenement({ evenement, className = '' }: { evenement: Even
       <div className="event-vibe-orb absolute -right-16 -top-20 h-72 w-72 rounded-full border border-white/15" />
       <div className="event-vibe-orb absolute -right-4 top-[-2.5rem] h-52 w-52 rounded-full border border-white/10" />
       <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'repeating-linear-gradient(118deg, transparent 0 27px, rgba(255,255,255,.14) 28px, transparent 29px 54px)' }} />
-      <div className="absolute bottom-8 right-8 flex h-28 items-end gap-2 opacity-45" aria-hidden="true">
-        {[30, 52, 38, 76, 46, 92, 58, 34].map((height, index) => (
-          <span key={index} className="w-2 rounded-t-full bg-white/75" style={{ height }} />
-        ))}
-      </div>
+      {plage ? (
+        <div aria-hidden="true" className="absolute inset-0">
+          <span className="absolute right-[16%] top-[18%] h-20 w-20 rounded-full bg-yellow-300/90 shadow-[0_0_55px_rgba(253,224,71,.5)] sm:h-28 sm:w-28" />
+          <svg viewBox="0 0 800 420" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-3/5 w-full opacity-70">
+            <path d="M0 115 C130 55 230 175 370 115 S610 55 800 115 V420 H0Z" fill="#06b6d4" />
+            <path d="M0 180 C130 120 230 240 370 180 S610 120 800 180" fill="none" stroke="#cffafe" strokeWidth="9" />
+            <path d="M0 245 C130 185 230 305 370 245 S610 185 800 245" fill="none" stroke="#f0fdff" strokeWidth="6" />
+          </svg>
+        </div>
+      ) : nature ? (
+        <svg aria-hidden="true" viewBox="0 0 800 420" preserveAspectRatio="none" className="absolute inset-0 h-full w-full opacity-50">
+          <circle cx="640" cy="90" r="54" fill="#bef264" />
+          <path d="M0 330 180 150 310 290 465 100 650 290 735 210 800 270 V420H0Z" fill="#65a30d" />
+          <path d="M0 365 185 245 310 330 480 190 635 335 755 255 800 290 V420H0Z" fill="#14532d" />
+          <path d="M130 285 185 170 240 285M575 305 630 190 685 305" fill="none" stroke="#f7fee7" strokeWidth="10" strokeLinecap="round" />
+        </svg>
+      ) : (
+        <div className="absolute bottom-8 right-8 flex h-28 items-end gap-2 opacity-45" aria-hidden="true">
+          {[30, 52, 38, 76, 46, 92, 58, 34].map((height, index) => (
+            <span key={index} className="w-2 rounded-t-full bg-white/75" style={{ height }} />
+          ))}
+        </div>
+      )}
       {evenement.aImage && (
         <img
           src={urlImageEvenement(evenement.id)}

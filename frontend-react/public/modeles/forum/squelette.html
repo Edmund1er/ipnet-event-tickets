@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forum</title>
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/ionicons/css/ionicons.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>
+:root{--forum-blue:#1d4ed8;--forum-navy:#0f2a5c;--forum-soft:#eff4ff}
+body{color:#334155;background:#fff;overflow-x:hidden}
+a{color:var(--forum-blue)}
+.navbar-custom,.navbar-solid{background-color:var(--forum-navy)!important}
+.navbar-custom{padding-top:6px;padding-bottom:6px}
+.navbar-custom .navbar-nav>li>a:hover,.navbar-custom .navbar-nav>.active>a{border-color:#93c5fd}
+.site-branding .logo{letter-spacing:.5px;text-transform:none;font-size:18px}
+.site-header{background:linear-gradient(135deg,var(--forum-navy),var(--forum-blue));background-size:cover;background-position:center}
+.site-header::before{background-color:rgba(15,42,92,.55)}
+.site-header .intro{height:auto;min-height:100vh;padding:110px 18px 70px}
+.site-header .intro h1{font-size:clamp(30px,6vw,56px);line-height:1.15;word-break:break-word}
+.site-header .intro h2{font-size:clamp(15px,2.4vw,22px);letter-spacing:1px}
+.site-header .intro p{margin:14px 0 8px;font-size:18px;text-transform:none}
+.ipnet-hero-cta{border-radius:4px}
+.section-title{color:var(--forum-navy);position:relative;padding-bottom:14px}
+.section-title::after{content:"";display:block;width:56px;height:3px;background:var(--forum-blue);margin-top:12px}
+.facts::before{background-color:rgba(15,42,92,.88)}
+.facts .container{position:relative;z-index:1}
+.facts i{color:#93c5fd}
+.facts h3{color:#fff}
+.about p{white-space:pre-line}
+.speaker{text-align:center;margin-bottom:34px}
+.speaker figure img{width:170px;height:170px;object-fit:cover;border-radius:50%;border:4px solid var(--forum-soft)}
+.speaker h4{color:var(--forum-navy);margin:16px 0 4px}
+.speaker p{margin:0;color:#64748b}
+.schedule{background:var(--forum-soft)}
+.schedule-day{margin-bottom:34px}
+.schedule-day>h3{color:var(--forum-blue);border-bottom:2px solid #bfdbfe;padding-bottom:10px;margin:0 0 20px;font-size:22px}
+.schedule-box{background:#fff;border-left:4px solid var(--forum-blue);border-radius:4px;padding:16px 18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(15,42,92,.07);min-height:120px}
+.schedule-box .time{color:var(--forum-blue);font-weight:700;margin-bottom:6px}
+.schedule-box h3{font-size:18px;margin:0 0 6px;color:var(--forum-navy)}
+.schedule-box p{margin:0;color:#64748b}
+.schedule-box[data-ipnet]{cursor:pointer}
+.pricing .offer{background:#fff;border:1px solid #dbe5fb;border-top:4px solid var(--forum-blue);border-radius:4px;padding:24px 22px;margin-bottom:24px;text-align:center;box-shadow:0 2px 10px rgba(15,42,92,.06)}
+.pricing .offer h3{margin:0 0 8px;color:var(--forum-navy)}
+.pricing .offer .prix{font-size:28px;font-weight:700;color:var(--forum-blue);margin-bottom:14px}
+.pricing .offer ul{list-style:none;padding:0;margin:0 0 18px}
+.pricing .offer ul li{font-weight:400;margin-bottom:6px}
+.btn-black{background:var(--ipnet-button,var(--forum-blue));color:#fff;border-radius:4px}
+.btn-black:hover,.btn-black:focus{background:var(--forum-navy);color:#fff}
+.location{background:var(--forum-soft)}
+.location .map{min-height:360px}
+.site-footer{background:var(--forum-navy);color:#cbd5e1;padding:36px 0;text-align:center}
+.site-footer p{margin:0 0 6px}
+@media(max-width:767px){
+ .section{padding:48px 0}
+ .section-title{text-align:center}
+ .section-title::after{margin-left:auto;margin-right:auto}
+ .site-branding{margin-left:0}
+ .navbar-collapse{background:var(--forum-navy)}
+ .schedule-box{min-height:0}
+ .facts [class*="col-"]{margin-bottom:18px}
+ .location .map{min-height:280px;margin-top:20px}
+ .btn:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<nav id="site-nav" class="navbar navbar-fixed-top navbar-custom">
+ <div class="container">
+  <div class="navbar-header">
+   <div class="site-branding"><a class="logo" href="#hero"><span>Forum</span></a></div>
+   <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-items" aria-expanded="false"><span class="sr-only">Menu</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+  </div>
+  <div class="collapse navbar-collapse" id="navbar-items">
+   <ul class="nav navbar-nav navbar-right"><li class="active"><a href="#about">À propos</a></li></ul>
+  </div>
+ </div>
+</nav>
+
+<header id="hero" class="site-header valign-center">
+ <div class="intro">
+  <h2>Date / Lieu</h2>
+  <h1>Titre</h1>
+  <p>Accroche</p>
+  <div class="hero-actions"></div>
+ </div>
+</header>
+
+<section id="about" class="section about">
+ <div class="container">
+  <div class="row">
+   <div class="col-sm-6 about-text">
+    <h3 class="section-title">À propos</h3>
+    <p>Texte</p>
+   </div>
+   <div class="col-sm-6 about-image"><figure><img alt="" class="img-responsive" src="assets/images/about-us.jpg"></figure></div>
+  </div>
+  <div class="row about-extra"></div>
+ </div>
+</section>
+
+<section id="facts" class="section bg-image-1 facts text-center">
+ <div class="container">
+  <div class="row">
+   <div class="col-sm-4 fact-date"><i class="ion-ios-calendar"></i><h3>Date</h3></div>
+   <div class="col-sm-4 fact-lieu"><i class="ion-ios-location"></i><h3>Lieu</h3></div>
+   <div class="col-sm-4 fact-speakers"><i class="ion-speakerphone"></i><h3>Intervenants</h3></div>
+  </div>
+ </div>
+</section>
+
+<section id="speakers" class="section speakers">
+ <div class="container">
+  <div class="row"><div class="col-md-12"><h3 class="section-title">Intervenants</h3><p class="section-sub"></p></div></div>
+  <div class="row speakers-row">
+   <div class="col-sm-6 col-md-4 speaker-col"><div class="speaker"><figure><img alt="" class="img-responsive center-block" src="assets/images/speaker.jpg"></figure><h4>Nom</h4><p>Rôle</p></div></div>
+  </div>
+ </div>
+</section>
+
+<section id="schedule" class="section schedule">
+ <div class="container">
+  <div class="row"><div class="col-md-12"><h3 class="section-title">Programme</h3><p class="section-sub"></p></div></div>
+  <div class="schedule-days"></div>
+ </div>
+</section>
+
+<section id="billets" class="section pricing">
+ <div class="container">
+  <div class="row"><div class="col-md-12"><h3 class="section-title">Billets</h3></div></div>
+  <div class="row offers-row">
+   <div class="col-sm-6 col-md-4 offer-col"><div class="offer"><h3>Offre</h3><div class="prix">0</div><ul><li>Point</li></ul><a class="btn btn-black" href="#">Réserver</a></div></div>
+  </div>
+ </div>
+</section>
+
+<section id="location" class="section location">
+ <div class="container">
+  <div class="row">
+   <div class="col-sm-4 location-info"><h3 class="section-title">Lieu</h3><address><p>Adresse</p></address></div>
+   <div class="col-sm-8 map"></div>
+  </div>
+ </div>
+</section>
+
+<footer class="site-footer">
+ <div class="container">
+  <p class="site-info"></p>
+ </div>
+</footer>
+
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<script>
+(function () {
+  function f() {
+    var n = document.getElementById('site-nav');
+    if (n) n.classList.toggle('navbar-solid', window.pageYOffset > 10);
+  }
+  window.addEventListener('scroll', f);
+  window.addEventListener('load', f);
+})();
+</script>
+</body>
+</html>

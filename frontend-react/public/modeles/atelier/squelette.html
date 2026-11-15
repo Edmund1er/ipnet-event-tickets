@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Journée d’intégration, plage et festival campus">
-  <title>Journée d’intégration</title>
+  <meta name="description" content="Atelier, workshop et festival créatif">
+  <title>Atelier créatif</title>
   <style>
     :root {
-      --ipnet-primary: #0ea5e9;
-      --ipnet-secondary: #0f766e;
-      --atelier-ink: #20323b;
-      --atelier-muted: #5d707a;
-      --atelier-paper: #f4fafb;
+      --ipnet-primary: #65a30d;
+      --ipnet-secondary: #173b32;
+      --atelier-ink: #26342a;
+      --atelier-muted: #5d6b5f;
+      --atelier-paper: #f7faf4;
       --atelier-white: #fff;
-      --atelier-line: #d7e7ea;
-      --atelier-shadow: 0 22px 65px rgba(14, 116, 144, .12);
+      --atelier-line: #dce6d7;
+      --atelier-shadow: 0 22px 65px rgba(35, 79, 42, .14);
       --atelier-radius: 24px;
       font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
       color: var(--atelier-ink);
@@ -38,7 +38,7 @@
     .atelier-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 1px solid var(--ipnet-primary, #326b58); border-radius: 999px; padding: 0 23px; background: var(--ipnet-primary, #326b58); color: #fff; text-decoration: none; font-weight: 750; font-size: .9rem; transition: transform .2s ease, box-shadow .2s ease; }
     .atelier-button:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(50,107,88,.22); }
     .atelier-header__cta { flex: 0 0 auto; }
-    .atelier-hero { position: relative; min-height: 610px; display: flex; align-items: center; overflow: hidden; padding: 92px 0 118px; color: white; background: radial-gradient(ellipse at 78% 28%, rgba(251,191,36,.42), transparent 33%), linear-gradient(122deg, #075985 4%, #0e7490 57%, #0f766e 100%); background-size: cover; background-position: center; }
+    .atelier-hero { position: relative; min-height: 610px; display: flex; align-items: center; overflow: hidden; padding: 92px 0 118px; color: white; background: radial-gradient(ellipse at 78% 28%, rgba(250,204,21,.55), transparent 33%), linear-gradient(122deg, #14532d 4%, #166534 57%, #365314 100%); background-size: cover; background-position: center; }
     .atelier-hero::before, .atelier-hero::after { position: absolute; content: ""; pointer-events: none; border: 1px solid rgba(255,255,255,.16); border-radius: 50%; }
     .atelier-hero::before { width: 560px; height: 560px; right: -120px; top: -190px; }
     .atelier-hero::after { width: 410px; height: 410px; right: 16px; top: -110px; }
@@ -150,6 +150,50 @@
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+    /* ===== Identité ATELIER : studio créatif, papier crème, encre noire, ombres franches ===== */
+    :root { --atelier-ink:#1c1917; --atelier-muted:#57534e; --atelier-paper:#fbf4e6; --atelier-line:#1c1917; --atelier-shadow:6px 6px 0 #1c1917; --atelier-radius:6px; --atelier-pop:#f5b800; }
+    body { background:var(--atelier-paper); background-image:radial-gradient(rgba(28,25,23,.12) 1px,transparent 1.2px); background-size:18px 18px; overflow-wrap:anywhere; }
+    img { max-width:100%; }
+    .atelier-header { background:#fbf4e6; border-bottom:3px solid #1c1917; backdrop-filter:none; }
+    .atelier-nav a { color:#1c1917; text-transform:uppercase; letter-spacing:.06em; font-weight:800; font-size:.78rem; }
+    .atelier-nav a:hover,.atelier-nav a.active { color:#1c1917; box-shadow:inset 0 -4px 0 var(--atelier-pop); }
+    .atelier-brand { color:#1c1917; }
+    .atelier-button { border:2.5px solid #1c1917; border-radius:6px; box-shadow:4px 4px 0 #1c1917; text-transform:uppercase; letter-spacing:.05em; font-weight:850; }
+    .atelier-button:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #1c1917; }
+    .atelier-hero { background-color:#1c1917; background-image:repeating-linear-gradient(135deg,rgba(245,184,0,.09) 0 2px,transparent 2px 22px); color:#fff; border-bottom:3px solid #1c1917; }
+    .atelier-hero::before { border:0; border-radius:0; width:260px; height:260px; right:6%; top:auto; bottom:-60px; background:var(--atelier-pop); transform:rotate(12deg); opacity:.92; }
+    .atelier-hero::after { border:4px solid #fbf4e6; border-radius:50%; width:150px; height:150px; right:calc(6% + 190px); top:40px; opacity:.5; }
+    .atelier-hero h1 { font-family:"Arial Black",Impact,Inter,sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:-.03em; line-height:1; font-size:clamp(2.2rem,6.4vw,5rem); overflow-wrap:anywhere; text-shadow:4px 4px 0 rgba(0,0,0,.45); }
+    .atelier-hero__eyebrow { display:inline-block; padding:6px 12px; background:var(--atelier-pop); color:#1c1917; transform:rotate(-1.5deg); }
+    .atelier-hero__summary,.atelier-hero__meta { text-shadow:0 1px 8px rgba(0,0,0,.6); }
+    .atelier-hero__meta span::before { border-radius:0; background:var(--atelier-pop); }
+    .atelier-hero__cta { background:var(--atelier-pop); border-color:#fbf4e6; color:#1c1917; box-shadow:4px 4px 0 #fbf4e6; }
+    .atelier-section--white { background:#fff; border-block:3px solid #1c1917; }
+    .atelier-section--tint { background:#ffe9a8; border-block:3px solid #1c1917; }
+    .atelier-section h2,.atelier-speaker__name,.atelier-offer__name,.atelier-text h2 { font-family:"Arial Black",Impact,Inter,sans-serif; color:#1c1917; text-transform:uppercase; letter-spacing:-.02em; font-weight:900; }
+    .atelier-section__kicker { display:inline-block; padding:4px 10px; background:#1c1917; color:#fbf4e6; }
+    .atelier-about__image,.atelier-venue__image { border:3px solid #1c1917; border-radius:6px; box-shadow:10px 10px 0 var(--atelier-pop); }
+    .atelier-speaker,.atelier-day,.atelier-offer,.atelier-text { border:3px solid #1c1917; border-radius:6px; box-shadow:var(--atelier-shadow); background:#fff; }
+    .atelier-speaker img { border-bottom:3px solid #1c1917; background:#ffe9a8; min-height:120px; }
+    .atelier-day__head { background:#1c1917; }
+    .atelier-day__label,.atelier-day__date { color:#fbf4e6; }
+    .atelier-session { border-bottom:2px dashed #1c1917; }
+    .atelier-session__time { color:#1c1917; background:var(--atelier-pop); align-self:start; justify-self:start; padding:3px 9px; }
+    .atelier-offer--featured { border-color:#1c1917; background:#fff6d6; transform:none; box-shadow:8px 8px 0 var(--atelier-pop),8px 8px 0 3px #1c1917; }
+    .atelier-offer__price { color:#1c1917; }
+    .atelier-offer__points li::before { color:#1c1917; }
+    .atelier-footer { background:#1c1917; border-top:6px solid var(--atelier-pop); }
+    .atelier-venue,.atelier-about { min-width:0; }
+    .atelier-texts:empty,.atelier-section:empty { display:none; }
+    @media (max-width:900px) { .atelier-about,.atelier-venue { grid-template-columns:1fr; } .atelier-hero::before,.atelier-hero::after { display:none; } }
+    @media (max-width:620px) {
+      .atelier-shell { padding:0 18px; } .atelier-section { padding:60px 0; }
+      .atelier-header__inner { flex-wrap:wrap; gap:10px 14px; padding:10px 0; }
+      .atelier-nav { order:3; flex-basis:100%; overflow-x:auto; } .atelier-nav ul { flex-wrap:nowrap; justify-content:flex-start; white-space:nowrap; }
+      .atelier-session { grid-template-columns:1fr; gap:6px; } .atelier-day__head { flex-direction:column; gap:4px; padding:16px 18px; } .atelier-day__sessions { padding:0 18px; }
+      .atelier-speaker,.atelier-day,.atelier-offer,.atelier-text { box-shadow:4px 4px 0 #1c1917; } .atelier-text { padding:22px; }
+      .atelier-hero { padding:64px 0 72px; min-height:0; }
     }
   </style>
 </head>

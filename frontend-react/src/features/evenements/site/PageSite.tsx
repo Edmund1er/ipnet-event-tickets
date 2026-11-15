@@ -36,7 +36,8 @@ export function PageSite({ evenement, elements, config, modele, surReserver, sur
     // Coalesce quick successive edits before parsing and rebuilding the full template document.
     const timer = window.setTimeout(() => {
       setErreur(null)
-      const contenu = construireContenu(evenement, elements, config, resoudre)
+      const evenementThematique = { ...evenement, modele }
+      const contenu = construireContenu(evenementThematique, elements, config, resoudre)
       // Les chemins d'image relatifs à l'API deviennent absolus : le cadre n'a pas la même base d'adresse
       if (contenu.imageHero?.startsWith('/')) contenu.imageHero = window.location.origin + contenu.imageHero
       genererPage(modele, contenu)

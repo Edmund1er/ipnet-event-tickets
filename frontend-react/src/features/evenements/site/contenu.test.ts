@@ -36,6 +36,10 @@ describe('visuels et actions des pages événement', () => {
     expect(sansAffiche.imageHero?.startsWith('data:image/svg+xml,')).toBe(true)
     expect(sansAffiche.imageHero).not.toContain('event-card-default.jpg')
     expect(avecAffiche.imageHero).toBe('/api/evenements/0/image')
+
+    const visuelPlage = construireContenu({ ...evenementExemple(), modele: 'RENCONTRE' as const }, [], PAGE_VIDE, (nom) => `/images/${nom}`)
+    const visuelNature = construireContenu({ ...evenementExemple(), modele: 'ATELIER' as const }, [], PAGE_VIDE, (nom) => `/images/${nom}`)
+    expect(visuelPlage.imageHero).not.toBe(visuelNature.imageHero)
   })
 
   it('remplace le hero de démonstration et ajoute le CTA réel au modèle Concert', () => {

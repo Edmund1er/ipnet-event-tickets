@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useImmersion } from '../../../core/components/layout/Immersion'
 import { COULEURS_MODELE } from '../site/immersion'
@@ -5,13 +6,13 @@ import { PageSite } from '../site/PageSite'
 import { evenementExemple, pageExemple } from '../site/exemple'
 import { MODELES, PAGE_VIDE, modeleDe } from '../site/types'
 
-const evenement = evenementExemple()
-const page = pageExemple()
 
 /** Aperçu d'un modèle avec un contenu d'exemple (ou la page de base avec ?vide=1). Aucune donnée réelle n'est utilisée. */
 export function ApercuModelePage() {
   const { cle } = useParams()
   const modele = modeleDe(cle?.toUpperCase()) ?? MODELES[0]
+  const evenement = useMemo(() => evenementExemple(modele.cle), [modele.cle])
+  const page = useMemo(() => pageExemple(modele.cle), [modele.cle])
   const vide = new URLSearchParams(window.location.search).has('vide')
   useImmersion({ ...COULEURS_MODELE[modele.cle], retour: { libelle: 'Événements', vers: '/' } })
   return (

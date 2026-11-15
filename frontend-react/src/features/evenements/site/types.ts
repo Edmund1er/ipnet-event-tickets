@@ -1,5 +1,5 @@
 /** Types de page, un par modèle de template. Le choix de l'admin est conservé dans `evenement.modele`. */
-export type CleModele = 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE' | 'ATELIER' | 'TOURNOI' | 'SALON' | 'RESEAUTAGE'
+export type CleModele = 'SOIREE' | 'CONFERENCE' | 'RENCONTRE' | 'CEREMONIE' | 'ATELIER' | 'TOURNOI' | 'SALON' | 'RESEAUTAGE' | 'LAGON' | 'FORET' | 'FORUM'
 
 export interface DescriptionModele {
   cle: CleModele
@@ -12,13 +12,16 @@ export interface DescriptionModele {
 
 export const MODELES: DescriptionModele[] = [
   { cle: 'SOIREE', nom: 'Soirée étudiante, club et nuit dansante', pourQui: 'Ambiance nocturne, DJ, danse et réservation rapide.', dossier: 'soiree' },
-  { cle: 'CONFERENCE', nom: 'Concert rap, showcase et scène live', pourQui: 'Line-up d’artistes, horaires de scène et billets de concert.', dossier: 'conference' },
-  { cle: 'RENCONTRE', nom: 'Journée d’intégration, plage et chill', pourQui: 'Sortie étudiante en plein air, activités et programme de la journée.', dossier: 'rencontre' },
+  { cle: 'CONFERENCE', nom: 'Concert & showcase — scène live', pourQui: 'Line-up d’artistes, horaires de scène et billets de concert.', dossier: 'conference' },
+  { cle: 'RENCONTRE', nom: 'Plage & beach day', pourQui: 'Sortie au bord de l’eau, activités, soleil et programme de la journée.', dossier: 'rencontre' },
   { cle: 'CEREMONIE', nom: 'Bal de promo, gala et remise des diplômes', pourQui: 'Grande soirée habillée, dîner, distinctions et danse.', dossier: 'ceremonie' },
-  { cle: 'ATELIER', nom: 'Festival de la jeunesse & animations', pourQui: 'Journée festive avec plusieurs espaces, stands et expériences à partager.', dossier: 'atelier' },
+  { cle: 'ATELIER', nom: 'Nature & plein air', pourQui: 'Escapade nature, activités extérieures et moments à partager.', dossier: 'atelier' },
   { cle: 'TOURNOI', nom: 'Tournoi sportif et e-sport', pourQui: 'Matchs, équipes, journées de compétition et accès.', dossier: 'tournoi' },
   { cle: 'SALON', nom: 'Gospel, louange et concert', pourQui: 'Concert live, invités, programme et billetterie.', dossier: 'salon' },
   { cle: 'RESEAUTAGE', nom: 'Soirée DJ, club et nuit électro', pourQui: 'Line-up de DJs, ambiance nocturne et accès à la soirée.', dossier: 'reseautage' },
+  { cle: 'LAGON', nom: 'Sortie à la plage — couleurs vives', pourQui: 'Journée plage, lagon, activités nautiques et programme ensoleillé.', dossier: 'lagon' },
+  { cle: 'FORET', nom: 'Escapade nature & randonnée', pourQui: 'Visite nature, sentiers, verdure et moments en plein air.', dossier: 'foret' },
+  { cle: 'FORUM', nom: 'Forum, conférence & séminaire', pourQui: 'Intervenants, sessions, programme sur plusieurs jours.', dossier: 'forum' },
 ]
 
 export const modeleDe = (cle?: string | null) => MODELES.find((m) => m.cle === cle) ?? null
