@@ -260,9 +260,6 @@ export function ProgrammeAdminPage() {
               <Link to={`/admin/evenements/${cadre.id}`} className={classeBouton('secondaire')}>
                 <Icone nom="edit" taille={18} /> Informations
               </Link>
-              <Link to={`/admin/evenements/${cadre.id}/page`} className={classeBouton('sombre')}>
-                <Icone nom="web" taille={18} /> Page de l'événement
-              </Link>
               <Bouton icone="add" onClick={() => ouvrirActivite(null)}>
                 Ajouter une activité
               </Bouton>

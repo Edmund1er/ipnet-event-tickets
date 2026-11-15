@@ -1,6 +1,5 @@
 import { http } from '../../../core/api/httpClient'
 import type { Evenement, PageResponse } from '../../../core/api/types'
-import type { PageConfig } from '../site/types'
 
 export interface FiltresEvenements {
   titre?: string
@@ -30,10 +29,6 @@ export const evenementService = {
   /** admin : l'administrateur voit aussi les brouillons (aperçu avant publication). */
   async detail(id: number, admin = false) {
     return (await http.get<Evenement>(admin ? `/admin/evenements/${id}` : `/evenements/${id}`)).data
-  },
-  /** Sections de la page d'un événement (vide : la page de base se construit seule). */
-  async page(id: number, admin = false) {
-    return (await http.get<PageConfig>(admin ? `/admin/evenements/${id}/page` : `/evenements/${id}/page`)).data
   },
   /** Réservation existante du participant pour cet événement (RG-06 : une seule par événement). */
   async maReservation(evenementId: number) {

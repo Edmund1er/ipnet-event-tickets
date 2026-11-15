@@ -1,8 +1,10 @@
 import { fireEvent, render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
-import { evenementExemple } from '../site/exemple'
+import type { Evenement } from '../../../core/api/types'
 import { CarteEvenement } from './CarteEvenement'
+
+const evenementExemple = (): Evenement => ({ id: 0, titre: 'Exemple', description: null, dateDebut: '2026-12-19T07:00:00', lieu: 'Avépozo', prix: 2000, devise: 'XOF', capacite: 100, placesReservees: 0, placesRestantes: 100, statut: 'PUBLIE', aImage: false })
 
 describe('CarteEvenement', () => {
   it('affiche une composition festive locale quand aucune affiche n’a été fournie', () => {

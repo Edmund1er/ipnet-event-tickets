@@ -2,35 +2,21 @@ import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../../core/auth/AuthContext'
 import { messageErreur, versErreurApi } from '../../../core/api/httpClient'
-import { useImmersion } from '../../../core/components/layout/Immersion'
 import { ChargementPage } from '../../../core/components/ui/Chargement'
 import { Alerte } from '../../../core/components/ui/Divers'
 import { useRequete } from '../../../core/hooks/useRequete'
-import { versDate } from '../../../core/utils/format'
+import { dateLongue, heure, montant, versDate } from '../../../core/utils/format'
 import { BlocReservation } from '../components/BlocReservation'
-import { ModaleReservation } from '../components/ModaleReservation'
-import { COULEURS_MODELE } from '../site/immersion'
-import { PageSite } from '../site/PageSite'
-import { PAGE_VIDE, modeleDe, type CleModele } from '../site/types'
 import { evenementService } from '../services/evenementService'
-import { estHex, texteSur, themeDe } from '../theme/ambiances'
+import { themeDe } from '../theme/ambiances'
 
-/** Modèle choisi par l'admin ; une activité ou un pass reprend celui de son programme ; à défaut, un modèle par type d'événement. */
-function modeleEffectif(modele: string | null | undefined, modeleParent: string | null | undefined, programme: boolean): CleModele {
-  return (modeleDe(modele)?.cle ?? modeleDe(modeleParent)?.cle ?? (programme ? 'RENCONTRE' : 'SOIREE')) as CleModele
-}
-
-/**
- * Page d'un événement. Elle se présente comme un site à part, dans l'espace à droite du menu :
- * le template choisi, rempli par les sections de l'administrateur (ou la page de base s'il n'en a pas ajouté).
- */
+/** Page d'un événement : visuel, informations pratiques, programme et réservation. */
 export function DetailEvenementPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { session, profil } = useAuth()
   const estAdmin = session?.role === 'ADMIN'
   const { donnees: evt, chargement, erreur } = useRequete(() => evenementService.detail(Number(id), estAdmin), [id, estAdmin])
-  const { donnees: config } = useRequete(() => evenementService.page(Number(id), estAdmin).catch(() => PAGE_VIDE), [id, estAdmin])
   const estParticipant = session?.role === 'PARTICIPANT'
   const { donnees: existante } = useRequete(
     () => (estParticipant ? evenementService.maReservation(Number(id)) : Promise.resolve(null)),
@@ -40,31 +26,10 @@ export function DetailEvenementPage() {
   const { donnees: elements } = useRequete(() => (estCadre ? evenementService.activites(Number(id), estAdmin) : Promise.resolve([])), [id, estCadre, estAdmin])
   const parentId = evt?.parentId ?? null
   const { donnees: parent } = useRequete(() => (parentId ? evenementService.detail(parentId, estAdmin) : Promise.resolve(null)), [parentId, estAdmin])
-  const [ouverte, setOuverte] = useState(false)
   const [erreurResa, setErreurResa] = useState<string | null>(null)
   const [dejaReserve, setDejaReserve] = useState(false)
   const [enCours, setEnCours] = useState(false)
 
-  const ouvrirReservation = useCallback(() => setOuverte(true), [])
-  // La page prend toute la place et habille l'en-tête et le menu aux couleurs de son template
-  const modeleCourant = modeleEffectif(evt?.modele, parent?.modele, evt?.type === 'CADRE')
-  const apparencePage = config?.apparence
-  const accentPage = apparencePage?.couleurBouton ?? apparencePage?.couleurPrincipale
-  const accentValide = estHex(accentPage) ? accentPage : null
-  const fondEntete = estHex(apparencePage?.couleurEntete) ? apparencePage.couleurEntete : null
-  const texteEntete = estHex(apparencePage?.couleurTexteEntete) ? apparencePage.couleurTexteEntete : null
-  useImmersion(
-    evt
-      ? {
-          ...COULEURS_MODELE[modeleCourant],
-          ...(fondEntete ? { fond: fondEntete } : {}),
-          ...(texteEntete ? { texte: texteEntete } : {}),
-          ...(accentValide ? { accent: accentValide, surAccent: texteSur(accentValide) } : {}),
-          retour: { libelle: parent ? parent.titre : 'Événements', vers: parent ? `/evenements/${parent.id}` : '/' },
-          badge: evt.statut === 'BROUILLON' ? 'Brouillon : visible par vous seul' : undefined,
-        }
-      : null,
-  )
   const ouvrirActivite = useCallback((cible: number) => navigate(`/evenements/${cible}`), [navigate])
 
   if (chargement) return <ChargementPage />
@@ -75,7 +40,6 @@ export function DetailEvenementPage() {
   const passe = (versDate(finVente)?.getTime() ?? 0) < Date.now()
   const reservable = evt.statut === 'PUBLIE' && !passe && evt.placesRestantes > 0
   const passes = (elements ?? []).filter((e) => e.type === 'PASS' && e.statut === 'PUBLIE')
-  const modele = modeleCourant
 
   async function reserver() {
     setErreurResa(null)
@@ -109,10 +73,62 @@ export function DetailEvenementPage() {
     />
   )
 
+  const programmeActivites = (elements ?? []).filter((e) => e.type === 'ACTIVITE' && e.statut === 'PUBLIE')
+
   return (
-    <div className="h-[calc(100dvh-4rem)] min-h-[420px]" style={themeDe(evt)}>
-      <PageSite evenement={evt} elements={elements ?? []} config={config ?? PAGE_VIDE} modele={modele} surReserver={ouvrirReservation} surOuvrir={ouvrirActivite} />
-      <ModaleReservation evenement={evt} passes={passes} ouverte={ouverte} surFermeture={() => setOuverte(false)} reservation={reservation} />
+    <div style={themeDe(evt)} className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
+      <button type="button" onClick={() => navigate(parent ? `/evenements/${parent.id}` : '/')} className="mb-4 text-sm font-semibold text-primaire hover:underline">
+        ← {parent ? parent.titre : 'Événements'}
+      </button>
+      {evt.statut === 'BROUILLON' && <Alerte ton="info">Brouillon : visible par vous seul</Alerte>}
+      <header className="overflow-hidden rounded-2xl bg-primaire text-white shadow-lg">
+        {evt.aImage && <img src={`/api/evenements/${evt.id}/image`} alt="" className="h-56 w-full object-cover sm:h-80" />}
+        <div className="p-6 sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-wide opacity-90">{dateLongue(evt.dateDebut)} · {heure(evt.dateDebut)}</p>
+          <h1 className="mt-1 text-3xl font-extrabold sm:text-4xl">{evt.titre}</h1>
+          {evt.lieu && <p className="mt-2 opacity-90">📍 {evt.lieu}</p>}
+        </div>
+      </header>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="space-y-6">
+          {evt.description && (
+            <section className="carte p-5">
+              <h2 className="mb-2 text-lg font-bold">À propos</h2>
+              <p className="whitespace-pre-line leading-relaxed">{evt.description}</p>
+            </section>
+          )}
+          {programmeActivites.length > 0 && (
+            <section className="carte p-5">
+              <h2 className="mb-3 text-lg font-bold">Programme</h2>
+              <ul className="divide-y divide-black/5">
+                {programmeActivites.map((a) => (
+                  <li key={a.id}>
+                    <button type="button" onClick={() => ouvrirActivite(a.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:text-primaire">
+                      <span><span className="font-semibold">{a.titre}</span><span className="block text-sm text-attenue">{dateLongue(a.dateDebut)} · {heure(a.dateDebut)}</span></span>
+                      <span className="text-sm font-semibold">{a.prix === 0 ? 'Gratuit' : montant(a.prix, a.devise)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {passes.length > 0 && (
+            <section className="carte p-5">
+              <h2 className="mb-3 text-lg font-bold">Pass</h2>
+              <ul className="space-y-2">
+                {passes.map((p) => (
+                  <li key={p.id}>
+                    <button type="button" onClick={() => ouvrirActivite(p.id)} className="flex w-full items-center justify-between rounded-lg border border-black/10 p-3 text-left hover:border-primaire">
+                      <span className="font-semibold">{p.titre}</span><span>{p.prix === 0 ? 'Gratuit' : montant(p.prix, p.devise)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+        <aside className="carte h-fit p-5 lg:sticky lg:top-24">{reservation}</aside>
+      </div>
     </div>
   )
 }

@@ -55,7 +55,6 @@ function MenuPlus({ e, surAction }: { e: Evenement; surAction: Props['surAction'
         <Icone nom="more_horiz" taille={20} />
       </summary>
       <div className="absolute right-0 z-20 mt-1 w-56 rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-black/10">
-        {actives && <Link to={`/admin/evenements/${e.id}/page`} className={item}><Icone nom="web" taille={18} /> Personnaliser la page</Link>}
         {e.type === 'CADRE' && actives && <Link to={`/admin/evenements/${e.id}/programme`} className={item}><Icone nom="calendar_view_week" taille={18} /> Programme et pass</Link>}
         {e.type !== 'CADRE' && e.statut === 'PUBLIE' && <Link to={`/admin/evenements/${e.id}/participants`} className={item}><Icone nom="group" taille={18} /> Participants</Link>}
         {e.statut === 'PUBLIE' &&

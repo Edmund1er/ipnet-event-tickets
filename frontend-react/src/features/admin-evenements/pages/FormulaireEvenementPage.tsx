@@ -120,8 +120,8 @@ export function FormulaireEvenementPage() {
             toast.erreur(`Brouillon créé, mais l'image n'a pas été envoyée : ${messageErreur(errImage)}`)
           }
         }
-        toast.succes(programme ? 'Programme créé : ajoutez maintenant ses activités' : 'Événement créé : choisissez maintenant le type et le contenu de sa page')
-        navigate(programme ? `/admin/evenements/${cree.id}/programme` : `/admin/evenements/${cree.id}/page`)
+        toast.succes(programme ? 'Programme créé : ajoutez maintenant ses activités' : 'Événement créé')
+        navigate(programme ? `/admin/evenements/${cree.id}/programme` : '/admin/evenements')
       }
     } catch (err) {
       const api = versErreurApi(err)
@@ -256,11 +256,6 @@ export function FormulaireEvenementPage() {
               </label>
             )}
           </fieldset>
-          {evt && (
-            <Link to={`/admin/evenements/${evt.id}/page`} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[1.5px] border-primaire font-semibold text-primaire hover:bg-primaire-clair">
-              <Icone nom="web" taille={20} /> Page de l'événement : type, sections, images
-            </Link>
-          )}
           {evt && programme && (
             <Link to={`/admin/evenements/${evt.id}/programme`} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[1.5px] border-primaire font-semibold text-primaire hover:bg-primaire-clair">
               <Icone nom="calendar_view_week" taille={20} /> Gérer les activités et les pass

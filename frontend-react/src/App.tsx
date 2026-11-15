@@ -24,7 +24,6 @@ import { navigation as navReservations } from './features/reservations/navigatio
 // Charger chaque écran avec sa route pour garder le premier écran léger.
 const AdminEvenementsPage = lazy(() => import('./features/admin-evenements/pages/AdminEvenementsPage').then((m) => ({ default: m.AdminEvenementsPage })))
 const FormulaireEvenementPage = lazy(() => import('./features/admin-evenements/pages/FormulaireEvenementPage').then((m) => ({ default: m.FormulaireEvenementPage })))
-const ConstructeurPage = lazy(() => import('./features/admin-evenements/pages/ConstructeurPage').then((m) => ({ default: m.ConstructeurPage })))
 const ParticipantsPage = lazy(() => import('./features/admin-evenements/pages/ParticipantsPage').then((m) => ({ default: m.ParticipantsPage })))
 const ProgrammeAdminPage = lazy(() => import('./features/admin-evenements/pages/ProgrammeAdminPage').then((m) => ({ default: m.ProgrammeAdminPage })))
 const ImportRelevePage = lazy(() => import('./features/admin-paiements/pages/ImportRelevePage').then((m) => ({ default: m.ImportRelevePage })))
@@ -42,7 +41,6 @@ const VerificationInscriptionPage = lazy(() => import('./features/auth/pages/Ver
 const VerificationPage = lazy(() => import('./features/auth/pages/VerificationPage').then((m) => ({ default: m.VerificationPage })))
 const MesBilletsPage = lazy(() => import('./features/billets/pages/MesBilletsPage').then((m) => ({ default: m.MesBilletsPage })))
 const DetailEvenementPage = lazy(() => import('./features/evenements/pages/DetailEvenementPage').then((m) => ({ default: m.DetailEvenementPage })))
-const ApercuModelePage = lazy(() => import('./features/evenements/pages/ApercuModelePage').then((m) => ({ default: m.ApercuModelePage })))
 const ListeEvenementsPage = lazy(() => import('./features/evenements/pages/ListeEvenementsPage').then((m) => ({ default: m.ListeEvenementsPage })))
 const ParametresPage = lazy(() => import('./features/parametres/pages/ParametresPage').then((m) => ({ default: m.ParametresPage })))
 const ProfilPage = lazy(() => import('./features/profil/pages/ProfilPage').then((m) => ({ default: m.ProfilPage })))
@@ -94,7 +92,6 @@ export default function App() {
             <Route element={<GabaritAdaptatif />}>
               <Route index element={<ListeEvenementsPage />} />
               <Route path="evenements/:id" element={<DetailEvenementPage />} />
-              <Route path="apercu-modele/:cle" element={<ApercuModelePage />} />
             </Route>
 
             {/* Authentification */}
@@ -119,7 +116,6 @@ export default function App() {
               <Route path="admin/evenements" element={admin(<AdminEvenementsPage />)} />
               <Route path="admin/evenements/nouveau" element={admin(<FormulaireEvenementPage />)} />
               <Route path="admin/evenements/:id" element={admin(<FormulaireEvenementPage />)} />
-              <Route path="admin/evenements/:id/page" element={admin(<ConstructeurPage />)} />
               <Route path="admin/evenements/:id/programme" element={admin(<ProgrammeAdminPage />)} />
               <Route path="admin/evenements/:id/participants" element={admin(<ParticipantsPage />)} />
               <Route path="admin/paiements" element={admin(<PaiementsPage />)} />

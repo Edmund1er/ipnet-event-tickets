@@ -88,6 +88,6 @@ export function themeEvenement(cle?: string | null, couleur?: string | null): CS
 
 /** Thème d'un événement : sa couleur, sinon celle de son ambiance, sinon une couleur stable propre à l'événement. */
 export function themeDe(e: Pick<Evenement, 'id' | 'ambiance' | 'couleurPrincipale'> & Partial<Pick<Evenement, 'modele'>>): CSSProperties {
-  const ambiance = e.ambiance ?? ambiancePourModele(e.modele)
+  const ambiance = e.ambiance ?? undefined
   return themeEvenement(ambiance, e.couleurPrincipale ?? (ambiance ? null : couleurParDefaut(e.id)))
 }

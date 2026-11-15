@@ -6,7 +6,6 @@ import { montant, dateLongue } from '../../../core/utils/format'
 import { urlImageEvenement } from '../services/evenementService'
 import { themeDe } from '../theme/ambiances'
 import { categorieDe } from '../theme/categories'
-import { modeleDe } from '../site/types'
 
 /** Affiche l'affiche de l'organisateur, sinon une composition graphique adaptée à son ambiance. */
 export function VisuelEvenement({ evenement, className = '' }: { evenement: Evenement; className?: string }) {
@@ -82,9 +81,8 @@ export function JaugePlaces({ evenement }: { evenement: Evenement }) {
 }
 
 export function CarteEvenement({ evenement }: { evenement: Evenement }) {
-  const type = modeleDe(evenement.modele)
   const categorie = evenement.categorie ? categorieDe(evenement.categorie).libelle : null
-  const etiquette = type?.nom ?? categorie ?? (evenement.type === 'CADRE' ? 'Programme festif' : 'Fête & sortie')
+  const etiquette = categorie ?? (evenement.type === 'CADRE' ? 'Programme festif' : 'Fête & sortie')
   const prix = evenement.type === 'CADRE' ? 'Pass disponibles' : evenement.accesLibre || evenement.prix === 0 ? 'Gratuit' : montant(evenement.prix, evenement.devise)
   return (
     <Link
